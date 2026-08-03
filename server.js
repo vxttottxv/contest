@@ -9,28 +9,59 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// In-memory Database Simulation with passwords for login support
+// In-memory Database Simulation with preset users for each role
 const registeredUsers = [
   {
     id: 1,
-    email: "admin@luxe.com",
-    password: "admin123!",
-    name: "LUXE 관리자",
+    email: "organizer@competehub.com",
+    password: "organizer123!",
+    name: "김주최",
     phone: "010-1234-5678",
-    role: "VIP Administrator",
-    address: "[06164] 서울 강남구 테헤란로 123 LUXE 타워 15층",
-    gender: "male",
+    role: "organizer",
+    roleLabel: "주최자 (기업/기관)",
+    orgName: "한국인공지능협회",
+    orgType: "public", // public, enterprise, startup, university, etc.
+    bizRegNum: "123-45-67890",
+    website: "https://ai-association.kr",
+    address: "[06164] 서울 강남구 테헤란로 123 AI타워 10층",
     createdAt: new Date().toISOString()
   },
   {
     id: 2,
-    email: "user@example.com",
-    password: "user123!",
-    name: "홍길동",
+    email: "participant@competehub.com",
+    password: "participant123!",
+    name: "이참가",
     phone: "010-9876-5432",
-    role: "Gold Member",
+    role: "participant",
+    roleLabel: "참가자 (학생/개인)",
+    affiliation: "university", // university, student, jobseeker, professional, etc.
+    interests: ["SW/AI", "디자인/기획", "아이디어"],
     address: "[04524] 서울 중구 세종대로 110",
-    gender: "male",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 3,
+    email: "academy@competehub.com",
+    password: "academy123!",
+    name: "박학원",
+    phone: "010-5555-7777",
+    role: "academy",
+    roleLabel: "관련 학원 / 광고주",
+    academyName: "코드마스터 IT 아카데미",
+    academyCategory: "SW/코딩/AI",
+    bizRegNum: "987-65-43210",
+    address: "[06234] 서울 강남구 역삼로 456 코딩 빌딩 3층",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 4,
+    email: "admin@competehub.com",
+    password: "admin123!",
+    name: "최관리",
+    phone: "010-0000-0000",
+    role: "admin",
+    roleLabel: "플랫폼 통합 관리자",
+    address: "[06164] 서울 강남구 테헤란로 123",
     createdAt: new Date().toISOString()
   }
 ];
@@ -57,11 +88,30 @@ app.post('/api/check-email', (req, res) => {
   }
 });
 
-// 2. Member Sign-up API
+// 2. Member Sign-up API (Supports Roles: organizer, participant, academy)
 app.post('/api/register', (req, res) => {
-  const { email, password, name, phone, zipcode, address, detailAddress, gender, birthdate, agreements } = req.body;
+  const {
+    role, // 'organizer' | 'participant' | 'academy'
+    email,
+    password,
+    name,
+    phone,
+    zipcode,
+    address,
+    detailAddress,
+    agreements,
+    // Role specific fields:
+    orgName,
+    orgType,
+    bizRegNum,
+    website,
+    affiliation,
+    interests,
+    academyName,
+    academyCategory
+  } = req.body;
 
-  if (!email || !password || !name || !phone) {
+  if (!email || !password || !name || !phone || !role) {
     return res.status(400).json({ success: false, message: "필수 입력 항목이 누락되었습니다." });
   }
 
@@ -78,35 +128,44 @@ app.post('/api/register', (req, res) => {
     return res.status(400).json({ success: false, message: "이미 가입된 이메일 계정입니다." });
   }
 
+  let roleLabel = "일반 회원";
+  if (role === 'organizer') roleLabel = "주최자 (기업/기관)";
+  else if (role === 'participant') roleLabel = "참가자 (학생/개인)";
+  else if (role === 'academy') roleLabel = "관련 학원 / 광고주";
+
   const newUser = {
     id: registeredUsers.length + 1,
+    role,
+    roleLabel,
     email: email.trim(),
     password: password,
     name: name.trim(),
     phone: phone.trim(),
-    role: "Regular Member",
-    address: zipcode && address ? `[${zipcode}] ${address} ${detailAddress || ''}`.trim() : "주소 미입력",
-    gender: gender || 'unspecified',
-    birthdate: birthdate || '',
+    address: zipcode && address ? `[${zipcode}] ${address} ${detailAddress || ''}`.trim() : (address || "주소 미입력"),
     marketingAgree: !!(agreements && agreements.marketing),
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+
+    // Dynamic Role Specific Data
+    orgName: orgName ? orgName.trim() : '',
+    orgType: orgType || '',
+    bizRegNum: bizRegNum ? bizRegNum.trim() : '',
+    website: website ? website.trim() : '',
+    affiliation: affiliation || '',
+    interests: Array.isArray(interests) ? interests : (interests ? [interests] : []),
+    academyName: academyName ? academyName.trim() : '',
+    academyCategory: academyCategory || ''
   };
 
   registeredUsers.push(newUser);
-  console.log('[NODE SERVER] Registered new user:', newUser.email);
+  console.log('[COMPETE HUB SERVER] Registered new user:', newUser.email, 'Role:', newUser.role);
+
+  // Return clean payload
+  const { password: _, ...userWithoutPassword } = newUser;
 
   return res.status(201).json({
     success: true,
-    message: `${newUser.name}님, 회원가입이 성공적으로 완료되었습니다!`,
-    user: {
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-      phone: newUser.phone,
-      role: newUser.role,
-      address: newUser.address,
-      createdAt: newUser.createdAt
-    }
+    message: `${newUser.name}님(${roleLabel}), 회원가입이 성공적으로 완료되었습니다!`,
+    user: userWithoutPassword
   });
 });
 
@@ -128,22 +187,15 @@ app.post('/api/login', (req, res) => {
     return res.status(401).json({ success: false, message: "비밀번호가 일치하지 않습니다." });
   }
 
-  console.log('[NODE SERVER] User logged in:', user.email);
+  console.log('[COMPETE HUB SERVER] User logged in:', user.email, 'Role:', user.role);
 
-  // Return user info and simulated auth token
+  const { password: _, ...userWithoutPassword } = user;
+
   return res.json({
     success: true,
     message: `${user.name}님 환영합니다!`,
-    token: `luxe_token_${Date.now()}_${user.id}`,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role || "Member",
-      address: user.address || "등록된 주소 없음",
-      createdAt: user.createdAt
-    }
+    token: `compete_hub_token_${Date.now()}_${user.id}`,
+    user: userWithoutPassword
   });
 });
 
@@ -168,6 +220,6 @@ app.post('/api/find-password', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`==================================================`);
-  console.log(` LUXE Auth Server running at http://localhost:${PORT}`);
+  console.log(` COMPETE HUB Auth Server running at http://localhost:${PORT}`);
   console.log(`==================================================`);
 });
