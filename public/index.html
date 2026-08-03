@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LUXE Boutique - 프리미엄 인증 및 회원 관리 포털">
+  <title>LUXE | 로그인 & 회원가입</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Daum Postcode SDK -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Motion Background -->
+  <div class="background-decor">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <main class="auth-container">
+    <!-- Header / Brand -->
+    <header class="auth-header">
+      <div class="brand-logo">
+        <span class="logo-accent">L</span>UXE
+      </div>
+      <p class="auth-subtitle" id="authSubtitle">LUXE 하우스의 독점 서비스와 맞춤형 혜택을 이용해보세요.</p>
+    </header>
+
+    <!-- Navigation Tabs Switcher -->
+    <nav class="auth-tabs" id="authTabsNav">
+      <button type="button" class="tab-btn active" id="tabLogin" data-tab="login">
+        <i class="fa-solid fa-right-to-bracket"></i> 로그인
+      </button>
+      <button type="button" class="tab-btn" id="tabSignup" data-tab="signup">
+        <i class="fa-solid fa-user-plus"></i> 회원가입
+      </button>
+    </nav>
+
+    <!-- ==========================================
+         SECTION 1: 로그인 창 (LOGIN SECTION)
+         ========================================== -->
+    <section class="tab-content active" id="loginContent">
+      <!-- Quick Demo Login Bar -->
+      <div class="demo-login-box">
+        <span class="demo-box-label"><i class="fa-solid fa-bolt"></i> 빠른 테스트 로그인</span>
+        <div class="demo-buttons">
+          <button type="button" class="btn-demo" id="btnDemoUser">
+            <i class="fa-solid fa-user"></i> 일반 회원 (user)
+          </button>
+          <button type="button" class="btn-demo btn-demo-admin" id="btnDemoAdmin">
+            <i class="fa-solid fa-user-shield"></i> 관리자 (admin)
+          </button>
+        </div>
+      </div>
+
+      <form id="loginForm" class="auth-form" novalidate>
+        <!-- Email Input -->
+        <div class="form-group">
+          <label for="loginEmail" class="form-label">이메일 주소</label>
+          <div class="input-wrapper">
+            <i class="fa-regular fa-envelope input-icon"></i>
+            <input type="email" id="loginEmail" name="loginEmail" placeholder="example@luxe.com" autocomplete="email" required>
+          </div>
+          <div class="feedback-msg" id="loginEmailFeedback"></div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="form-group">
+          <label for="loginPassword" class="form-label">비밀번호</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="loginPassword" name="loginPassword" placeholder="비밀번호를 입력해 주세요" autocomplete="current-password" required>
+            <button type="button" class="toggle-password" id="toggleLoginPassword" tabIndex="-1" title="비밀번호 보기/숨기기">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <div class="feedback-msg" id="loginPasswordFeedback"></div>
+        </div>
+
+        <!-- Options: Remember Me & Find Password -->
+        <div class="form-options">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="rememberMe">
+            <span class="checkmark"></span>
+            <span class="checkbox-text">로그인 상태 유지</span>
+          </label>
+          <button type="button" class="btn-text-link" id="btnOpenFindPassword">비밀번호 재설정</button>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btnLoginSubmit" class="btn-primary">
+          <span class="btn-text">로그인</span>
+          <div class="spinner" id="loginSpinner" style="display: none;"></div>
+        </button>
+      </form>
+
+      <div class="social-divider">
+        <span>SNS 계정으로 소셜 로그인</span>
+      </div>
+
+      <!-- Social Logins -->
+      <div class="social-buttons">
+        <button type="button" class="btn-social btn-kakao" title="카카오로 로그인">
+          <i class="fa-solid fa-comment"></i>
+          <span>카카오</span>
+        </button>
+        <button type="button" class="btn-social btn-naver" title="네이버로 로그인">
+          <span class="naver-icon">N</span>
+          <span>네이버</span>
+        </button>
+        <button type="button" class="btn-social btn-google" title="Google로 로그인">
+          <i class="fa-brands fa-google"></i>
+          <span>Google</span>
+        </button>
+        <button type="button" class="btn-social btn-apple" title="Apple로 로그인">
+          <i class="fa-brands fa-apple"></i>
+          <span>Apple</span>
+        </button>
+      </div>
+
+      <div class="switch-prompt">
+        아직 LUXE 회원이 아니신가요? <button type="button" class="link-switch" id="linkToSignup">회원가입 하기</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 2: 회원가입 창 (SIGNUP SECTION)
+         ========================================== -->
+    <section class="tab-content" id="signupContent">
+      <div class="social-signup-section">
+        <span class="social-label">간편 소셜 가입</span>
+        <div class="social-buttons">
+          <button type="button" class="btn-social btn-kakao" title="카카오로 가입">
+            <i class="fa-solid fa-comment"></i>
+            <span>카카오</span>
+          </button>
+          <button type="button" class="btn-social btn-naver" title="네이버로 가입">
+            <span class="naver-icon">N</span>
+            <span>네이버</span>
+          </button>
+          <button type="button" class="btn-social btn-google" title="Google로 가입">
+            <i class="fa-brands fa-google"></i>
+            <span>Google</span>
+          </button>
+          <button type="button" class="btn-social btn-apple" title="Apple로 가입">
+            <i class="fa-brands fa-apple"></i>
+            <span>Apple</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="social-divider">
+        <span>또는 이메일로 가입</span>
+      </div>
+
+      <form id="signupForm" class="auth-form" novalidate>
+        
+        <!-- 1. 이메일 (아이디) -->
+        <div class="form-group">
+          <label for="email" class="form-label">
+            이메일 주소 <span class="required">*</span>
+          </label>
+          <div class="input-with-button">
+            <div class="input-wrapper">
+              <i class="fa-regular fa-envelope input-icon"></i>
+              <input type="email" id="email" name="email" placeholder="example@luxe.com" autocomplete="email" required>
+            </div>
+            <button type="button" id="btnCheckEmail" class="btn-secondary">중복 확인</button>
+          </div>
+          <div class="feedback-msg" id="emailFeedback"></div>
+        </div>
+
+        <!-- 2. 비밀번호 -->
+        <div class="form-group">
+          <label for="password" class="form-label">
+            비밀번호 <span class="required">*</span>
+          </label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="password" name="password" placeholder="영문, 숫자, 특수문자 조합 8자 이상" autocomplete="new-password" required>
+            <button type="button" class="toggle-password" id="togglePassword" tabIndex="-1" title="비밀번호 보기/숨기기">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          
+          <!-- Password Strength Meter -->
+          <div class="password-strength-container" id="strengthContainer">
+            <div class="strength-bar-track">
+              <div class="strength-bar-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-header">
+              <span class="strength-label">안전도: <strong id="strengthText">입력 대기</strong></span>
+            </div>
+          </div>
+
+          <ul class="password-rules">
+            <li id="ruleLength"><i class="fa-solid fa-circle-check"></i> 8자 이상</li>
+            <li id="ruleLetter"><i class="fa-solid fa-circle-check"></i> 영문 포함</li>
+            <li id="ruleNumber"><i class="fa-solid fa-circle-check"></i> 숫자 포함</li>
+            <li id="ruleSpecial"><i class="fa-solid fa-circle-check"></i> 특수문자 포함</li>
+          </ul>
+          <div class="feedback-msg" id="passwordFeedback"></div>
+        </div>
+
+        <!-- 3. 비밀번호 확인 -->
+        <div class="form-group">
+          <label for="passwordConfirm" class="form-label">
+            비밀번호 확인 <span class="required">*</span>
+          </label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-shield-halved input-icon"></i>
+            <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="비밀번호를 다시 한번 입력해 주세요" autocomplete="new-password" required>
+            <button type="button" class="toggle-password" id="togglePasswordConfirm" tabIndex="-1">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <div class="feedback-msg" id="passwordConfirmFeedback"></div>
+        </div>
+
+        <!-- 4. 이름 -->
+        <div class="form-group">
+          <label for="name" class="form-label">
+            이름 <span class="required">*</span>
+          </label>
+          <div class="input-wrapper">
+            <i class="fa-regular fa-user input-icon"></i>
+            <input type="text" id="name" name="name" placeholder="홍길동" autocomplete="name" required>
+          </div>
+          <div class="feedback-msg" id="nameFeedback"></div>
+        </div>
+
+        <!-- 5. 휴대폰 번호 -->
+        <div class="form-group">
+          <label for="phone" class="form-label">
+            휴대폰 번호 <span class="required">*</span>
+          </label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-mobile-screen-button input-icon"></i>
+            <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" required>
+          </div>
+          <div class="feedback-msg" id="phoneFeedback"></div>
+        </div>
+
+        <!-- 6. 주소 입력 (카카오/다음 우편번호) -->
+        <div class="form-group">
+          <label class="form-label">
+            배송지 주소
+          </label>
+          <div class="input-with-button address-zip-group">
+            <div class="input-wrapper">
+              <i class="fa-solid fa-location-dot input-icon"></i>
+              <input type="text" id="zipcode" name="zipcode" placeholder="우편번호" readonly>
+            </div>
+            <button type="button" id="btnSearchAddress" class="btn-secondary">주소 검색</button>
+          </div>
+          <div class="input-wrapper address-main">
+            <input type="text" id="address" name="address" placeholder="기본 주소" readonly>
+          </div>
+          <div class="input-wrapper address-detail">
+            <input type="text" id="detailAddress" name="detailAddress" placeholder="상세 주소 (동, 호수 등)">
+          </div>
+        </div>
+
+        <!-- 7. 생년월일 & 성별 -->
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="birthdate" class="form-label">생년월일 (선택)</label>
+            <div class="input-wrapper">
+              <i class="fa-regular fa-calendar input-icon"></i>
+              <input type="date" id="birthdate" name="birthdate">
+            </div>
+          </div>
+          <div class="form-group col-half">
+            <label class="form-label">성별 (선택)</label>
+            <div class="gender-radio-group">
+              <label class="radio-card">
+                <input type="radio" name="gender" value="male">
+                <span>남성</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="gender" value="female">
+                <span>여성</span>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="gender" value="none" checked>
+                <span>선택안함</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. 이용약관 동의 -->
+        <div class="form-group terms-container">
+          <div class="terms-all-checkbox">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="agreeAll">
+              <span class="checkmark"></span>
+              <span class="checkbox-text font-bold">모든 약관 및 마케팅 수신에 동의합니다.</span>
+            </label>
+          </div>
+          <div class="terms-divider"></div>
+          <ul class="terms-list">
+            <li>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="agreeTerms" class="term-item" required>
+                <span class="checkmark"></span>
+                <span class="checkbox-text"><span class="badge-required">[필수]</span> LUXE 이용약관 동의</span>
+              </label>
+              <button type="button" class="btn-text-link" data-modal="modalTerms">보기</button>
+            </li>
+            <li>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="agreePrivacy" class="term-item" required>
+                <span class="checkmark"></span>
+                <span class="checkbox-text"><span class="badge-required">[필수]</span> 개인정보 수집 및 이용 동의</span>
+              </label>
+              <button type="button" class="btn-text-link" data-modal="modalPrivacy">보기</button>
+            </li>
+            <li>
+              <label class="custom-checkbox">
+                <input type="checkbox" id="agreeMarketing" class="term-item">
+                <span class="checkmark"></span>
+                <span class="checkbox-text"><span class="badge-optional">[선택]</span> 쇼핑 혜택 / 이벤트 알림 수신 동의</span>
+              </label>
+            </li>
+          </ul>
+          <div class="feedback-msg" id="termsFeedback"></div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btnSubmit" class="btn-primary">
+          <span class="btn-text">LUXE 회원가입 완료</span>
+          <div class="spinner" id="btnSpinner" style="display: none;"></div>
+        </button>
+
+        <div class="switch-prompt">
+          이미 계정이 있으신가요? <button type="button" class="link-switch" id="linkToLogin">로그인 하기</button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- ==========================================
+         SECTION 3: 로그인 성공 마이페이지/프로필 (DASHBOARD)
+         ========================================== -->
+    <section class="tab-content" id="dashboardContent">
+      <div class="profile-card">
+        <div class="profile-header-banner">
+          <div class="user-avatar-large" id="dashAvatar">
+            <i class="fa-solid fa-user-check"></i>
+          </div>
+          <div class="profile-title-box">
+            <h2 class="user-welcome-name" id="dashUserName">홍길동 님</h2>
+            <span class="user-badge" id="dashUserRole">VIP Member</span>
+          </div>
+        </div>
+
+        <div class="profile-info-grid">
+          <div class="info-tile">
+            <span class="tile-label"><i class="fa-regular fa-envelope"></i> 이메일</span>
+            <span class="tile-value" id="dashUserEmail">user@example.com</span>
+          </div>
+          <div class="info-tile">
+            <span class="tile-label"><i class="fa-solid fa-mobile-screen-button"></i> 휴대폰</span>
+            <span class="tile-value" id="dashUserPhone">010-0000-0000</span>
+          </div>
+          <div class="info-tile full-width">
+            <span class="tile-label"><i class="fa-solid fa-location-dot"></i> 배송지 주소</span>
+            <span class="tile-value" id="dashUserAddress">서울 강남구 테헤란로 123</span>
+          </div>
+          <div class="info-tile">
+            <span class="tile-label"><i class="fa-regular fa-clock"></i> 계정 가입일</span>
+            <span class="tile-value" id="dashUserDate">2026-08-03</span>
+          </div>
+          <div class="info-tile">
+            <span class="tile-label"><i class="fa-solid fa-shield-halved"></i> 보안 인증</span>
+            <span class="tile-value status-active"><i class="fa-solid fa-circle-check"></i> 이메일 인증됨</span>
+          </div>
+        </div>
+
+        <div class="dashboard-actions">
+          <button type="button" class="btn-primary" id="btnExploreShop">
+            <i class="fa-solid fa-bag-shopping"></i> LUXE 쇼핑 시작하기
+          </button>
+          <button type="button" class="btn-danger" id="btnLogout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> 로그아웃
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Success Modal (After Registration) -->
+  <div class="modal-backdrop" id="successModal">
+    <div class="modal-card">
+      <div class="modal-icon-wrapper">
+        <i class="fa-solid fa-award"></i>
+      </div>
+      <h2 class="modal-title">가입을 축하합니다!</h2>
+      <p class="modal-message">
+        <strong id="modalUserName">회원</strong>님, LUXE 패밀리가 되신 것을 환영합니다.<br>
+        신규 회원만을 위한 <strong>10% 웰컴 쿠폰</strong>이 발급되었습니다.
+      </p>
+      <button type="button" class="btn-primary" id="btnGoLogin">시작하기 (자동 로그인)</button>
+    </div>
+  </div>
+
+  <!-- Find Password Modal -->
+  <div class="modal-backdrop" id="findPasswordModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key"></i> 비밀번호 재설정</h3>
+        <button type="button" class="btn-close-modal" id="btnCloseFindPassword"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="modal-description">가입 시 등록한 이메일 주소를 입력해 주시면 비밀번호 재설정 링크를 보내드립니다.</p>
+      <form id="findPasswordForm">
+        <div class="form-group" style="margin-top: 16px;">
+          <div class="input-wrapper">
+            <i class="fa-regular fa-envelope input-icon"></i>
+            <input type="email" id="findPasswordEmail" placeholder="example@luxe.com" required>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding: 0; margin-top: 20px;">
+          <button type="submit" class="btn-primary" id="btnSendResetLink">재설정 링크 발송</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Terms Detail Modal -->
+  <div class="modal-backdrop" id="infoModal">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3 id="infoModalTitle">약관 내용</h3>
+        <button type="button" class="btn-close-modal" id="btnCloseInfoModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="infoModalContent">
+        <!-- Content injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btnConfirmInfoModal">확인했습니다</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
