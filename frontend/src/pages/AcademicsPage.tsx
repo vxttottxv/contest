@@ -111,8 +111,8 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
 
       {/* Premium Liquid Ambient Background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/15 rounded-[100%] blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
-        <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] bg-blue-500/10 rounded-[100%] blur-[140px] animate-[pulse_12s_ease-in-out_infinite_reverse]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/[0.08] rounded-[100%] blur-[140px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] bg-white/[0.05] rounded-[100%] blur-[140px] animate-[pulse_12s_ease-in-out_infinite_reverse]" />
       </div>
 
       {/* HEADER BAR (Minimalist) */}
