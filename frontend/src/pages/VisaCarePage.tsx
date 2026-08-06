@@ -28,8 +28,8 @@ import {
   MOCK_CHECKLIST_GROUPS,
   MOCK_HIKOREA_STEPS,
   MOCK_ARC_STEPS,
+  MOCK_ARC_STEPS,
   MOCK_VISA_FAQS,
-  calculateDDay,
 } from '../services/visaCareApi';
 import type { VisaProfile } from '../services/visaCareApi';
 
@@ -38,7 +38,7 @@ interface VisaCarePageProps {
 }
 
 export default function VisaCarePage({ onBack }: VisaCarePageProps) {
-  const [activeTab, setActiveTab] = useState<'ai-coach' | 'd-day' | 'checklist' | 'qna'>('ai-coach');
+  const [activeTab, setActiveTab] = useState<'ai-coach' | 'checklist' | 'qna'>('ai-coach');
 
   // AI Coach state
   const [isCoachLoading, setIsCoachLoading] = useState(false);
@@ -96,9 +96,6 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
   const [faqCategory] = useState<string>('all');
   const [faqSearchQuery, setFaqSearchQuery] = useState<string>('');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>('faq-1');
-
-  // Recalculate D-Day
-  const dDayInfo = calculateDDay(visaProfile.expiryDate);
 
   const handleSaveVisaProfile = () => {
     const newProfile: VisaProfile = {
@@ -178,58 +175,6 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
       </header>
 
       <main className="relative z-10 max-w-6xl w-full mx-auto px-6 pt-8 space-y-8 flex-1">
-        {/* HERO D-DAY COUNTDOWN STATUS CARD */}
-        <div className="relative rounded-3xl border border-white/10 p-6 md:p-8 bg-gradient-to-r from-neutral-900/90 via-neutral-900/80 to-purple-950/40 backdrop-blur-xl shadow-2xl overflow-hidden">
-          {/* Subtle Grid overlay */}
-          <div
-            className="absolute inset-0 opacity-10 pointer-events-none"
-            style={{
-              backgroundImage: `linear-gradient(rgba(168,85,247,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,0.4) 1px, transparent 1px)`,
-              backgroundSize: '24px 24px',
-            }}
-          />
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            {/* Left Info */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-600/30 border border-purple-400/40 text-purple-200">
-                  {visaProfile.visaName}
-                </span>
-                <span className="text-xs text-neutral-400 font-mono">ARC: {visaProfile.arcNumber}</span>
-              </div>
-
-              <div>
-                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-                  <span>비자 만료예정일:</span>
-                  <span className="text-purple-400 font-mono">{visaProfile.expiryDate}</span>
-                </h2>
-                <p className="text-xs md:text-sm text-neutral-300 mt-1.5 font-medium flex items-center gap-2">
-                  <Info size={14} className="text-purple-400 shrink-0" />
-                  <span>{dDayInfo.recommendedText}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Right Big D-Day Badge */}
-            <div className="flex items-center gap-4 shrink-0">
-              <div className={`px-6 py-4 rounded-2xl border text-center shadow-2xl transition-all ${
-                dDayInfo.status === 'CRITICAL' || dDayInfo.status === 'EXPIRED'
-                  ? 'bg-red-950/80 border-red-500/50 text-red-300 shadow-red-600/20'
-                  : dDayInfo.status === 'WARNING'
-                  ? 'bg-amber-950/80 border-amber-500/50 text-amber-300 shadow-amber-600/20'
-                  : 'bg-purple-950/80 border-purple-500/50 text-purple-200 shadow-purple-600/20'
-              }`}>
-                <span className="text-xs font-extrabold uppercase tracking-wider block opacity-80">
-                  {dDayInfo.statusLabel}
-                </span>
-                <span className="text-4xl md:text-5xl font-black font-mono tracking-tight block mt-1">
-                  {dDayInfo.dDayText}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* DOMAIN NAVIGATION TABS */}
         <div className="flex items-center gap-2 border-b border-white/10 pb-1 overflow-x-auto">
@@ -243,18 +188,6 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
           >
             <Bot size={16} />
             <span>🤖 AI 적응 코치</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('d-day')}
-            className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-              activeTab === 'd-day'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 font-black'
-                : 'text-neutral-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Clock size={16} />
-            <span>비자 D-Day 알림 & 케어</span>
           </button>
 
           <button
@@ -424,93 +357,6 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
           </motion.div>
         )}
 
-        {/* TAB 1: VISA D-DAY & AUTOMATIC CARE */}
-        {activeTab === 'd-day' && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            {/* Timeline Roadmap */}
-            <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4">
-              <h3 className="text-base font-black flex items-center gap-2 text-purple-300">
-                <Calendar size={18} />
-                <span>체류기간 연장 권장 타임라인</span>
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                <div className="p-4 rounded-2xl bg-neutral-950 border border-white/10 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-blue-400">STAGE 1</span>
-                    <span className="text-neutral-400">만료 4개월 전</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-white">연장 신청 가능 오픈</h4>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    하이코리아를 통해 비자 연장 신청이 가능해지는 시점입니다.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/30 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-amber-400">STAGE 2</span>
-                    <span className="text-neutral-400">만료 45일 전 (★추천)</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-amber-200">서류 접수 권장 기간</h4>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    출입국 방문예약 또는 온라인 서류 심사가 3~4주 소요되므로 이 시기에 접수하세요.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-red-950/40 border border-red-500/30 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-red-400">STAGE 3</span>
-                    <span className="text-neutral-400">만료 당일</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-red-200">체류기간 최종 마감</h4>
-                  <p className="text-xs text-neutral-300 leading-relaxed">
-                    당일까지 서류 미접수 시 불법체류로 처리되어 출국 조치됩니다.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Direct Action Banners */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <a
-                href="https://www.hikorea.go.kr"
-                target="_blank"
-                rel="noreferrer"
-                className="p-5 rounded-2xl bg-gradient-to-r from-blue-900/60 to-indigo-900/60 border border-blue-500/40 hover:border-blue-400 transition-all flex items-center justify-between group cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-blue-600 text-white">
-                    <ExternalLink size={20} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
-                      하이코리아 (HiKorea) 방문예약 접수
-                    </h4>
-                    <p className="text-xs text-neutral-400 mt-0.5">대한민국 출입국·외국인청 공식 온라인 전자민원</p>
-                  </div>
-                </div>
-                <ChevronRight size={18} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-              </a>
-
-              <div className="p-5 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-purple-600/30 border border-purple-400/40 text-purple-300">
-                    <PhoneCall size={20} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white">유학생 지원 센터 행정 창구</h4>
-                    <p className="text-xs text-neutral-400 mt-0.5">명지전문대학 본관(A동) 101호 | 02-300-9999</p>
-                  </div>
-                </div>
-                <a
-                  href="tel:02-300-9999"
-                  className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-colors"
-                >
-                  전화 상담
-                </a>
-              </div>
-            </div>
-          </motion.div>
         )}
 
         {/* TAB 2: REQUIRED DOCUMENT CHECKLIST */}
