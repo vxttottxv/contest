@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee } from 'lucide-react';
+import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee, LogOut, UserCheck } from 'lucide-react';
 import AuthModal from './components/AuthModal';
+import type { UserSession } from './components/AuthModal';
 
 const CATEGORIES = [
   {
@@ -172,29 +173,68 @@ function CircularMenu() {
 export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
+
+  // Restore current user session on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('mjc_current_user');
+    if (saved) {
+      try {
+        setCurrentUser(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
 
   const openAuth = (mode: 'login' | 'signup') => {
     setAuthMode(mode);
     setAuthModalOpen(true);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('mjc_current_user');
+    setCurrentUser(null);
+  };
+
   return (
     <div className="w-screen h-screen flex flex-col items-center pt-16 md:pt-24 relative overflow-hidden bg-[#0a0a0a]">
        
        {/* Top Auth Navigation */}
-       <div className="absolute top-6 left-8 flex gap-3 z-50">
-         <button 
-           onClick={() => openAuth('login')}
-           className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
-         >
-           로그인
-         </button>
-         <button 
-           onClick={() => openAuth('signup')}
-           className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
-         >
-           회원가입
-         </button>
+       <div className="absolute top-6 left-8 flex items-center gap-3 z-50">
+         {currentUser ? (
+           <div className="flex items-center gap-3">
+             <div className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white text-xs font-semibold backdrop-blur-md">
+               <UserCheck size={16} className="text-emerald-400" />
+               <span>{currentUser.name} ({currentUser.studentId})</span>
+               <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-600/80 text-white rounded-md uppercase">
+                 {currentUser.nationality}
+               </span>
+             </div>
+             <button
+               onClick={handleLogout}
+               className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
+             >
+               <LogOut size={16} />
+               <span>로그아웃</span>
+             </button>
+           </div>
+         ) : (
+           <>
+             <button 
+               onClick={() => openAuth('login')}
+               className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
+             >
+               로그인
+             </button>
+             <button 
+               onClick={() => openAuth('signup')}
+               className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
+             >
+               회원가입
+             </button>
+           </>
+         )}
        </div>
 
        <div className="text-center z-10 shrink-0 mt-8 md:mt-0">
@@ -212,6 +252,7 @@ export default function App() {
          isOpen={authModalOpen} 
          onClose={() => setAuthModalOpen(false)} 
          initialMode={authMode} 
+         onLoginSuccess={(user) => setCurrentUser(user)}
        />
     </div>
   );

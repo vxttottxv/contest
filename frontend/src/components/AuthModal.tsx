@@ -1,35 +1,118 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Mail, Lock, User, Globe, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Globe, CheckCircle2, Eye, EyeOff, AlertCircle } from 'lucide-react';
+
+export interface UserSession {
+  name: string;
+  studentId: string;
+  nationality: string;
+  email: string;
+}
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup';
+  onLoginSuccess: (user: UserSession) => void;
 }
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLoginSuccess }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
-  const [nationality, setNationality] = useState('South Korea');
+  const [nationality, setNationality] = useState('Vietnam');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // 백엔드 연동 전 프론트엔드 모의 동작
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      onClose();
-    }, 1500);
+    setErrorMessage('');
+
+    const existingUsers = JSON.parse(localStorage.getItem('mjc_users_db') || '[]');
+
+    if (mode === 'signup') {
+      // Check if user already exists
+      const userExists = existingUsers.some((u: { email: string }) => u.email === email);
+      if (userExists) {
+        setErrorMessage('이미 가입된 이메일 주소입니다. 로그인해주세요.');
+        return;
+      }
+
+      // Create new user record
+      const newUser = {
+        name: name || '유학생',
+        studentId: studentId || '20260001',
+        nationality: nationality || 'Vietnam',
+        email,
+        password,
+      };
+
+      existingUsers.push(newUser);
+      localStorage.setItem('mjc_users_db', JSON.stringify(existingUsers));
+
+      const session: UserSession = {
+        name: newUser.name,
+        studentId: newUser.studentId,
+        nationality: newUser.nationality,
+        email: newUser.email,
+      };
+
+      localStorage.setItem('mjc_current_user', JSON.stringify(session));
+
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onLoginSuccess(session);
+        onClose();
+      }, 1200);
+    } else {
+      // Login mode
+      const foundUser = existingUsers.find((u: { email: string }) => u.email === email);
+
+      if (foundUser) {
+        if (foundUser.password !== password) {
+          setErrorMessage('비밀번호가 일치하지 않습니다.');
+          return;
+        }
+        const session: UserSession = {
+          name: foundUser.name,
+          studentId: foundUser.studentId,
+          nationality: foundUser.nationality,
+          email: foundUser.email,
+        };
+        localStorage.setItem('mjc_current_user', JSON.stringify(session));
+
+        setIsSubmitted(true);
+        setTimeout(() => {
+          setIsSubmitted(false);
+          onLoginSuccess(session);
+          onClose();
+        }, 1200);
+      } else {
+        // Fallback for new login input
+        const session: UserSession = {
+          name: email.split('@')[0] || '유학생',
+          studentId: '20261234',
+          nationality: 'Vietnam',
+          email,
+        };
+        localStorage.setItem('mjc_current_user', JSON.stringify(session));
+
+        setIsSubmitted(true);
+        setTimeout(() => {
+          setIsSubmitted(false);
+          onLoginSuccess(session);
+          onClose();
+        }, 1200);
+      }
+    }
   };
 
   return (
@@ -44,10 +127,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-600/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-cyan-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close / Back button */}
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+          className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
         >
           ✕
         </button>
@@ -65,13 +148,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             <p className="text-sm text-neutral-400">
               {mode === 'login'
                 ? '환영합니다. 글로벌 캠퍼스로 이동합니다.'
-                : '회원가입이 성공적으로 완료되었습니다.'}
+                : '계정이 생성되었습니다. 로그인되었습니다.'}
             </p>
           </motion.div>
         ) : (
           <>
             {/* Header */}
-            <div className="mb-8 text-center">
+            <div className="mb-6 text-center">
               <span className="text-xs font-bold tracking-[0.2em] text-neutral-500 uppercase">
                 Myongji College International Hub
               </span>
@@ -85,12 +168,23 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               </p>
             </div>
 
+            {/* Error banner */}
+            {errorMessage && (
+              <div className="flex items-center gap-2 p-3 mb-4 text-xs bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl">
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             {/* Mode Switch Tabs */}
             <div className="flex bg-neutral-800/60 p-1 rounded-2xl mb-6 border border-white/5">
               <button
                 type="button"
-                onClick={() => setMode('login')}
-                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+                onClick={() => {
+                  setMode('login');
+                  setErrorMessage('');
+                }}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   mode === 'login'
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'text-neutral-400 hover:text-white'
@@ -100,8 +194,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               </button>
               <button
                 type="button"
-                onClick={() => setMode('signup')}
-                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+                onClick={() => {
+                  setMode('signup');
+                  setErrorMessage('');
+                }}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   mode === 'signup'
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'text-neutral-400 hover:text-white'
@@ -119,11 +216,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-300">이름 (Full Name)</label>
                     <div className="relative">
-                      <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
+                      <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
                       <input
                         type="text"
                         required
-                        placeholder="Hong Gildong"
+                        placeholder="Nguyen Van A"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full pl-11 pr-4 py-3 bg-neutral-800/80 border border-white/10 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition-colors"
@@ -202,7 +299,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -212,7 +309,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98]"
+                className="w-full py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer"
               >
                 {mode === 'login' ? '로그인하기' : '회원가입하기'}
               </button>
