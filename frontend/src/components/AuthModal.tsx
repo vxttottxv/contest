@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Lock, User, Globe, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
@@ -10,6 +10,11 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+
+  // initialMode prop이 변경될 때 내부 mode 동기화
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
