@@ -13,40 +13,40 @@ const CATEGORIES = [
   {
     id: 'campus-map',
     title: 'Campus Map',
-    subtitle: '캠퍼스 맵',
-    description: '3D 건물 지도, 시설 운영 시간 및 기숙사 공고를 안내합니다.',
+    subtitle: '3D & Floor Map',
+    description: '3D building map, facility operating hours, and floor blueprint navigation.',
     icon: Map,
     image: '/images/img1_campus_map.jpg',
   },
   {
     id: 'academics',
     title: 'Academics',
-    subtitle: '학사·장학',
-    description: '학사일정, 장학금 지원 정보 및 공모전 소식을 확인하세요.',
+    subtitle: 'Academics & Scholarships',
+    description: 'Monthly academic calendar, scholarship notices, and competition team recruiting.',
     icon: GraduationCap,
     image: '/images/img5_academics.jpg',
   },
   {
     id: 'visa-care',
     title: 'Visa Care',
-    subtitle: '비자·행정',
-    description: '비자 D-Day 카운트다운, 서류 체크리스트 및 출입국 Q&A를 지원합니다.',
+    subtitle: 'Visa & Admin Care',
+    description: 'Visa D-Day countdown alerts, document preparation checklists, and immigration Q&A.',
     icon: ShieldCheck,
     image: '/images/img2_visa_care.jpg',
   },
   {
     id: 'community',
     title: 'Community',
-    subtitle: '커뮤니티',
-    description: '유학생 종합 게시판, 익명 Q&A 및 실시간 인기글을 공유하세요.',
+    subtitle: 'Community Forum',
+    description: 'International student board, anonymous Q&A, and real-time hot feed.',
     icon: MessageCircle,
     image: '/images/img3_community.jpg',
   },
   {
     id: 'lounge',
     title: 'Lounge',
-    subtitle: '라운지·교류',
-    description: '버디/프렌즈 매칭, 한국어 미니게임 및 교내 이벤트를 즐겨보세요.',
+    subtitle: 'Lounge & Friends',
+    description: 'Tinder-style AI Friends matching, 10s Speed Attack Quiz, and campus events.',
     icon: Coffee,
     image: '/images/img4_lounge.jpg',
   },
@@ -260,7 +260,7 @@ export default function App() {
                className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
              >
                <LogOut size={16} />
-               <span>로그아웃</span>
+               <span>Log Out</span>
              </button>
            </div>
          ) : (
@@ -269,13 +269,13 @@ export default function App() {
                onClick={() => openAuth('login')}
                className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
              >
-               로그인
+               Login
              </button>
              <button 
                onClick={() => openAuth('signup')}
                className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
              >
-               회원가입
+               Sign Up
              </button>
            </>
          )}
