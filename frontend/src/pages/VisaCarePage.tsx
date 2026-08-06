@@ -22,6 +22,7 @@ import {
   X,
   Bot,
   Loader2,
+  ChevronRight,
 } from 'lucide-react';
 import {
   MOCK_DEFAULT_VISA,
