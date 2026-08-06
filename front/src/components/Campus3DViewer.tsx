@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import { RotateCw, ZoomIn, ZoomOut, RefreshCw, Eye, Sparkles, Building2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { RotateCw, ZoomIn, ZoomOut, RefreshCw, Sparkles, Building2, Eye } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
 interface Campus3DViewerProps {
@@ -8,132 +10,321 @@ interface Campus3DViewerProps {
   onSelectBuilding: (building: Building3D) => void;
 }
 
-interface Building3DStruct {
-  id: string;
-  name: string;
-  code: string;
-  color: string;
-  roofColor: string;
-  x: number; // Isometric X coordinate
-  y: number; // Isometric Y coordinate
-  width: number;
-  length: number;
-  height: number;
-  floors: number;
-  trees?: { x: number; y: number }[];
-}
-
-const CAMPUS_BUILDING_MODELS: Building3DStruct[] = [
-  {
-    id: 'bld-1',
-    name: '본관 / 본부동 (A동)',
-    code: 'A동',
-    color: '#3b82f6',
-    roofColor: '#1d4ed8',
-    x: 0,
-    y: -80,
-    width: 140,
-    length: 90,
-    height: 120,
-    floors: 7,
-  },
-  {
-    id: 'bld-2',
-    name: '공학관 / IT융합관 (B동)',
-    code: 'B동',
-    color: '#06b6d4',
-    roofColor: '#0e7490',
-    x: -160,
-    y: 20,
-    width: 110,
-    length: 120,
-    height: 140,
-    floors: 8,
-  },
-  {
-    id: 'bld-3',
-    name: '중앙도서관 & 체육관 (C동)',
-    code: 'C동',
-    color: '#8b5cf6',
-    roofColor: '#6d28d9',
-    x: 150,
-    y: 0,
-    width: 150,
-    length: 100,
-    height: 100,
-    floors: 5,
-  },
-  {
-    id: 'bld-4',
-    name: '명지 국제 기숙사 (D동)',
-    code: 'D동',
-    color: '#ec4899',
-    roofColor: '#be185d',
-    x: 20,
-    y: 130,
-    width: 130,
-    length: 80,
-    height: 180,
-    floors: 12,
-  },
-];
-
 export default function Campus3DViewer({
   buildings,
   selectedBuilding,
   onSelectBuilding,
 }: Campus3DViewerProps) {
-  // 360 Rotation states (degrees)
-  const [rotY, setRotY] = useState(30);
-  const [rotX, setRotX] = useState(35);
-  const [zoom, setZoom] = useState(1);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+
   const [autoRotate, setAutoRotate] = useState(true);
 
-  const isDragging = useRef(false);
-  const previousMouse = useRef({ x: 0, y: 0 });
-
-  // Auto rotate timer
   useEffect(() => {
-    if (!autoRotate) return;
-    const interval = setInterval(() => {
-      setRotY((prev) => (prev + 0.4) % 360);
-    }, 30);
-    return () => clearInterval(interval);
+    const container = mountRef.current;
+    if (!container) return;
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    // 1. Three.js Scene Setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x18181b); // Dark slate background matching reference photo
+    scene.fog = new THREE.FogExp2(0x18181b, 0.008);
+
+    // 2. Camera Setup
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(30, 22, 35);
+    cameraRef.current = camera;
+
+    // 3. Renderer Setup
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
+    container.appendChild(renderer.domElement);
+
+    // 4. OrbitControls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.02; // Prevents camera from going under ground
+    controls.minDistance = 10;
+    controls.maxDistance = 80;
+    controls.autoRotate = autoRotate;
+    controls.autoRotateSpeed = 1.8;
+    controls.target.set(0, 4, 0);
+    controlsRef.current = controls;
+
+    // 5. Lighting Setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    dirLight.position.set(40, 50, 30);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.bias = -0.0001;
+    scene.add(dirLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x333333, 0.8);
+    scene.add(hemiLight);
+
+    // 6. Campus Materials
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.9 });
+    const yardMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.8 }); // Sand playground
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 }); // Green grass track border
+    const wallBrickMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.6 }); // Red brick front wall
+    const wallWhiteMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 }); // Building main body
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.5 }); // Windows
+    const silverDomeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.8 }); // Gym silver dome
+    const roofBlueMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.4 });
+    const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f });
+    const treeLeavesMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.6 });
+
+    // 7. Base Terrain & Playground Construction
+    const baseGround = new THREE.Mesh(new THREE.BoxGeometry(70, 1, 60), groundMat);
+    baseGround.position.set(0, -0.5, 0);
+    baseGround.receiveShadow = true;
+    scene.add(baseGround);
+
+    // Front Playground / Yard (Matching Photo)
+    const playground = new THREE.Mesh(new THREE.BoxGeometry(28, 0.2, 18), yardMat);
+    playground.position.set(6, 0.1, 12);
+    playground.receiveShadow = true;
+    scene.add(playground);
+
+    const trackBorder = new THREE.Mesh(new THREE.BoxGeometry(30, 0.15, 20), trackMat);
+    trackBorder.position.set(6, 0.05, 12);
+    trackBorder.receiveShadow = true;
+    scene.add(trackBorder);
+
+    // Front Entrance Brick Wall (Matching Photo)
+    const frontWall = new THREE.Mesh(new THREE.BoxGeometry(32, 2.5, 1), wallBrickMat);
+    frontWall.position.set(6, 1.25, 23);
+    frontWall.castShadow = true;
+    scene.add(frontWall);
+
+    // 8. Procedural 3D Buildings (Matched with Photo Layout & 4 Main Categories)
+    const buildingMeshes: { mesh: THREE.Group; buildingData: Building3D }[] = [];
+
+    // Helper to build window grids on a building block
+    const addWindowGrid = (parent: THREE.Group, width: number, height: number, depth: number) => {
+      const windowGeo = new THREE.BoxGeometry(0.8, 0.6, 0.1);
+      for (let y = 1.5; y < height - 1; y += 1.8) {
+        for (let x = -width / 2 + 1.2; x < width / 2 - 1; x += 1.8) {
+          const winFront = new THREE.Mesh(windowGeo, glassMat);
+          winFront.position.set(x, y, depth / 2 + 0.06);
+          parent.add(winFront);
+
+          const winBack = new THREE.Mesh(windowGeo, glassMat);
+          winBack.position.set(x, y, -depth / 2 - 0.06);
+          parent.add(winBack);
+        }
+      }
+    };
+
+    // --- A동: 본관 / 본부동 (Main Administration Building) ---
+    const aData = buildings.find((b) => b.id === 'bld-1') || buildings[0];
+    const groupA = new THREE.Group();
+    groupA.position.set(-12, 0, -5);
+
+    const bodyA = new THREE.Mesh(new THREE.BoxGeometry(14, 10, 8), wallWhiteMat);
+    bodyA.position.set(0, 5, 0);
+    bodyA.castShadow = true;
+    bodyA.receiveShadow = true;
+    groupA.add(bodyA);
+
+    const roofA = new THREE.Mesh(new THREE.BoxGeometry(14.4, 0.6, 8.4), roofBlueMat);
+    roofA.position.set(0, 10.3, 0);
+    groupA.add(roofA);
+    addWindowGrid(groupA, 14, 10, 8);
+
+    scene.add(groupA);
+    buildingMeshes.push({ mesh: groupA, buildingData: aData });
+
+    // --- B동: 공학관 / IT융합관 (Engineering Building) ---
+    const bData = buildings.find((b) => b.id === 'bld-2') || buildings[1];
+    const groupB = new THREE.Group();
+    groupB.position.set(-14, 0, 10);
+
+    const bodyB = new THREE.Mesh(new THREE.BoxGeometry(12, 12, 10), wallWhiteMat);
+    bodyB.position.set(0, 6, 0);
+    bodyB.castShadow = true;
+    bodyB.receiveShadow = true;
+    groupB.add(bodyB);
+
+    const roofB = new THREE.Mesh(new THREE.BoxGeometry(12.4, 0.8, 10.4), roofBlueMat);
+    roofB.position.set(0, 12.4, 0);
+    groupB.add(roofB);
+    addWindowGrid(groupB, 12, 12, 10);
+
+    scene.add(groupB);
+    buildingMeshes.push({ mesh: groupB, buildingData: bData });
+
+    // --- C동: 중앙도서관 & Silver Curved Gym Dome (Matching Photo!) ---
+    const cData = buildings.find((b) => b.id === 'bld-3') || buildings[2];
+    const groupC = new THREE.Group();
+    groupC.position.set(10, 0, -6);
+
+    // Library Block
+    const bodyC = new THREE.Mesh(new THREE.BoxGeometry(12, 8, 9), wallWhiteMat);
+    bodyC.position.set(0, 4, 0);
+    bodyC.castShadow = true;
+    bodyC.receiveShadow = true;
+    groupC.add(bodyC);
+    addWindowGrid(groupC, 12, 8, 9);
+
+    // Iconic Silver Curved Metallic Gym Dome (Matching Reference Photo!)
+    const domeGeo = new THREE.CylinderGeometry(4.5, 4.5, 10, 32, 1, false, 0, Math.PI);
+    const domeMesh = new THREE.Mesh(domeGeo, silverDomeMat);
+    domeMesh.rotation.z = Math.PI / 2;
+    domeMesh.rotation.y = Math.PI / 2;
+    domeMesh.position.set(0, 8.5, 2);
+    domeMesh.castShadow = true;
+    groupC.add(domeMesh);
+
+    scene.add(groupC);
+    buildingMeshes.push({ mesh: groupC, buildingData: cData });
+
+    // --- D동: 명지 국제 기숙사 (Global Dormitory Tower) ---
+    const dData = buildings.find((b) => b.id === 'bld-4') || buildings[3];
+    const groupD = new THREE.Group();
+    groupD.position.set(-2, 0, -18);
+
+    const bodyD = new THREE.Mesh(new THREE.BoxGeometry(14, 16, 8), wallWhiteMat);
+    bodyD.position.set(0, 8, 0);
+    bodyD.castShadow = true;
+    bodyD.receiveShadow = true;
+    groupD.add(bodyD);
+
+    const roofD = new THREE.Mesh(new THREE.BoxGeometry(14.4, 0.8, 8.4), roofBlueMat);
+    roofD.position.set(0, 16.4, 0);
+    groupD.add(roofD);
+    addWindowGrid(groupD, 14, 16, 8);
+
+    scene.add(groupD);
+    buildingMeshes.push({ mesh: groupD, buildingData: dData });
+
+    // 9. Trees Line (Matching Photo along front wall and playground border)
+    const addTree = (x: number, z: number) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2), treeTrunkMat);
+      trunk.position.set(x, 1, z);
+      trunk.castShadow = true;
+      scene.add(trunk);
+
+      const leaves = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), treeLeavesMat);
+      leaves.position.set(x, 2.5, z);
+      leaves.castShadow = true;
+      scene.add(leaves);
+    };
+
+    for (let x = -8; x <= 20; x += 4) {
+      addTree(x, 21.5);
+    }
+    for (let z = 3; z <= 20; z += 4.5) {
+      addTree(20.5, z);
+    }
+
+    // 10. Raycasting for Mouse Hover & Building Click Selection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const handleCanvasClick = (event: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      for (const item of buildingMeshes) {
+        const intersects = raycaster.intersectObjects(item.mesh.children, true);
+        if (intersects.length > 0) {
+          onSelectBuilding(item.buildingData);
+          break;
+        }
+      }
+    };
+
+    const handleCanvasMouseMove = (event: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      let found = false;
+
+      for (const item of buildingMeshes) {
+        const intersects = raycaster.intersectObjects(item.mesh.children, true);
+        if (intersects.length > 0) {
+          renderer.domElement.style.cursor = 'pointer';
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        renderer.domElement.style.cursor = 'default';
+      }
+    };
+
+    renderer.domElement.addEventListener('click', handleCanvasClick);
+    renderer.domElement.addEventListener('mousemove', handleCanvasMouseMove);
+
+    // 11. Animation Loop
+    let animationFrameId: number;
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // Resize Handler
+    const handleResize = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      renderer.domElement.removeEventListener('click', handleCanvasClick);
+      renderer.domElement.removeEventListener('mousemove', handleCanvasMouseMove);
+      cancelAnimationFrame(animationFrameId);
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+    };
+  }, []);
+
+  // Update autoRotate when state changes
+  useEffect(() => {
+    if (controlsRef.current) {
+      controlsRef.current.autoRotate = autoRotate;
+    }
   }, [autoRotate]);
 
-  // Mouse interaction handlers for 360 degree drag rotation
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-    previousMouse.current = { x: e.clientX, y: e.clientY };
-    setAutoRotate(false);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current) return;
-
-    const deltaX = e.clientX - previousMouse.current.x;
-    const deltaY = e.clientY - previousMouse.current.y;
-
-    setRotY((prev) => (prev + deltaX * 0.5) % 360);
-    setRotX((prev) => Math.max(10, Math.min(75, prev - deltaY * 0.4)));
-
-    previousMouse.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleMouseUp = () => {
-    isDragging.current = false;
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    setZoom((prev) => Math.max(0.6, Math.min(1.8, prev - e.deltaY * 0.0015)));
-  };
-
   const resetCamera = () => {
-    setRotY(30);
-    setRotX(35);
-    setZoom(1);
-    setAutoRotate(true);
+    if (cameraRef.current && controlsRef.current) {
+      cameraRef.current.position.set(30, 22, 35);
+      controlsRef.current.target.set(0, 4, 0);
+      controlsRef.current.update();
+      setAutoRotate(true);
+    }
   };
 
   return (
@@ -142,7 +333,7 @@ export default function Campus3DViewer({
       <div className="p-4 flex items-center justify-between z-20 pointer-events-auto">
         <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-neutral-900/90 border border-white/10 text-xs font-bold backdrop-blur-md">
           <Sparkles size={16} className="text-blue-400" />
-          <span>360° 3D 캠퍼스 입체 지형 렌더러 (WebGL-Style CSS 3D)</span>
+          <span>명지전문대학 360° Three.js 3D WebGL 실물 캠퍼스 렌더러</span>
         </div>
 
         {/* Camera Tools */}
@@ -157,14 +348,18 @@ export default function Campus3DViewer({
             <RotateCw size={16} className={autoRotate ? 'animate-spin' : ''} />
           </button>
           <button
-            onClick={() => setZoom((prev) => Math.min(1.8, prev + 0.15))}
+            onClick={() => {
+              if (cameraRef.current) cameraRef.current.position.multiplyScalar(0.85);
+            }}
             className="p-2 text-neutral-400 hover:text-white rounded-lg transition-colors cursor-pointer"
             title="확대 (Zoom In)"
           >
             <ZoomIn size={16} />
           </button>
           <button
-            onClick={() => setZoom((prev) => Math.max(0.6, prev - 0.15))}
+            onClick={() => {
+              if (cameraRef.current) cameraRef.current.position.multiplyScalar(1.15);
+            }}
             className="p-2 text-neutral-400 hover:text-white rounded-lg transition-colors cursor-pointer"
             title="축소 (Zoom Out)"
           >
@@ -180,175 +375,38 @@ export default function Campus3DViewer({
         </div>
       </div>
 
-      {/* Interactive 360 Rotatable WebGL / CSS 3D Scene View */}
-      <div
-        className="relative w-full flex-1 cursor-grab active:cursor-grabbing flex items-center justify-center overflow-hidden"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
-      >
-        {/* Ambient Glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.15)_0%,transparent_70%)] pointer-events-none" />
+      {/* WebGL 3D Canvas Container */}
+      <div ref={mountRef} className="w-full flex-1 relative z-10" />
 
-        {/* 3D Scene Canvas */}
-        <div
-          className="relative transition-transform duration-75 ease-out"
-          style={{
-            perspective: '1400px',
-            transform: `scale(${zoom})`,
-          }}
-        >
-          {/* Rotating Ground Plane */}
-          <div
-            className="relative w-[650px] h-[650px] rounded-full border border-blue-500/20 shadow-[0_0_100px_rgba(37,99,235,0.25)] flex items-center justify-center"
-            style={{
-              transformStyle: 'preserve-3d',
-              transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
-              transition: isDragging.current ? 'none' : 'transform 0.1s ease-out',
-              background: 'radial-gradient(circle, rgba(15,23,42,0.9) 0%, rgba(10,10,10,0.98) 75%)',
-            }}
-          >
-            {/* Grid & Campus Roads */}
-            <div
-              className="absolute inset-0 rounded-full opacity-20 pointer-events-none"
-              style={{
-                backgroundImage: `linear-gradient(rgba(59,130,246,0.4) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(59,130,246,0.4) 1.5px, transparent 1.5px)`,
-                backgroundSize: '36px 36px',
-              }}
-            />
-
-            {/* Campus Road Network SVG */}
-            <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
-              <circle cx="325" cy="325" r="220" fill="none" stroke="#38bdf8" strokeWidth="3" strokeDasharray="8 8" />
-              <line x1="325" y1="50" x2="325" y2="600" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 4" />
-              <line x1="50" y1="325" x2="600" y2="325" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 4" />
-            </svg>
-
-            {/* Campus Trees Decor */}
-            {[-120, -40, 60, 140].map((offset, idx) => (
-              <div
-                key={idx}
-                className="absolute w-4 h-4 rounded-full bg-emerald-500/40 border border-emerald-400/60 shadow-lg shadow-emerald-500/20"
-                style={{
-                  transform: `translate3d(${offset}px, ${offset * 0.8}px, 5px)`,
-                }}
-              />
-            ))}
-
-            {/* 3D Buildings Rendered Procedurally */}
-            {CAMPUS_BUILDING_MODELS.map((bldStruct) => {
-              const matchedBuilding = buildings.find((b) => b.id === bldStruct.id) || buildings[0];
-              const isSelected = selectedBuilding.id === matchedBuilding.id;
-
-              return (
-                <div
-                  key={bldStruct.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectBuilding(matchedBuilding);
-                  }}
-                  className="absolute cursor-pointer group"
-                  style={{
-                    left: `calc(50% + ${bldStruct.x}px)`,
-                    top: `calc(50% + ${bldStruct.y}px)`,
-                    transformStyle: 'preserve-3d',
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                >
-                  {/* 3D Block Prism with Front/Side/Top Glass Walls */}
-                  <div
-                    className={`relative transition-all duration-300 ${
-                      isSelected ? 'scale-110' : 'group-hover:scale-105'
-                    }`}
-                    style={{
-                      width: bldStruct.width,
-                      height: bldStruct.length,
-                      transformStyle: 'preserve-3d',
-                    }}
-                  >
-                    {/* Front Glass Wall */}
-                    <div
-                      className="absolute inset-0 rounded-2xl border border-white/20 transition-all duration-300 flex flex-col justify-between p-2 shadow-2xl backdrop-blur-md"
-                      style={{
-                        height: bldStruct.height,
-                        transform: `translateZ(${bldStruct.height / 2}px) rotateX(-90deg)`,
-                        transformOrigin: 'bottom',
-                        backgroundColor: isSelected ? 'rgba(37, 99, 235, 0.85)' : 'rgba(30, 41, 59, 0.85)',
-                        borderColor: isSelected ? '#60a5fa' : 'rgba(255, 255, 255, 0.2)',
-                      }}
-                    >
-                      {/* Window Rows */}
-                      <div className="w-full flex justify-between gap-1">
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                      </div>
-                      <div className="w-full flex justify-between gap-1">
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                      </div>
-                      <div className="w-full flex justify-between gap-1">
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                        <div className="h-2 flex-1 bg-cyan-400/40 rounded-sm" />
-                      </div>
-                    </div>
-
-                    {/* Roof Top Cap */}
-                    <div
-                      className="absolute inset-0 rounded-2xl border border-white/30 flex items-center justify-center font-bold text-white text-xs shadow-lg"
-                      style={{
-                        transform: `translateZ(${bldStruct.height}px)`,
-                        backgroundColor: isSelected ? '#2563eb' : bldStruct.roofColor,
-                      }}
-                    >
-                      <Building2 size={16} className="text-white/80" />
-                    </div>
-
-                    {/* Billboard Pin Counter-Rotates to Face Camera */}
-                    <div
-                      className="absolute -top-16 left-1/2 -translate-x-1/2 pointer-events-none z-40"
-                      style={{
-                        transform: `rotateY(${-rotY}deg) rotateX(${-rotX}deg)`,
-                        transition: 'transform 0.1s ease-out',
-                      }}
-                    >
-                      <div
-                        className={`px-3.5 py-1.5 rounded-2xl border text-xs font-black whitespace-nowrap shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all ${
-                          isSelected
-                            ? 'bg-blue-600 text-white border-blue-300 ring-4 ring-blue-500/40 scale-110'
-                            : 'bg-neutral-900/90 text-neutral-200 border-white/20 group-hover:border-blue-400 group-hover:scale-105'
-                        }`}
-                      >
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
-                        <span className="font-extrabold">{bldStruct.code}</span>
-                        <span className="font-semibold text-[10px] text-neutral-300">
-                          {bldStruct.name.split('(')[0]}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Rotation Guidance Overlay */}
-      <div className="p-4 flex items-center justify-between text-xs text-neutral-400 bg-neutral-950/80 border-t border-white/10 backdrop-blur-md z-20">
+      {/* Building Hotspots Quick Selector & Info Bar */}
+      <div className="p-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs bg-neutral-950/90 border-t border-white/10 backdrop-blur-md z-20">
         <div className="flex items-center gap-2">
           <Eye size={16} className="text-blue-400" />
           <span>
-            마우스 드래그로 <strong>3D 캠퍼스 지형 및 층별 건물 구조를 360도 입체 탐색</strong>하세요. (휠 확대/축소)
+            마우스를 드래그하면 <strong>360도 자유 회전</strong>되며, 3D 건물을 직접 클릭하면 세부 정보가 동기화됩니다.
           </span>
         </div>
-        <span className="font-mono text-neutral-500">
-          Camera Y: {Math.round(rotY)}° | X: {Math.round(rotX)}°
-        </span>
+
+        {/* Building Selector Badges */}
+        <div className="flex gap-2 overflow-x-auto max-w-full">
+          {buildings.map((bld) => {
+            const isSelected = selectedBuilding.id === bld.id;
+            return (
+              <button
+                key={bld.id}
+                onClick={() => onSelectBuilding(bld)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-400'
+                    : 'bg-neutral-900 border border-white/10 text-neutral-400 hover:text-white'
+                }`}
+              >
+                <Building2 size={14} />
+                <span>{bld.code}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
