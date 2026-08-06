@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee } from 'lucide-react';
+import AuthModal from './components/AuthModal';
 
 const CATEGORIES = [
   {
@@ -169,13 +170,31 @@ function CircularMenu() {
 }
 
 export default function App() {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+
+  const openAuth = (mode: 'login' | 'signup') => {
+    setAuthMode(mode);
+    setAuthModalOpen(true);
+  };
+
   return (
     <div className="w-screen h-screen flex flex-col items-center pt-16 md:pt-24 relative overflow-hidden bg-[#0a0a0a]">
        
        {/* Top Auth Navigation */}
        <div className="absolute top-6 left-8 flex gap-3 z-50">
-         <button className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide">로그인</button>
-         <button className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide">회원가입</button>
+         <button 
+           onClick={() => openAuth('login')}
+           className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
+         >
+           로그인
+         </button>
+         <button 
+           onClick={() => openAuth('signup')}
+           className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
+         >
+           회원가입
+         </button>
        </div>
 
        <div className="text-center z-10 shrink-0 mt-8 md:mt-0">
@@ -187,6 +206,13 @@ export default function App() {
        <div className="w-full flex justify-center mt-12 md:mt-16 shrink-0">
           <CircularMenu />
        </div>
+
+       {/* Auth Modal */}
+       <AuthModal 
+         isOpen={authModalOpen} 
+         onClose={() => setAuthModalOpen(false)} 
+         initialMode={authMode} 
+       />
     </div>
   );
 }
