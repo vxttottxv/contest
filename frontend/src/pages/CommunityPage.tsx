@@ -263,15 +263,24 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-blue-500 selection:text-white pb-20">
-      {/* Background Glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-25">
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 left-1/4 w-[30rem] h-[30rem] bg-indigo-600/20 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#080d14] text-white flex flex-col font-sans selection:bg-[#BADDFF]/30 relative selection:text-white pb-20">
+      {/* Halftone Texture Overlay */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.05] mix-blend-screen"
+        style={{
+          backgroundImage: 'radial-gradient(circle at center, #ffffff 1.5px, transparent 1.5px)',
+          backgroundSize: '16px 16px',
+        }}
+      />
+
+      {/* Pastel Liquid Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#496580]/40 rounded-[100%] blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] bg-[#BADDFF]/15 rounded-[100%] blur-[120px] animate-[pulse_12s_ease-in-out_infinite_reverse]" />
       </div>
 
       {/* HEADER */}
-      <header className="relative z-10 border-b border-white/10 bg-black/60 backdrop-blur-md sticky top-0 px-6 py-4 flex items-center justify-between">
+      <header className="relative z-10 border-b border-white/10 bg-[#080d14]/70 backdrop-blur-3xl border-b border-[#BADDFF]/10 sticky top-0 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -282,13 +291,13 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 shadow-lg shadow-blue-600/20">
+            <div className="p-3 rounded-2xl bg-[#BADDFF] shadow-lg shadow-[#BADDFF]/20">
               <MessageCircle size={22} className="text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-black tracking-tight">Community (유학생 소통 커뮤니티)</h1>
-                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#BADDFF]/20 text-[#BADDFF] border border-[#BADDFF]/30 flex items-center gap-1">
                   <Sparkles size={10} />
                   Global Lounge Feed
                 </span>
@@ -302,7 +311,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
 
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
+          className="px-5 py-2.5 bg-[#BADDFF] hover:from-[#BADDFF] hover:to-[#BADDFF] text-white font-black text-xs rounded-2xl shadow-lg shadow-[#BADDFF]/30 flex items-center gap-1.5 transition-all cursor-pointer"
         >
           <Plus size={16} />
           <span>새 글 작성하기</span>
@@ -319,7 +328,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                 onClick={() => setActiveTab('ai-coach')}
                 className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
                   activeTab === 'ai-coach'
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30 font-black'
+                    ? 'bg-gradient-to-r from-[#BAFFF5] to-teal-600 text-white shadow-lg shadow-[#BAFFF5]/30 font-black'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -331,11 +340,11 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                 onClick={() => setActiveTab('hot')}
                 className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === 'hot'
-                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg shadow-amber-600/30 font-black'
+                    ? 'bg-gradient-to-r from-[#FFDBBB] to-orange-600 text-white shadow-lg shadow-[#FFDBBB]/30 font-black'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <Flame size={15} className="text-amber-300" />
+                <Flame size={15} className="text-[#FFDBBB]" />
                 <span>🔥 실시간 인기글</span>
               </button>
 
@@ -343,7 +352,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                 onClick={() => setActiveTab('board')}
                 className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === 'board'
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-black'
+                    ? 'bg-[#BADDFF] text-white shadow-lg shadow-[#BADDFF]/30 font-black'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -355,7 +364,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                 onClick={() => setActiveTab('anonymous')}
                 className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === 'anonymous'
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 font-black'
+                    ? 'bg-[#FFDBBB] text-white shadow-lg shadow-[#FFDBBB]/30 font-black'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -372,7 +381,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="게시글 제목, 내용, 국적 검색..."
-                className="w-full pl-10 pr-4 py-2.5 bg-neutral-950 border border-white/10 rounded-2xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 bg-neutral-950 border border-white/10 rounded-2xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#BADDFF] transition-colors"
               />
             </div>
           </div>
@@ -393,7 +402,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                   onClick={() => setBoardCategoryFilter(subCat.key)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
                     boardCategoryFilter === subCat.key
-                      ? 'bg-blue-600 text-white shadow-md'
+                      ? 'bg-[#BADDFF] text-white shadow-md'
                       : 'bg-neutral-950 border border-white/10 text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -407,12 +416,12 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
         {/* AI CULTURE COACH FEED */}
         {activeTab === 'ai-coach' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <div className="p-6 md:p-8 rounded-3xl bg-neutral-900 border border-emerald-500/30 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="p-6 md:p-8 rounded-3xl bg-neutral-900 border border-[#BAFFF5]/30 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#BAFFF5]/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="relative z-10 flex flex-col items-center text-center space-y-4 mb-8">
-                <div className="p-4 rounded-full bg-emerald-500/20 border border-emerald-500/40">
-                  <Bot size={32} className="text-emerald-400" />
+                <div className="p-4 rounded-full bg-[#BAFFF5]/20 border border-[#BAFFF5]/40">
+                  <Bot size={32} className="text-[#BAFFF5]" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-black text-white">AI 문화 코치</h2>
@@ -428,12 +437,12 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                   value={coachInput}
                   onChange={(e) => setCoachInput(e.target.value)}
                   placeholder="예: 교수님 밥 사주세요 / 과제 언제까지인가요?"
-                  className="w-full h-32 p-4 bg-neutral-950 border border-white/10 rounded-2xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                  className="w-full h-32 p-4 bg-neutral-950 border border-white/10 rounded-2xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-[#BAFFF5] transition-colors resize-none"
                 />
                 <button
                   onClick={handleCoachAnalyze}
                   disabled={isCoachLoading || !coachInput.trim()}
-                  className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full py-4 bg-gradient-to-r from-[#BAFFF5] to-teal-600 hover:from-[#BAFFF5] hover:to-teal-500 text-white font-black rounded-2xl shadow-lg shadow-[#BAFFF5]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isCoachLoading ? (
                     <>
@@ -459,9 +468,9 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="p-6 md:p-8 rounded-3xl bg-neutral-950 border border-emerald-500/40 shadow-xl space-y-6">
+                  <div className="p-6 md:p-8 rounded-3xl bg-neutral-950 border border-[#BAFFF5]/40 shadow-xl space-y-6">
                     <div className="flex items-center gap-2 border-b border-white/10 pb-4">
-                      <h3 className="text-lg font-black text-emerald-400">분석 결과</h3>
+                      <h3 className="text-lg font-black text-[#BAFFF5]">분석 결과</h3>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -473,7 +482,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                               <Star
                                 key={star}
                                 size={18}
-                                className={star <= coachResult.politeness ? 'fill-amber-400 text-amber-400' : 'text-neutral-700'}
+                                className={star <= coachResult.politeness ? 'fill-amber-400 text-[#FFDBBB]' : 'text-neutral-700'}
                               />
                             ))}
                           </div>
@@ -483,7 +492,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
 
                       <div className="space-y-2">
                         <span className="text-xs font-bold text-neutral-400">AI 문화 팁 (Culture Tip)</span>
-                        <p className="text-sm text-neutral-300 leading-relaxed bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                        <p className="text-sm text-neutral-300 leading-relaxed bg-[#BAFFF5]/10 p-4 rounded-xl border border-[#BAFFF5]/20">
                           {coachResult.comment}
                         </p>
                       </div>
@@ -496,11 +505,11 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                       </div>
                       
                       <div className="flex justify-center">
-                        <ArrowRight size={24} className="text-emerald-500 rotate-90 md:rotate-0" />
+                        <ArrowRight size={24} className="text-[#BAFFF5] rotate-90 md:rotate-0" />
                       </div>
 
-                      <div className="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 shadow-inner">
-                        <span className="text-xs font-black text-emerald-400 flex items-center gap-1.5 mb-2">
+                      <div className="p-5 rounded-2xl bg-emerald-950/30 border border-[#BAFFF5]/30 shadow-inner">
+                        <span className="text-xs font-black text-[#BAFFF5] flex items-center gap-1.5 mb-2">
                           <Sparkles size={14} /> 더 공손한 표현 (Highly Recommended)
                         </span>
                         <p className="text-lg font-black text-white">{coachResult.polite}</p>
@@ -522,7 +531,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
               <p className="text-sm font-bold text-neutral-400">조건에 맞는 게시글이 존재하지 않습니다.</p>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl"
+                className="px-4 py-2 bg-[#BADDFF] hover:bg-[#BADDFF] text-white text-xs font-bold rounded-xl"
               >
                 첫 번째 글 작성하기
               </button>
@@ -536,21 +545,21 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={() => setSelectedPost(post)}
-                  className="p-5 md:p-6 rounded-3xl border border-white/10 bg-neutral-900/80 hover:bg-neutral-900 hover:border-white/20 transition-all cursor-pointer space-y-3 shadow-xl group"
+                  className="p-5 md:p-6 rounded-3xl border border-white/10 bg-[#496580]/20 hover:bg-neutral-900 hover:border-white/20 transition-all cursor-pointer space-y-3 shadow-xl group"
                 >
                   {/* Category & Author Row */}
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
                         post.category === 'tips'
-                          ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                          ? 'bg-[#BADDFF]/20 text-[#BADDFF] border-[#BADDFF]/30'
                           : post.category === 'market'
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                          ? 'bg-[#BAFFF5]/20 text-[#BAFFF5] border-[#BAFFF5]/30'
                           : post.category === 'housing'
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          ? 'bg-[#FFDBBB]/20 text-[#FFDBBB] border-[#FFDBBB]/30'
                           : post.category === 'anonymous'
-                          ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                          : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+                          ? 'bg-[#FFDBBB]/20 text-[#FFDBBB] border-[#FFDBBB]/30'
+                          : 'bg-[#BADDFF]/20 text-[#BADDFF] border-[#BADDFF]/30'
                       }`}>
                         {post.categoryLabel}
                       </span>
@@ -568,7 +577,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                         {post.authorNation}
                       </span>
                       {post.verifiedBadge && (
-                        <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-0.5">
+                        <span className="text-[10px] font-bold text-[#BAFFF5] flex items-center gap-0.5">
                           <CheckCircle2 size={10} /> {post.verifiedBadge}
                         </span>
                       )}
@@ -578,7 +587,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
 
                   {/* Title & Content Preview */}
                   <div>
-                    <h3 className="text-base font-black text-white group-hover:text-blue-300 transition-colors line-clamp-1">
+                    <h3 className="text-base font-black text-white group-hover:text-[#BADDFF] transition-colors line-clamp-1">
                       {post.title}
                     </h3>
                     <p className="text-xs text-neutral-400 leading-relaxed mt-1 line-clamp-2 font-medium">
@@ -590,12 +599,12 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                   {(post.price || post.location) && (
                     <div className="flex items-center gap-3 pt-1 text-xs">
                       {post.price && (
-                        <span className="px-2.5 py-1 rounded-xl bg-emerald-950 border border-emerald-500/40 text-emerald-300 font-extrabold">
+                        <span className="px-2.5 py-1 rounded-xl bg-emerald-950 border border-[#BAFFF5]/40 text-[#BAFFF5] font-extrabold">
                           💰 가격: {post.price}
                         </span>
                       )}
                       {post.location && (
-                        <span className="px-2.5 py-1 rounded-xl bg-amber-950 border border-amber-500/40 text-amber-300 font-extrabold flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-xl bg-amber-950 border border-[#FFDBBB]/40 text-[#FFDBBB] font-extrabold flex items-center gap-1">
                           <MapPin size={12} /> {post.location}
                         </span>
                       )}
@@ -626,7 +635,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                       </span>
                     </div>
 
-                    <span className="text-[11px] text-blue-400 font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[11px] text-[#BADDFF] font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       자세히 보기 ➔
                     </span>
                   </div>
@@ -646,12 +655,12 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-3xl max-h-[90vh] bg-neutral-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-white flex flex-col space-y-4 overflow-hidden"
+              className="w-full max-w-3xl max-h-[90vh] bg-gradient-to-br from-[#BADDFF]/5 to-transparent border border-[#BADDFF]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] rounded-3xl p-6 shadow-2xl text-white flex flex-col space-y-4 overflow-hidden"
             >
               {/* Modal Header */}
               <div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-600/30 border border-blue-400/40 text-blue-300">
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-[#BADDFF]/30 border border-[#BADDFF]/40 text-[#BADDFF]">
                     {selectedPost.categoryLabel}
                   </span>
                   <span className="text-xs font-bold text-neutral-400">작성자: {selectedPost.authorName} ({selectedPost.authorNation})</span>
@@ -673,8 +682,8 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
 
                 {(selectedPost.price || selectedPost.location) && (
                   <div className="flex gap-2 text-xs">
-                    {selectedPost.price && <span className="px-3 py-1 bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 font-bold rounded-xl">💰 희망가격: {selectedPost.price}</span>}
-                    {selectedPost.location && <span className="px-3 py-1 bg-amber-900/50 border border-amber-500/40 text-amber-300 font-bold rounded-xl">📍 거래/위치: {selectedPost.location}</span>}
+                    {selectedPost.price && <span className="px-3 py-1 bg-[#BAFFF5]/50 border border-[#BAFFF5]/40 text-[#BAFFF5] font-bold rounded-xl">💰 희망가격: {selectedPost.price}</span>}
+                    {selectedPost.location && <span className="px-3 py-1 bg-[#FFDBBB]/50 border border-[#FFDBBB]/40 text-[#FFDBBB] font-bold rounded-xl">📍 거래/위치: {selectedPost.location}</span>}
                   </div>
                 )}
 
@@ -708,7 +717,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                             <span className="font-bold text-white">{cm.authorName}</span>
                             <span className="text-[10px] text-neutral-400">{cm.authorNation}</span>
                             {cm.authorBadge && (
-                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-[#BAFFF5]/20 text-[#BAFFF5] border border-[#BAFFF5]/30">
                                 {cm.authorBadge}
                               </span>
                             )}
@@ -730,11 +739,11 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                   onChange={(e) => setNewCommentText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
                   placeholder="댓글 또는 답변을 입력하세요..."
-                  className="flex-1 px-4 py-2.5 bg-neutral-950 border border-white/10 rounded-2xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500"
+                  className="flex-1 px-4 py-2.5 bg-neutral-950 border border-white/10 rounded-2xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#BADDFF]"
                 />
                 <button
                   onClick={handleAddComment}
-                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-2xl flex items-center gap-1 cursor-pointer transition-colors"
+                  className="px-4 py-2.5 bg-[#BADDFF] hover:bg-[#BADDFF] text-white font-bold text-xs rounded-2xl flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <Send size={14} />
                   <span>등록</span>
@@ -753,7 +762,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-neutral-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-white space-y-4"
+              className="w-full max-w-lg bg-gradient-to-br from-[#BADDFF]/5 to-transparent border border-[#BADDFF]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] rounded-3xl p-6 shadow-2xl text-white space-y-4"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <h3 className="text-base font-black">유학생 게시글 작성하기</h3>
@@ -768,7 +777,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as any)}
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#BADDFF]"
                   >
                     <option value="tips">💡 생활 팁 공유</option>
                     <option value="market">🛍️ 중고 거래 (벼룩시장)</option>
@@ -786,7 +795,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="게시글 제목을 입력하세요"
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#BADDFF]"
                   />
                 </div>
 
@@ -799,7 +808,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                         value={newPrice}
                         onChange={(e) => setNewPrice(e.target.value)}
                         placeholder="예: 30,000원 / 보증금 300"
-                        className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                        className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#BADDFF]"
                       />
                     </div>
                     <div className="space-y-1">
@@ -809,7 +818,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                         value={newLocation}
                         onChange={(e) => setNewLocation(e.target.value)}
                         placeholder="예: 공학관 로비 / 정문 3분"
-                        className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                        className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#BADDFF]"
                       />
                     </div>
                   </div>
@@ -822,7 +831,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                     onChange={(e) => setNewContent(e.target.value)}
                     rows={5}
                     placeholder="상세 내용을 자유롭게 작성하세요..."
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500 resize-none"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#BADDFF] resize-none"
                   />
                 </div>
 
@@ -832,7 +841,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                     id="chk-anon"
                     checked={newIsAnonymous}
                     onChange={(e) => setNewIsAnonymous(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 rounded bg-neutral-950 border-white/20"
+                    className="w-4 h-4 text-[#BADDFF] rounded bg-neutral-950 border-white/20"
                   />
                   <label htmlFor="chk-anon" className="text-xs font-bold text-neutral-300 cursor-pointer">
                     익명으로 게시하기 (🔒 이름 및 국적 비공개)
@@ -849,7 +858,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
                 </button>
                 <button
                   onClick={handleCreatePost}
-                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-600/30 cursor-pointer"
+                  className="flex-1 py-2.5 bg-[#BADDFF] hover:bg-[#BADDFF] text-white font-bold rounded-xl text-xs shadow-lg shadow-[#BADDFF]/30 cursor-pointer"
                 >
                   등록하기
                 </button>
