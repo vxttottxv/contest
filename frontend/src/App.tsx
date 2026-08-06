@@ -185,16 +185,9 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
 
-  // Restore current user session on mount
+  // Ensure app always starts on home page
   useEffect(() => {
-    const saved = localStorage.getItem('mjc_current_user');
-    if (saved) {
-      try {
-        setCurrentUser(JSON.parse(saved));
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    setCurrentPage('home');
   }, []);
 
   const openAuth = (mode: 'login' | 'signup') => {
