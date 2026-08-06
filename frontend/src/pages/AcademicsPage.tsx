@@ -100,6 +100,15 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-white/20 pb-20 relative">
       
+      {/* Halftone Texture Overlay (Premium Tech Dot Grid) */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.04] mix-blend-screen"
+        style={{
+          backgroundImage: 'radial-gradient(circle at center, #ffffff 1.5px, transparent 1.5px)',
+          backgroundSize: '16px 16px',
+        }}
+      />
+
       {/* Liquid Ambient Background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/[0.03] rounded-[100%] blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
