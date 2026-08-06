@@ -71,8 +71,9 @@ export default function CampusNavigationModal({
   const walkingSpeed = 4.2;
 
   const animTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Pre-fetch & ensure Web Speech API voices are loaded for female Korean voice
+  // Initialize Web Speech API & Audio Context
   useEffect(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
@@ -95,33 +96,85 @@ export default function CampusNavigationModal({
     return matchCat && matchQuery;
   });
 
-  // Dedicated High Quality Female Korean Voice TTS Engine
+  // Play Real Navigation Chime Sound (Ding-Dong Audio via Web Audio API)
+  const playNavigationChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new AudioCtx();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+
+      // Chime Tone (C5 = 523.25Hz -> G5 = 783.99Hz)
+      osc1.frequency.setValueAtTime(523.25, now);
+      osc2.frequency.setValueAtTime(783.99, now + 0.12);
+
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(now);
+      osc1.stop(now + 0.15);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.45);
+    } catch (e) {
+      console.error('Audio chime error:', e);
+    }
+  };
+
+  // High Quality Audible Female Korean Voice TTS Engine
   const speakText = (text: string) => {
     setSpeakingText(text);
     if (isVoiceMuted || !('speechSynthesis' in window)) return;
 
     try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR';
-      utterance.rate = 1.05;
-      utterance.pitch = 1.25; // Bright clear female navigation voice pitch
-
-      const voices = window.speechSynthesis.getVoices();
-      const femaleKoVoice = voices.find(
-        (v) => (v.lang.includes('ko') || v.lang.includes('KO')) &&
-          (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami'))
-      ) || voices.find((v) => v.lang.includes('ko') || v.lang.includes('KO'));
-
-      if (femaleKoVoice) {
-        utterance.voice = femaleKoVoice;
+      // 1. Unlock browser speaker audio
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
       }
+      window.speechSynthesis.cancel();
 
-      utterance.onend = () => {
-        setSpeakingText(null);
-      };
+      // 2. Play Navigation Chime Sound
+      playNavigationChime();
 
-      window.speechSynthesis.speak(utterance);
+      // 3. Synthesize Female Korean Voice Prompt
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        utterance.rate = 1.05;
+        utterance.pitch = 1.35; // Bright clear female navigation voice pitch
+
+        const voices = window.speechSynthesis.getVoices();
+        // Priority selection for Female Korean Voices
+        const femaleKoVoice = voices.find(
+          (v) => (v.lang.includes('ko') || v.lang.includes('KO')) &&
+            (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami') || v.name.includes('Siri'))
+        ) || voices.find((v) => v.lang.includes('ko') || v.lang.includes('KO'));
+
+        if (femaleKoVoice) {
+          utterance.voice = femaleKoVoice;
+        }
+
+        utterance.onend = () => {
+          setSpeakingText(null);
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }, 180);
     } catch (e) {
       console.error('Speech Synthesis Error:', e);
     }
@@ -146,7 +199,7 @@ export default function CampusNavigationModal({
           setIsNavigating(false);
           setRemainingDistance(0);
           setCurrentStep(2);
-          const arriveMsg = `축하합니다! 목적지인 ${selectedPlace.name}에 도착했습니다. 길안내 서비스를 종료합니다.`;
+          const arriveMsg = `목적지인 ${selectedPlace.name}에 도착했습니다. 길안내 서비스를 종료합니다.`;
           speakText(arriveMsg);
           if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
           return 100;
@@ -256,11 +309,11 @@ export default function CampusNavigationModal({
                   <h3 className="text-lg font-black tracking-tight">여성 음성 네비게이션 길안내 시스템</h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 flex items-center gap-1">
                     <Mic size={10} className="animate-pulse" />
-                    여성 성우 음성 (ko-KR Voice)
+                    여성 성우 음성 (Speaker Audio ON)
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  학교 평면도 기반 실시간 여성 음성 턴바이턴 보이스 길안내 서비스
+                  학교 평면도 기반 실시간 스피커 음성 딩동 알림 & 한국어 여성 보이스 길안내
                 </p>
               </div>
             </div>
@@ -280,11 +333,11 @@ export default function CampusNavigationModal({
                   const testText = `여성 네비게이션 음성 테스트입니다. 목적지는 ${selectedPlace.name}입니다.`;
                   speakText(testText);
                 }}
-                className="px-3 py-1.5 bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
-                title="여성 음성 테스트"
+                className="px-3.5 py-1.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg shadow-pink-600/20 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5"
+                title="스피커 여성 음성 청음"
               >
                 <Volume2 size={14} className="animate-bounce" />
-                <span>🔊 여성 음성 테스트</span>
+                <span>🔊 스피커 음성 재생</span>
               </button>
 
               <button
@@ -425,7 +478,7 @@ export default function CampusNavigationModal({
                 <span className="text-neutral-500">|</span>
                 <span className="flex items-center gap-1 font-bold text-pink-300">
                   <Mic size={16} className="animate-pulse" />
-                  여성 음성 수신중
+                  스피커 여성 음성 출력중
                 </span>
               </div>
 
@@ -460,9 +513,9 @@ export default function CampusNavigationModal({
 
             {/* LIVE VOICE PROMPT CAPTION TOAST OVER CANVAS */}
             {speakingText && (
-              <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 px-5 py-2.5 rounded-2xl bg-pink-950/90 border border-pink-500/50 text-pink-200 text-xs font-extrabold shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce">
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 px-5 py-2.5 rounded-2xl bg-pink-950/95 border border-pink-500/60 text-pink-200 text-xs font-extrabold shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce">
                 <Volume2 size={16} className="text-pink-400 animate-pulse shrink-0" />
-                <span>🔊 여성 음성 안내: "{speakingText}"</span>
+                <span>🔊 스피커 음성 재생중: "{speakingText}"</span>
               </div>
             )}
 
@@ -566,7 +619,7 @@ export default function CampusNavigationModal({
           <div className="flex items-center justify-between pt-1 shrink-0">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Eye size={16} className="text-blue-400" />
-              <span>선택하신 [{selectedPlace.name}] 한국어 여성 네비게이션 음성이 실시간으로 송출 중입니다.</span>
+              <span>선택하신 [{selectedPlace.name}] 한국어 여성 네비게이션 스피커 실시간 음성 송출 중입니다.</span>
             </div>
             <button
               onClick={() => {
