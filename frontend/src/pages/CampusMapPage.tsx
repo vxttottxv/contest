@@ -451,11 +451,11 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
 
               {/* 2D Floor Plan Visual Canvas with Real Blueprint Background */}
               <div className="flex-1 min-h-[300px] p-6 rounded-2xl bg-black border border-white/10 flex flex-col justify-between relative overflow-hidden">
-                {/* Real School Floor Blueprint Image Background */}
+                {/* Real School Floor Blueprint Image Background (Black Theme) */}
                 <img
                   src="/images/school_floor_blueprint.png"
-                  alt="School Architectural Blueprint"
-                  className="absolute inset-0 w-full h-full object-contain filter invert contrast-125 brightness-90 opacity-60 p-2"
+                  alt="School Architectural Blueprint Black Theme"
+                  className="absolute inset-0 w-full h-full object-contain filter invert contrast-150 brightness-90 opacity-85 p-4"
                 />
 
                 {/* Blueprint Grid Overlay */}

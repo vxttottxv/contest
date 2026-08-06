@@ -59,7 +59,6 @@ export default function CampusNavigationModal({
   const [selectedPlace, setSelectedPlace] = useState<DetailedPlace>(DETAILED_PLACES[0]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [mapMode, setMapMode] = useState<'blueprint' | 'aerial'>('blueprint');
   const [userLocationName, setUserLocationName] = useState<string>('정문 주출입구 (GPS 현위치)');
   const [currentStep, setCurrentStep] = useState<number>(0);
 
@@ -98,14 +97,13 @@ export default function CampusNavigationModal({
     }
   };
 
-  // Unified Single Navigation Engine
   const startLiveNavigation = () => {
     setIsNavigating(true);
     setCurrentStep(0);
     setProgressPercent(0);
     setRemainingDistance(140);
 
-    const startMsg = `네비게이션 길안내를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 1층 정문 출입구에서 50미터 직진하세요.`;
+    const startMsg = `네비게이션 길안내를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 정문 출입구에서 직진하세요.`;
     speakText(startMsg);
 
     if (animTimerRef.current) clearInterval(animTimerRef.current);
@@ -224,14 +222,14 @@ export default function CampusNavigationModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black tracking-tight">학교 정밀 평면도 기반 스마트 길안내 네비게이션</h3>
+                  <h3 className="text-lg font-black tracking-tight">학교 평면도 기반 블랙 테마 핀포인트 길안내</h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                     <LocateFixed size={10} />
                     GPS Live Tracking
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  학교 평면도 도면 사진을 배경으로 수강 강의실, 북카페, 학생식당, 무인 프린트실 핀포인트 안내
+                  블랙 스타일 평면도 도면 사진 기반 디테일 장소(강의실·카페·프린트실) 핀포인트 길안내
                 </p>
               </div>
             </div>
@@ -245,26 +243,6 @@ export default function CampusNavigationModal({
                 <MapPin size={14} />
                 <span>GPS 위치 갱신</span>
               </button>
-
-              {/* Toggle Map Mode (Blueprint vs 3D Aerial) */}
-              <div className="flex bg-neutral-950 p-1 rounded-xl border border-white/10">
-                <button
-                  onClick={() => setMapMode('blueprint')}
-                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
-                    mapMode === 'blueprint' ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  📐 평면도 도면
-                </button>
-                <button
-                  onClick={() => setMapMode('aerial')}
-                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
-                    mapMode === 'aerial' ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  🌐 3D 항공지도
-                </button>
-              </div>
 
               <button
                 onClick={() => setIsVoiceMuted(!isVoiceMuted)}
@@ -354,19 +332,17 @@ export default function CampusNavigationModal({
             </div>
           </div>
 
-          {/* REAL SCHOOL BLUEPRINT MAP VISUAL NAVIGATION CANVAS */}
+          {/* REAL SCHOOL BLUEPRINT MAP VISUAL NAVIGATION CANVAS (STRICT BLACK BLUEPRINT THEME) */}
           <div className="flex-1 min-h-[300px] relative rounded-3xl border border-white/10 overflow-hidden shadow-2xl flex flex-col justify-between bg-black">
-            {/* BACKGROUND MAP IMAGE (Blueprint vs Aerial) */}
+            {/* BLACK BLUEPRINT PLAN IMAGE BACKGROUND */}
             <img
-              src={mapMode === 'blueprint' ? '/images/school_floor_blueprint.png' : '/images/myongji_3d_campus_mesh.png'}
-              alt="School Map Background"
-              className={`absolute inset-0 w-full h-full object-contain filter ${
-                mapMode === 'blueprint' ? 'invert contrast-125 brightness-90 p-4' : 'brightness-90 contrast-110 object-cover'
-              }`}
+              src="/images/school_floor_blueprint.png"
+              alt="School Floor Blueprint Black Background"
+              className="absolute inset-0 w-full h-full object-contain filter invert contrast-150 brightness-90 p-4"
             />
 
-            {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-black/35 pointer-events-none" />
+            {/* Dark Backdrop Overlay */}
+            <div className="absolute inset-0 bg-black/40 pointer-events-none" />
 
             {/* ANIMATED NEON ROUTE PATH OVERLAY (SVG) */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
@@ -393,7 +369,7 @@ export default function CampusNavigationModal({
 
             {/* Top Navigation HUD Bar */}
             <div className="flex items-center justify-between text-xs p-4 z-20">
-              <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/85 border border-white/20 backdrop-blur-md shadow-2xl">
+              <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/90 border border-white/20 backdrop-blur-md shadow-2xl">
                 <span className="text-xl text-blue-400 font-extrabold flex items-center gap-1">
                   {routeSteps[currentStep].icon}
                   <span className="text-sm font-black text-white">{remainingDistance}m</span>
@@ -410,7 +386,7 @@ export default function CampusNavigationModal({
                 </span>
               </div>
 
-              {/* SINGLE UNIFIED START / PAUSE / RESET NAVIGATION BUTTON */}
+              {/* SINGLE CONSOLIDATED START NAVIGATION BUTTON */}
               <div className="flex items-center gap-2">
                 {!isNavigating ? (
                   <button
@@ -487,7 +463,7 @@ export default function CampusNavigationModal({
             </div>
 
             {/* Bottom Current Step & Voice Turn Guidance Banner */}
-            <div className="p-4 bg-black/90 border-t border-white/20 backdrop-blur-md z-20 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="p-4 bg-black/95 border-t border-white/20 backdrop-blur-md z-20 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl p-2.5 rounded-2xl bg-blue-600/30 border border-blue-400/40 text-blue-300 font-bold">
                   {routeSteps[currentStep].icon}
@@ -531,7 +507,7 @@ export default function CampusNavigationModal({
           <div className="flex items-center justify-between pt-1 shrink-0">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Eye size={16} className="text-blue-400" />
-              <span>선택하신 [{selectedPlace.name}] 평면도 위치까지 단일 통합 길안내가 가동 중입니다.</span>
+              <span>선택하신 [{selectedPlace.name}] 블랙 지적 평면도 핀포인트 길안내가 가동 중입니다.</span>
             </div>
             <button
               onClick={() => {
