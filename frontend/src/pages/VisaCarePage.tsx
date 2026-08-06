@@ -143,7 +143,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
         }}
       />
 
-      {/* Mysterious Blue Liquid Ambient Background */}
+      {/* Stone Path Liquid Ambient Background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#A49A87]/15 rounded-[100%] blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
         <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] bg-[#968F83]/15 rounded-[100%] blur-[120px] animate-[pulse_12s_ease-in-out_infinite_reverse]" />
@@ -190,7 +190,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
 
       <main className="relative z-10 max-w-6xl w-full mx-auto px-6 pt-8 space-y-8 flex-1">
         {/* HERO D-DAY COUNTDOWN STATUS CARD */}
-        <div className="relative rounded-3xl border border-white/10 p-6 md:p-8 bg-gradient-to-r from-neutral-900/90 via-neutral-900/80 to-purple-950/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="relative rounded-3xl border border-white/10 p-6 md:p-8 bg-gradient-to-r from-neutral-900/90 via-neutral-900/80 to-[#968F83]/40 backdrop-blur-xl shadow-2xl overflow-hidden">
           {/* Subtle Grid overlay */}
           <div
             className="absolute inset-0 opacity-10 pointer-events-none"
@@ -228,8 +228,8 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                 dDayInfo.status === 'CRITICAL' || dDayInfo.status === 'EXPIRED'
                   ? 'bg-red-950/80 border-[#A49A87]/50 text-[#A49A87] shadow-[#A49A87]/20'
                   : dDayInfo.status === 'WARNING'
-                  ? 'bg-amber-950/80 border-[#A49A87]/50 text-[#A49A87] shadow-[#A49A87]/20'
-                  : 'bg-purple-950/80 border-[#968F83]/50 text-[#E8E5DF] shadow-[#968F83]/20'
+                  ? 'bg-[#A49A87]/20 border-[#A49A87]/50 text-[#A49A87] shadow-[#A49A87]/20'
+                  : 'bg-[#968F83]/20 border-[#968F83]/50 text-[#E8E5DF] shadow-[#968F83]/20'
               }`}>
                 <span className="text-xs font-extrabold uppercase tracking-wider block opacity-80">
                   {dDayInfo.statusLabel}
@@ -386,7 +386,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                       <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-[#A5A58D] rounded-full z-10" />
                       <h4 className="text-sm font-black text-[#A5A58D] mb-3">입학 1주차 (D+1 ~ D+7)</h4>
                       <div className="space-y-2">
-                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-emerald-950/20 border border-[#A5A58D]/30 cursor-pointer group hover:bg-emerald-950/40 transition-colors">
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-[#A5A58D]/10 border border-[#A5A58D]/30 cursor-pointer group hover:bg-[#A5A58D]/20 transition-colors">
                           <input type="checkbox" checked={!!coachChecklist['t3']} onChange={() => toggleCoachCheck('t3')} className="mt-1 w-4 h-4 rounded text-[#A5A58D] bg-neutral-950 border-white/20" />
                           <div>
                             <div className="flex items-center gap-2 mb-1">
@@ -457,7 +457,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-amber-950/40 border border-[#A49A87]/30 space-y-2">
+                <div className="p-4 rounded-2xl bg-[#A49A87]/20 border border-[#A49A87]/30 space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-extrabold text-[#A49A87]">STAGE 2</span>
                     <span className="text-neutral-400">만료 45일 전 (★추천)</span>
@@ -565,7 +565,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-amber-950/40 border border-[#A49A87]/30 text-[#A49A87] text-xs font-medium flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-[#A49A87]/20 border border-[#A49A87]/30 text-[#A49A87] text-xs font-medium flex items-center gap-2">
                 <AlertTriangle size={16} className="text-[#A49A87] shrink-0" />
                 <span>{activeChecklistGroup.notice}</span>
               </div>
@@ -580,7 +580,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                       onClick={() => toggleCheckItem(item.id)}
                       className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-4 ${
                         isChecked
-                          ? 'bg-purple-950/30 border-[#968F83]/50 text-neutral-300'
+                          ? 'bg-[#968F83]/20 border-[#968F83]/50 text-neutral-300'
                           : 'bg-neutral-950 border-white/10 hover:border-white/20 text-white'
                       }`}
                     >
