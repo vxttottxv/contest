@@ -27,7 +27,6 @@ import {
 import type { Building3D } from '../services/campusMapApi';
 import Campus3DViewer from '../components/Campus3DViewer';
 import CampusNavigationModal from '../components/CampusNavigationModal';
-import IndoorFloorNavigationModal from '../components/IndoorFloorNavigationModal';
 
 interface CampusMapPageProps {
   onBack: () => void;
@@ -46,18 +45,9 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
   const [naviModalOpen, setNaviModalOpen] = useState<boolean>(false);
   const [naviDestBuilding, setNaviDestBuilding] = useState<Building3D | null>(null);
 
-  // Indoor Floor Navigation Modal State
-  const [indoorNaviModalOpen, setIndoorNaviModalOpen] = useState<boolean>(false);
-  const [indoorNaviBuilding, setIndoorNaviBuilding] = useState<Building3D | null>(null);
-
   const openNaviForBuilding = (bld: Building3D) => {
     setNaviDestBuilding(bld);
     setNaviModalOpen(true);
-  };
-
-  const openIndoorNaviForBuilding = (bld: Building3D) => {
-    setIndoorNaviBuilding(bld);
-    setIndoorNaviModalOpen(true);
   };
 
   // Filtered facilities
@@ -205,33 +195,25 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
                 <h2 className="text-xl font-black">{selectedBuilding.name}</h2>
                 <p className="text-xs text-neutral-400 leading-relaxed">{selectedBuilding.description}</p>
 
-                {/* Action Buttons: Floor Map, GPS Navigation & Indoor Floor Navigation */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {/* Action Buttons: Floor Map & Unified Smart Navigation */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     onClick={() => {
                       setFloorModalBuilding(selectedBuilding);
                       setSelectedFloor(1);
                     }}
-                    className="py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
+                    className="py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
                   >
-                    <MapIcon size={14} />
-                    <span>층별 지도</span>
+                    <MapIcon size={16} />
+                    <span>층별 지적도 지도</span>
                   </button>
 
                   <button
                     onClick={() => openNaviForBuilding(selectedBuilding)}
-                    className="py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+                    className="py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
                   >
-                    <Compass size={14} className="animate-spin" />
-                    <span>GPS 실외 길찾기</span>
-                  </button>
-
-                  <button
-                    onClick={() => openIndoorNaviForBuilding(selectedBuilding)}
-                    className="py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-[11px] rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-purple-600/20 transition-all cursor-pointer"
-                  >
-                    <Layers size={14} />
-                    <span>층별 실내 길찾기</span>
+                    <Compass size={16} className="animate-spin" />
+                    <span>스마트 길찾기 (디테일 장소)</span>
                   </button>
                 </div>
 
@@ -569,19 +551,11 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
         )}
       </AnimatePresence>
 
-      {/* STARFIELD STYLE CAMPUS NAVIGATION MODAL */}
+      {/* UNIFIED SMART NAVIGATION MODAL */}
       <CampusNavigationModal
         isOpen={naviModalOpen}
         onClose={() => setNaviModalOpen(false)}
         destinationBuilding={naviDestBuilding}
-        allBuildings={MOCK_BUILDINGS}
-      />
-
-      {/* INDOOR FLOOR-BY-FLOOR NAVIGATION MODAL */}
-      <IndoorFloorNavigationModal
-        isOpen={indoorNaviModalOpen}
-        onClose={() => setIndoorNaviModalOpen(false)}
-        building={indoorNaviBuilding}
         allBuildings={MOCK_BUILDINGS}
       />
     </div>
