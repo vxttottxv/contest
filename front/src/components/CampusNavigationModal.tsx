@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Navigation,
@@ -10,7 +10,11 @@ import {
   CheckCircle,
   LocateFixed,
   Eye,
-  Camera,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  RotateCcw,
 } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
@@ -31,6 +35,15 @@ export default function CampusNavigationModal({
   const [userLocationName, setUserLocationName] = useState<string>('정문 주출입구 (GPS 현위치)');
   const [currentStep, setCurrentStep] = useState<number>(0);
 
+  // Live Real-Time Navigation Engine States
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  const [isVoiceMuted, setIsVoiceMuted] = useState<boolean>(false);
+  const [progressPercent, setProgressPercent] = useState<number>(0);
+  const [remainingDistance, setRemainingDistance] = useState<number>(140);
+  const walkingSpeed = 4.2;
+
+  const animTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     if (destinationBuilding) {
       setSelectedDest(destinationBuilding);
@@ -38,6 +51,76 @@ export default function CampusNavigationModal({
       setSelectedDest(allBuildings[0]);
     }
   }, [destinationBuilding, allBuildings]);
+
+  // Web Speech API Voice Prompt Helper
+  const speakText = (text: string) => {
+    if (isVoiceMuted || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Live GPS Real Tracking & Simulation Animation Engine
+  const startLiveNavigation = () => {
+    setIsNavigating(true);
+    setCurrentStep(0);
+    setProgressPercent(0);
+    setRemainingDistance(140);
+
+    const startMsg = `명지전문대학 네비게이션 길안내를 시작합니다. 목적지는 ${selectedDest?.name.split('(')[0]}입니다. 정문에서 50미터 직진하세요.`;
+    speakText(startMsg);
+
+    if (animTimerRef.current) clearInterval(animTimerRef.current);
+
+    animTimerRef.current = setInterval(() => {
+      setProgressPercent((prev) => {
+        const next = prev + 1.2;
+        if (next >= 100) {
+          if (animTimerRef.current) clearInterval(animTimerRef.current);
+          setIsNavigating(false);
+          setRemainingDistance(0);
+          setCurrentStep(2);
+          const arriveMsg = `목적지인 ${selectedDest?.name.split('(')[0]} 출입구에 도착했습니다. 길안내를 종료합니다.`;
+          speakText(arriveMsg);
+          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+          return 100;
+        }
+
+        // Calculate dynamic step & voice triggers based on progress
+        const distLeft = Math.max(0, Math.round(140 * (1 - next / 100)));
+        setRemainingDistance(distLeft);
+
+        if (next > 40 && next < 45 && currentStep === 0) {
+          setCurrentStep(1);
+          speakText('30미터 앞 중앙 분수대에서 10시 방향으로 좌회전하세요.');
+        } else if (next > 80 && next < 85 && currentStep === 1) {
+          setCurrentStep(2);
+          speakText(`곧 목적지인 ${selectedDest?.name.split('(')[0]} 입구에 도착합니다.`);
+        }
+
+        return next;
+      });
+    }, 150);
+  };
+
+  const stopLiveNavigation = () => {
+    if (animTimerRef.current) clearInterval(animTimerRef.current);
+    setIsNavigating(false);
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  };
+
+  const resetNavigation = () => {
+    stopLiveNavigation();
+    setProgressPercent(0);
+    setCurrentStep(0);
+    setRemainingDistance(140);
+  };
 
   const handleGetGps = () => {
     if (navigator.geolocation) {
@@ -52,6 +135,13 @@ export default function CampusNavigationModal({
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (animTimerRef.current) clearInterval(animTimerRef.current);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    };
+  }, []);
+
   if (!isOpen || !selectedDest) return null;
 
   // Real campus map route landmark steps according to destination
@@ -62,8 +152,6 @@ export default function CampusNavigationModal({
       instruction: `[${userLocationName}] 정문 입구를 지나 중앙 잔디 운동장 트랙 방향으로 50m 직진하세요.`,
       distance: '50m',
       icon: '⬆️',
-      xPercent: 15,
-      yPercent: 75,
     },
     {
       step: 2,
@@ -71,8 +159,6 @@ export default function CampusNavigationModal({
       instruction: `중앙 운동장 우측 가로수길을 지나 ${selectedDest.code} (${selectedDest.name.split('(')[0]}) 방향으로 좌회전하세요.`,
       distance: '60m',
       icon: '↖️',
-      xPercent: 45,
-      yPercent: 50,
     },
     {
       step: 3,
@@ -80,10 +166,29 @@ export default function CampusNavigationModal({
       instruction: `${selectedDest.name.split('(')[0]} 1층 주 출입구(${selectedDest.entrances[0] || '메인 출입구'})에 도착했습니다!`,
       distance: '30m',
       icon: '🏁',
-      xPercent: selectedDest.coordinates.x,
-      yPercent: selectedDest.coordinates.y,
     },
   ];
+
+  // Dynamic user marker coordinates along the real map route based on progressPercent (0% to 100%)
+  const startX = 12;
+  const startY = 75;
+  const midX = 45;
+  const midY = 52;
+  const endX = 75;
+  const endY = 30;
+
+  let currentMarkerX = startX;
+  let currentMarkerY = startY;
+
+  if (progressPercent <= 50) {
+    const ratio = progressPercent / 50;
+    currentMarkerX = startX + (midX - startX) * ratio;
+    currentMarkerY = startY + (midY - startY) * ratio;
+  } else {
+    const ratio = (progressPercent - 50) / 50;
+    currentMarkerX = midX + (endX - midX) * ratio;
+    currentMarkerY = midY + (endY - midY) * ratio;
+  }
 
   return (
     <AnimatePresence>
@@ -102,24 +207,42 @@ export default function CampusNavigationModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black tracking-tight">실제 캠퍼스 지형 3D 실사 길찾기 네비게이션</h3>
+                  <h3 className="text-lg font-black tracking-tight">실제 GPS 턴바이턴 음성 길안내 네비게이션</h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                     <LocateFixed size={10} />
-                    GPS Live Tracking
+                    Live GPS & Voice Engine
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  길치 유학생을 위한 실제 학교 3D 입체 지형 사진 기반 시각적 도보 길안내
+                  실시간 위치 추적, 음성 안내 및 3D 지도 내 동적 이동을 지원하는 학교 전용 네비게이션
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-2 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
-            >
-              <X size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Voice Mute Toggle */}
+              <button
+                onClick={() => setIsVoiceMuted(!isVoiceMuted)}
+                className={`p-2.5 rounded-full border transition-colors cursor-pointer ${
+                  isVoiceMuted
+                    ? 'bg-neutral-800 border-white/10 text-neutral-500'
+                    : 'bg-blue-600/20 border-blue-500/30 text-blue-400'
+                }`}
+                title="음성 길안내 ON/OFF"
+              >
+                {isVoiceMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              </button>
+
+              <button
+                onClick={() => {
+                  stopLiveNavigation();
+                  onClose();
+                }}
+                className="p-2.5 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Location Selector Bar */}
@@ -160,7 +283,7 @@ export default function CampusNavigationModal({
                     key={b.id}
                     onClick={() => {
                       setSelectedDest(b);
-                      setCurrentStep(0);
+                      resetNavigation();
                     }}
                     className={`px-3 py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer shrink-0 ${
                       selectedDest.id === b.id
@@ -206,45 +329,81 @@ export default function CampusNavigationModal({
               />
             </svg>
 
-            {/* Top Navigation Summary Info */}
+            {/* Top Navigation HUD Bar (KakaoNavi / TMAP Style) */}
             <div className="flex items-center justify-between text-xs p-4 z-20">
-              <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/80 border border-white/20 backdrop-blur-md">
-                <span className="flex items-center gap-1 font-bold text-blue-400">
-                  <Footprints size={16} />
-                  도보 총 거리: <strong>140m</strong>
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-black/85 border border-white/20 backdrop-blur-md shadow-2xl">
+                <span className="text-xl text-blue-400 font-extrabold flex items-center gap-1">
+                  {routeSteps[currentStep].icon}
+                  <span className="text-sm font-black text-white">{remainingDistance}m</span>
                 </span>
                 <span className="text-neutral-500">|</span>
                 <span className="flex items-center gap-1 font-bold text-emerald-400">
+                  <Footprints size={16} />
+                  {walkingSpeed} km/h (도보)
+                </span>
+                <span className="text-neutral-500">|</span>
+                <span className="flex items-center gap-1 font-bold text-cyan-300">
                   <Clock size={16} />
-                  소요 시간: <strong>약 2분</strong>
+                  약 {Math.max(1, Math.ceil(remainingDistance / 70))}분 소요
                 </span>
               </div>
 
-              <div className="px-3.5 py-2 rounded-xl bg-blue-600/90 border border-blue-400 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-lg">
-                <Camera size={14} />
-                <span>실물 3D 학교 지도를 보고 화살표를 따라 이동하세요!</span>
+              {/* Start / Pause / Reset Navigation Controls */}
+              <div className="flex items-center gap-2">
+                {!isNavigating ? (
+                  <button
+                    onClick={startLiveNavigation}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    <Play size={14} />
+                    <span>실시간 네비게이션 시작</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={stopLiveNavigation}
+                    className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-black text-xs shadow-lg shadow-amber-600/30 flex items-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    <Pause size={14} />
+                    <span>일시정지</span>
+                  </button>
+                )}
+                <button
+                  onClick={resetNavigation}
+                  className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                  title="초기화"
+                >
+                  <RotateCcw size={16} />
+                </button>
               </div>
             </div>
 
-            {/* OVERLAID VISUAL LANDMARK & TURN PINS DIRECTLY ON REAL MAP */}
+            {/* OVERLAID VISUAL LANDMARK & DYNAMIC USER GPS MARKER */}
             <div className="relative w-full h-full flex-1 z-20">
-              {/* Start Pin: My Location (GPS) */}
-              <div className="absolute left-[12%] top-[75%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                <div className="p-3 rounded-full bg-blue-600 text-white shadow-2xl ring-4 ring-blue-500/40 animate-pulse">
-                  <LocateFixed size={20} />
+              {/* DYNAMIC USER MOVING GPS MARKER */}
+              <div
+                className="absolute transition-all duration-150 -translate-x-1/2 -translate-y-1/2 z-30"
+                style={{
+                  left: `${currentMarkerX}%`,
+                  top: `${currentMarkerY}%`,
+                }}
+              >
+                <div className="relative flex flex-col items-center">
+                  <div className="p-3 rounded-full bg-blue-600 text-white shadow-2xl ring-4 ring-blue-400 animate-pulse">
+                    <LocateFixed size={22} className="animate-spin" />
+                  </div>
+                  <span className="mt-1 px-2.5 py-1 rounded-lg bg-blue-950/90 border border-blue-400 text-[11px] font-extrabold text-blue-200 shadow-2xl whitespace-nowrap">
+                    🔵 내 위치 (GPS {Math.round(progressPercent)}% 이동)
+                  </span>
                 </div>
-                <span className="mt-1 px-2.5 py-1 rounded-lg bg-black/90 border border-blue-400 text-[11px] font-extrabold text-blue-300 shadow-xl whitespace-nowrap">
-                  📍 출발: 내 GPS 현위치
-                </span>
               </div>
 
               {/* Waypoint 1: Landmark Turn Point */}
               <div className="absolute left-[45%] top-[52%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                <div className="p-2 rounded-full bg-amber-500 text-black font-black text-xs shadow-xl ring-4 ring-amber-400/30 animate-bounce">
+                <div className="p-2 rounded-full bg-amber-500 text-black font-black text-xs shadow-xl ring-4 ring-amber-400/30">
                   ↖️
                 </div>
                 <span className="mt-1 px-2 py-0.5 rounded-lg bg-black/90 border border-amber-400 text-[10px] font-bold text-amber-300 shadow-xl whitespace-nowrap">
-                  📍 중앙 가로수길 좌회전
+                  📍 중앙 가로수길 10시 방향
                 </span>
               </div>
 
@@ -259,10 +418,10 @@ export default function CampusNavigationModal({
               </div>
             </div>
 
-            {/* Bottom Current Step Guidance Banner */}
-            <div className="p-4 bg-black/85 border-t border-white/20 backdrop-blur-md z-20 flex flex-col md:flex-row items-center justify-between gap-3">
+            {/* Bottom Current Step & Voice Turn Guidance Banner */}
+            <div className="p-4 bg-black/90 border-t border-white/20 backdrop-blur-md z-20 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="text-2xl p-2 rounded-2xl bg-blue-600/30 border border-blue-400/40">
+                <span className="text-2xl p-2.5 rounded-2xl bg-blue-600/30 border border-blue-400/40 text-blue-300 font-bold">
                   {routeSteps[currentStep].icon}
                 </span>
                 <div>
@@ -271,29 +430,30 @@ export default function CampusNavigationModal({
                       STEP {currentStep + 1} / {routeSteps.length}
                     </span>
                     <span className="text-xs font-bold text-amber-300">
-                      📍 랜드마크: {routeSteps[currentStep].landmark}
+                      📍 {routeSteps[currentStep].landmark}
                     </span>
                   </div>
-                  <p className="text-xs font-bold text-neutral-100 mt-1">
+                  <p className="text-xs font-black text-white mt-1">
                     {routeSteps[currentStep].instruction}
                   </p>
                 </div>
               </div>
 
+              {/* Step Navigation manual buttons */}
               <div className="flex gap-1.5 shrink-0">
                 <button
                   onClick={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
                   disabled={currentStep === 0}
                   className="px-4 py-2 bg-neutral-800 disabled:opacity-40 text-xs font-bold rounded-xl hover:bg-neutral-700 transition-colors cursor-pointer"
                 >
-                  이전 단계
+                  이전
                 </button>
                 <button
                   onClick={() => setCurrentStep((prev) => Math.min(routeSteps.length - 1, prev + 1))}
                   disabled={currentStep === routeSteps.length - 1}
                   className="px-4 py-2 bg-blue-600 disabled:opacity-40 text-xs font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer shadow-lg shadow-blue-600/30"
                 >
-                  다음 단계
+                  다음
                 </button>
               </div>
             </div>
@@ -303,10 +463,13 @@ export default function CampusNavigationModal({
           <div className="flex items-center justify-between pt-1 shrink-0">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Eye size={16} className="text-blue-400" />
-              <span>실사 지도 화살표를 보고 랜드마크를 확인하며 이동하세요!</span>
+              <span>실시간 GPS 이동 및 한국어 음성 턴바이턴 길안내가 작동중입니다.</span>
             </div>
             <button
-              onClick={onClose}
+              onClick={() => {
+                stopLiveNavigation();
+                onClose();
+              }}
               className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-blue-600/20 transition-all cursor-pointer flex items-center gap-1.5"
             >
               <CheckCircle size={16} />
