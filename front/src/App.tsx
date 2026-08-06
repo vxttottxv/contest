@@ -5,6 +5,7 @@ import AuthModal from './components/AuthModal';
 import type { UserSession } from './components/AuthModal';
 import AcademicsPage from './pages/AcademicsPage';
 import CampusMapPage from './pages/CampusMapPage';
+import VisaCarePage from './pages/VisaCarePage';
 
 const CATEGORIES = [
   {
@@ -177,7 +178,7 @@ function CircularMenu({ onSelectCategory }: CircularMenuProps) {
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'academics' | 'campus-map'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'academics' | 'campus-map' | 'visa-care'>('home');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
@@ -209,6 +210,8 @@ export default function App() {
       setCurrentPage('academics');
     } else if (id === 'campus-map') {
       setCurrentPage('campus-map');
+    } else if (id === 'visa-care') {
+      setCurrentPage('visa-care');
     }
   };
 
@@ -218,6 +221,10 @@ export default function App() {
 
   if (currentPage === 'campus-map') {
     return <CampusMapPage onBack={() => setCurrentPage('home')} />;
+  }
+
+  if (currentPage === 'visa-care') {
+    return <VisaCarePage onBack={() => setCurrentPage('home')} />;
   }
 
   return (
