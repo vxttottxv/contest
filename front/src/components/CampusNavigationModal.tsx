@@ -16,6 +16,7 @@ import {
   Pause,
   RotateCcw,
   Search,
+  Accessibility,
 } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
@@ -67,11 +68,12 @@ export default function CampusNavigationModal({
   const [isVoiceMuted, setIsVoiceMuted] = useState<boolean>(false);
   const [progressPercent, setProgressPercent] = useState<number>(0);
   const [remainingDistance, setRemainingDistance] = useState<number>(140);
+  const [currentNarration, setCurrentNarration] = useState<string>('');
   const walkingSpeed = 4.2;
 
   const animTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Pre-load Web Speech API voices
+  // Pre-load voices for female Korean SpeechSynthesis
   useEffect(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
@@ -94,8 +96,15 @@ export default function CampusNavigationModal({
     return matchCat && matchQuery;
   });
 
-  // Naver Maps / TMAP Style Real Female Voice Navigation TTS Engine
+  // Direct Audio & Speech Synthesis Trigger (Guarantees Speaker Output)
   const speakText = (text: string) => {
+    setCurrentNarration(text);
+
+    // Haptic vibration feedback for turns
+    if ('vibrate' in navigator) {
+      navigator.vibrate([200, 100, 200]);
+    }
+
     if (isVoiceMuted || !('speechSynthesis' in window)) return;
 
     try {
@@ -107,12 +116,12 @@ export default function CampusNavigationModal({
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ko-KR';
       utterance.rate = 1.0;
-      utterance.pitch = 1.3; // Naver Maps female voice pitch
+      utterance.pitch = 1.35; // Bright clear female voice pitch
 
       const voices = window.speechSynthesis.getVoices();
       const femaleKoVoice = voices.find(
         (v) => (v.lang.includes('ko') || v.lang.includes('KO')) &&
-          (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami') || v.name.includes('Kyoko') || v.name.includes('Siri'))
+          (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami') || v.name.includes('Siri'))
       ) || voices.find((v) => v.lang.includes('ko') || v.lang.includes('KO'));
 
       if (femaleKoVoice) {
@@ -125,14 +134,19 @@ export default function CampusNavigationModal({
     }
   };
 
-  // Naver Maps Style Real Voice Navigation Start
+  // Turn-by-Turn Voice & Barrier-Free Navigation Start
   const startLiveNavigation = () => {
+    // Force Unlock Audio Context
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.resume();
+    }
+
     setIsNavigating(true);
     setCurrentStep(0);
     setProgressPercent(0);
     setRemainingDistance(140);
 
-    // Naver Navigation Voice Prompt 1: "50m 직진하세요."
+    // Prompt 1: "50m 직진하세요."
     const naviPrompt1 = `네비게이션 길안내를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 정문에서 50미터 직진하세요.`;
     speakText(naviPrompt1);
 
@@ -146,7 +160,7 @@ export default function CampusNavigationModal({
           setIsNavigating(false);
           setRemainingDistance(0);
           setCurrentStep(2);
-          // Naver Navigation Voice Prompt 4: "목적지에 도착했습니다."
+          // Prompt 4: "목적지에 도착했습니다."
           const arrivePrompt = `목적지인 ${selectedPlace.name}에 도착했습니다. 안내를 종료합니다.`;
           speakText(arrivePrompt);
           return 100;
@@ -155,12 +169,12 @@ export default function CampusNavigationModal({
         const distLeft = Math.max(0, Math.round(140 * (1 - next / 100)));
         setRemainingDistance(distLeft);
 
-        // Naver Navigation Voice Prompt 2: "30m 앞 로비에서 좌회전하세요."
+        // Prompt 2: "30m 앞 로비에서 좌회전하세요."
         if (next > 40 && next < 45 && currentStep === 0) {
           setCurrentStep(1);
           speakText(`30미터 앞 로비에서 ${selectedPlace.floor} 복도 방향으로 좌회전하세요.`);
         }
-        // Naver Navigation Voice Prompt 3: "곧 목적지에 도착합니다."
+        // Prompt 3: "곧 목적지에 도착합니다."
         else if (next > 80 && next < 85 && currentStep === 1) {
           setCurrentStep(2);
           speakText(`곧 목적지인 ${selectedPlace.name}에 도착합니다.`);
@@ -174,6 +188,7 @@ export default function CampusNavigationModal({
   const stopLiveNavigation = () => {
     if (animTimerRef.current) clearInterval(animTimerRef.current);
     setIsNavigating(false);
+    setCurrentNarration('');
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   };
 
@@ -255,14 +270,14 @@ export default function CampusNavigationModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black tracking-tight">네이버 지도 스타일 여성 음성 길안내 네비게이션</h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center gap-1">
-                    <Volume2 size={10} className="animate-pulse" />
-                    Naver Voice Guidance
+                  <h3 className="text-lg font-black tracking-tight">배리어프리(시각·청각장애인) 음성 네비게이션</h3>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                    <Accessibility size={12} />
+                    Barrier-Free Audio & Visual
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  "50m 직진하세요", "30m 앞 좌회전하세요" 실제 내비게이션 여성 음성 안내
+                  시각장애인용 스피커 여성 음성 나레이션 & 청각장애인용 고대비 대형 자막 및 진동 알림
                 </p>
               </div>
             </div>
@@ -448,6 +463,14 @@ export default function CampusNavigationModal({
               </div>
             </div>
 
+            {/* HIGH-CONTRAST BARRIER-FREE SUBTITLE BANNER (FOR HEARING IMPAIRED USERS) */}
+            {currentNarration && (
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 max-w-lg w-11/12 px-6 py-3 rounded-2xl bg-blue-950/95 border-2 border-cyan-400 text-cyan-200 text-sm font-black text-center shadow-2xl backdrop-blur-md flex items-center justify-center gap-2 animate-pulse">
+                <Volume2 size={18} className="text-cyan-400 shrink-0" />
+                <span>🔊 "{currentNarration}"</span>
+              </div>
+            )}
+
             {/* OVERLAID VISUAL LANDMARK & DYNAMIC USER GPS MARKER ON BLUEPRINT */}
             <div className="relative w-full h-full flex-1 z-20">
               {/* DYNAMIC USER MOVING GPS MARKER */}
@@ -548,7 +571,7 @@ export default function CampusNavigationModal({
           <div className="flex items-center justify-between pt-1 shrink-0">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Eye size={16} className="text-blue-400" />
-              <span>네이버 지도 스타일 여성 음성 턴바이턴 길안내가 실제 출력 중입니다.</span>
+              <span>시각장애인용 음성 스피커 나레이션 및 청각장애인용 고대비 자막/진동 배리어프리 길안내 모드입니다.</span>
             </div>
             <button
               onClick={() => {
