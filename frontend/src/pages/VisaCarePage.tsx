@@ -234,7 +234,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                 <span className="text-xs font-extrabold uppercase tracking-wider block opacity-80">
                   {dDayInfo.statusLabel}
                 </span>
-                <span className="text-4xl md:text-5xl font-black font-mono tracking-tight block mt-1">
+                <span className="text-4xl md:text-5xl font-black font-mono tracking-tight block mt-1 text-white">
                   {dDayInfo.dDayText}
                 </span>
               </div>
