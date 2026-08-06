@@ -71,7 +71,7 @@ export default function CampusNavigationModal({
 
   const animTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Initialize Web Speech API
+  // Pre-load Web Speech API voices
   useEffect(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.getVoices();
@@ -94,7 +94,7 @@ export default function CampusNavigationModal({
     return matchCat && matchQuery;
   });
 
-  // Pure Audible Female Voice Narration Engine (No Sound Effects)
+  // Naver Maps / TMAP Style Real Female Voice Navigation TTS Engine
   const speakText = (text: string) => {
     if (isVoiceMuted || !('speechSynthesis' in window)) return;
 
@@ -107,12 +107,12 @@ export default function CampusNavigationModal({
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ko-KR';
       utterance.rate = 1.0;
-      utterance.pitch = 1.25; // Friendly female voice pitch
+      utterance.pitch = 1.3; // Naver Maps female voice pitch
 
       const voices = window.speechSynthesis.getVoices();
       const femaleKoVoice = voices.find(
         (v) => (v.lang.includes('ko') || v.lang.includes('KO')) &&
-          (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami'))
+          (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami') || v.name.includes('Kyoko') || v.name.includes('Siri'))
       ) || voices.find((v) => v.lang.includes('ko') || v.lang.includes('KO'));
 
       if (femaleKoVoice) {
@@ -125,16 +125,16 @@ export default function CampusNavigationModal({
     }
   };
 
-  // Turn-by-Turn Real Voice Navigation Start
+  // Naver Maps Style Real Voice Navigation Start
   const startLiveNavigation = () => {
     setIsNavigating(true);
     setCurrentStep(0);
     setProgressPercent(0);
     setRemainingDistance(140);
 
-    // Initial Voice Narration
-    const startNarration = `명지전문대학 길안내 서비스를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 정문 출입구를 지나 메인 로비 방향으로 50미터 직진하세요.`;
-    speakText(startNarration);
+    // Naver Navigation Voice Prompt 1: "50m 직진하세요."
+    const naviPrompt1 = `네비게이션 길안내를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 정문에서 50미터 직진하세요.`;
+    speakText(naviPrompt1);
 
     if (animTimerRef.current) clearInterval(animTimerRef.current);
 
@@ -146,20 +146,24 @@ export default function CampusNavigationModal({
           setIsNavigating(false);
           setRemainingDistance(0);
           setCurrentStep(2);
-          const arriveNarration = `목적지인 ${selectedPlace.name} 입구에 도착했습니다. 길안내를 종료합니다.`;
-          speakText(arriveNarration);
+          // Naver Navigation Voice Prompt 4: "목적지에 도착했습니다."
+          const arrivePrompt = `목적지인 ${selectedPlace.name}에 도착했습니다. 안내를 종료합니다.`;
+          speakText(arrivePrompt);
           return 100;
         }
 
         const distLeft = Math.max(0, Math.round(140 * (1 - next / 100)));
         setRemainingDistance(distLeft);
 
+        // Naver Navigation Voice Prompt 2: "30m 앞 로비에서 좌회전하세요."
         if (next > 40 && next < 45 && currentStep === 0) {
           setCurrentStep(1);
-          speakText(`30미터 앞 로비에서 ${selectedPlace.floor} 복도 방향으로 이동하세요.`);
-        } else if (next > 80 && next < 85 && currentStep === 1) {
+          speakText(`30미터 앞 로비에서 ${selectedPlace.floor} 복도 방향으로 좌회전하세요.`);
+        }
+        // Naver Navigation Voice Prompt 3: "곧 목적지에 도착합니다."
+        else if (next > 80 && next < 85 && currentStep === 1) {
           setCurrentStep(2);
-          speakText(`곧 목적지인 ${selectedPlace.name} 입구에 도착합니다.`);
+          speakText(`곧 목적지인 ${selectedPlace.name}에 도착합니다.`);
         }
 
         return next;
@@ -251,14 +255,14 @@ export default function CampusNavigationModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black tracking-tight">음성 나레이션 네비게이션 길안내</h3>
+                  <h3 className="text-lg font-black tracking-tight">네이버 지도 스타일 여성 음성 길안내 네비게이션</h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center gap-1">
                     <Volume2 size={10} className="animate-pulse" />
-                    Voice Narration Active
+                    Naver Voice Guidance
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  학교 평면도 기반 실시간 음성 나레이션 도보 길안내
+                  "50m 직진하세요", "30m 앞 좌회전하세요" 실제 내비게이션 여성 음성 안내
                 </p>
               </div>
             </div>
@@ -280,7 +284,7 @@ export default function CampusNavigationModal({
                     ? 'bg-neutral-800 border-white/10 text-neutral-500'
                     : 'bg-blue-600/20 border-blue-500/30 text-blue-400'
                 }`}
-                title="음성 나레이션 ON/OFF"
+                title="음성 안내 ON/OFF"
               >
                 {isVoiceMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
               </button>
@@ -544,7 +548,7 @@ export default function CampusNavigationModal({
           <div className="flex items-center justify-between pt-1 shrink-0">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Eye size={16} className="text-blue-400" />
-              <span>선택하신 [{selectedPlace.name}] 음성 나레이션 도보 길안내 시스템입니다.</span>
+              <span>네이버 지도 스타일 여성 음성 턴바이턴 길안내가 실제 출력 중입니다.</span>
             </div>
             <button
               onClick={() => {
