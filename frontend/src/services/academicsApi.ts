@@ -181,3 +181,80 @@ export const fetchCompetitions = async (): Promise<Competition[]> => {
   await new Promise((res) => setTimeout(res, 200));
   return MOCK_COMPETITIONS;
 };
+
+// ── AI Notice Data (New) ──────────────────────────────────────────
+
+export interface Notice {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  targetMajor: string | 'ALL';
+  targetGrade: number | 'ALL'; // 1, 2, 3, 4 or ALL
+  targetNationality: string | 'ALL';
+  aiLabel: string;
+  summary: string[];
+}
+
+export const MOCK_NOTICES: Notice[] = [
+  {
+    id: 'nt-1',
+    title: '2026학년도 2학기 컴퓨터공학과 졸업작품 전시회 일정 안내',
+    category: '학과공지',
+    date: '2026-08-01',
+    targetMajor: '컴퓨터공학과',
+    targetGrade: 3, // Assuming 3 is graduating year for this college or just examples
+    targetNationality: 'ALL',
+    aiLabel: '이건 졸업 예정자만 해당됩니다.',
+    summary: [
+      '컴퓨터공학과 3학년(졸업예정자) 대상 필수 참석',
+      '전시회 일자: 2026. 11. 20 (금) 본관 대강당',
+      '포스터 제출 마감일: 2026. 10. 15 (목)'
+    ]
+  },
+  {
+    id: 'nt-2',
+    title: '외국인 유학생(베트남 국적) 건강보험 자동가입 및 서류 제출 안내',
+    category: '국제교류',
+    date: '2026-08-03',
+    targetMajor: 'ALL',
+    targetGrade: 'ALL',
+    targetNationality: '베트남',
+    aiLabel: '이 공지는 당신에게 꼭 필요합니다.',
+    summary: [
+      '유학생 건강보험 의무 가입(자동 가입 처리)',
+      '여권 및 외국인등록증 사본 국제교류원 제출 必',
+      '미제출 시 비자 연장 및 장학금 수혜 불이익 발생 가능'
+    ]
+  },
+  {
+    id: 'nt-3',
+    title: '전교생 대상 명지 캠퍼스 투어 가이드 자원봉사자 모집',
+    category: '일반공지',
+    date: '2026-08-05',
+    targetMajor: 'ALL',
+    targetGrade: 'ALL',
+    targetNationality: 'ALL',
+    aiLabel: '모두를 위한 일반 공지입니다.',
+    summary: [
+      '캠퍼스 투어 안내 봉사자 모집 (봉사시간 지급)',
+      '지원 자격: 재학생 누구나 참여 가능',
+      '혜택: 교내 봉사시간 10시간 및 카페 쿠폰 증정'
+    ]
+  },
+  {
+    id: 'nt-4',
+    title: '신입생 전용(1학년) 대학 생활 적응 특강 신청',
+    category: '학사공지',
+    date: '2026-08-06',
+    targetMajor: 'ALL',
+    targetGrade: 1,
+    targetNationality: 'ALL',
+    aiLabel: '1학년 신입생에게 유용한 정보입니다.',
+    summary: [
+      '신입생의 대학 생활 적응을 돕는 필수 특강',
+      '학사 일정, 수강 신청 방법, 도서관 이용법 안내',
+      '참석자 전원에게 웰컴 키트(Welcome Kit) 증정'
+    ]
+  }
+];

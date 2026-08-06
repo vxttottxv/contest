@@ -12,20 +12,24 @@ import {
   Info,
   List,
   Grid,
+  Bot,
+  Filter,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   MOCK_ACADEMIC_EVENTS,
   MOCK_SCHOLARSHIPS,
   MOCK_COMPETITIONS,
+  MOCK_NOTICES,
 } from '../services/academicsApi';
-import type { AcademicEvent } from '../services/academicsApi';
+import type { AcademicEvent, Notice } from '../services/academicsApi';
 
 interface AcademicsPageProps {
   onBack: () => void;
 }
 
 export default function AcademicsPage({ onBack }: AcademicsPageProps) {
-  const [activeTab, setActiveTab] = useState<'calendar' | 'scholarships' | 'competitions'>('calendar');
+  const [activeTab, setActiveTab] = useState<'ai-notices' | 'calendar' | 'scholarships' | 'competitions'>('ai-notices');
   const [calendarViewMode, setCalendarViewMode] = useState<'grid' | 'list'>('grid');
 
   // Calendar State: Year & Month (Defaults to 2026-08 August)
@@ -41,6 +45,29 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
 
   // Competitions State
   const [competitionCategory, setCompetitionCategory] = useState<string>('all');
+
+  // User Profile (for AI Filtering)
+  const [userProfile, setUserProfile] = useState<{ major: string; grade: number; nationality: string }>(() => {
+    const saved = localStorage.getItem('mjc_current_user');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          major: parsed.major || '컴퓨터공학과',
+          grade: 3, // Assuming 3rd year for demo
+          nationality: parsed.nationality || '베트남',
+        };
+      } catch (e) {}
+    }
+    return { major: '컴퓨터공학과', grade: 3, nationality: '베트남' };
+  });
+
+  const filteredNotices = MOCK_NOTICES.filter(notice => {
+    const matchMajor = notice.targetMajor === 'ALL' || notice.targetMajor === userProfile.major;
+    const matchGrade = notice.targetGrade === 'ALL' || notice.targetGrade === userProfile.grade;
+    const matchNationality = notice.targetNationality === 'ALL' || notice.targetNationality === userProfile.nationality;
+    return matchMajor && matchGrade && matchNationality;
+  });
 
   // ── CALENDAR GRID GENERATION HELPERS ──────────────────────────────
   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
@@ -129,10 +156,22 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
       <main className="relative z-10 max-w-6xl w-full mx-auto px-6 pt-8 space-y-6 flex-1">
         {/* TAB NAVIGATION */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-white/10 pb-2">
-          <div className="flex items-center gap-2 bg-neutral-950 p-1.5 rounded-2xl border border-white/10 w-full md:w-auto">
+          <div className="flex items-center gap-2 bg-neutral-950 p-1.5 rounded-2xl border border-white/10 w-full md:w-auto overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('ai-notices')}
+              className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 ${
+                activeTab === 'ai-notices'
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/30 font-black'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Bot size={16} />
+              <span>🤖 AI 맞춤 공지</span>
+            </button>
+
             <button
               onClick={() => setActiveTab('calendar')}
-              className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 ${
                 activeTab === 'calendar'
                   ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/30 font-black'
                   : 'text-neutral-400 hover:text-white'
@@ -195,6 +234,83 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
             </div>
           )}
         </div>
+
+        {/* TAB 0: AI NOTICES */}
+        {activeTab === 'ai-notices' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            
+            {/* User Profile Overview */}
+            <div className="p-6 rounded-3xl bg-neutral-900 border border-purple-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+              <div>
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <Bot size={24} className="text-purple-400" />
+                  AI가 분석한 맞춤형 공지사항
+                </h2>
+                <p className="text-xs text-neutral-400 mt-1.5">
+                  학생님의 정보를 기반으로 꼭 필요한 학사 공지를 선별하고 3줄 요약해 드립니다.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs font-bold">
+                <span className="px-3 py-1.5 rounded-xl bg-neutral-950 border border-white/10 text-neutral-300">
+                  전공: {userProfile.major}
+                </span>
+                <span className="px-3 py-1.5 rounded-xl bg-neutral-950 border border-white/10 text-neutral-300">
+                  학년: {userProfile.grade}학년
+                </span>
+                <span className="px-3 py-1.5 rounded-xl bg-neutral-950 border border-white/10 text-neutral-300">
+                  국적: {userProfile.nationality}
+                </span>
+              </div>
+            </div>
+
+            {/* Notices List */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredNotices.length === 0 ? (
+                <div className="col-span-1 md:col-span-2 p-8 text-center rounded-3xl bg-neutral-900 border border-white/10 text-neutral-400">
+                  현재 조건에 맞는 맞춤형 공지사항이 없습니다.
+                </div>
+              ) : (
+                filteredNotices.map(notice => (
+                  <div key={notice.id} className="p-6 rounded-3xl bg-neutral-900 border border-white/10 shadow-xl flex flex-col relative overflow-hidden group hover:border-purple-500/50 transition-colors">
+                    {/* AI Glow Effect */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all pointer-events-none" />
+                    
+                    <div className="relative z-10 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-1 rounded-lg text-[10px] font-black bg-neutral-950 text-neutral-400 border border-white/5">
+                          {notice.category} | {notice.date}
+                        </span>
+                        {/* AI Label Highlight */}
+                        <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5">
+                          <Sparkles size={12} />
+                          {notice.aiLabel}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base font-black text-white leading-snug">{notice.title}</h3>
+
+                      {/* 3-Line Summary */}
+                      <div className="p-4 rounded-2xl bg-neutral-950 border border-purple-500/20 space-y-3 mt-2 shadow-inner">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Filter size={14} className="text-purple-400" />
+                          <span className="text-xs font-bold text-purple-300">AI 3줄 핵심 요약</span>
+                        </div>
+                        <ul className="space-y-2">
+                          {notice.summary.map((line, idx) => (
+                            <li key={idx} className="text-xs text-neutral-300 flex items-start gap-2">
+                              <CheckCircle2 size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                              <span className="leading-relaxed font-medium">{line}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* TAB 1: ACADEMIC CALENDAR (GRID OR LIST) */}
         {activeTab === 'calendar' && (
