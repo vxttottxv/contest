@@ -26,6 +26,7 @@ import {
 } from '../services/campusMapApi';
 import type { Building3D } from '../services/campusMapApi';
 import Campus3DViewer from '../components/Campus3DViewer';
+import CampusNavigationModal from '../components/CampusNavigationModal';
 
 interface CampusMapPageProps {
   onBack: () => void;
@@ -39,6 +40,15 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
   // Detailed Floor Map Modal State
   const [floorModalBuilding, setFloorModalBuilding] = useState<Building3D | null>(null);
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
+
+  // Starfield Navigation Modal State
+  const [naviModalOpen, setNaviModalOpen] = useState<boolean>(false);
+  const [naviDestBuilding, setNaviDestBuilding] = useState<Building3D | null>(null);
+
+  const openNaviForBuilding = (bld: Building3D) => {
+    setNaviDestBuilding(bld);
+    setNaviModalOpen(true);
+  };
 
   // Filtered facilities
   const filteredFacilities = facilityCategory === 'all'
@@ -185,17 +195,27 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
                 <h2 className="text-xl font-black">{selectedBuilding.name}</h2>
                 <p className="text-xs text-neutral-400 leading-relaxed">{selectedBuilding.description}</p>
 
-                {/* Open Floor Map Button */}
-                <button
-                  onClick={() => {
-                    setFloorModalBuilding(selectedBuilding);
-                    setSelectedFloor(1);
-                  }}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
-                >
-                  <MapIcon size={16} />
-                  <span>{selectedBuilding.code} 층별 상세 지도 열기</span>
-                </button>
+                {/* Action Buttons: Floor Map & Starfield Navigation */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      setFloorModalBuilding(selectedBuilding);
+                      setSelectedFloor(1);
+                    }}
+                    className="py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
+                  >
+                    <MapIcon size={16} />
+                    <span>층별 상세 지도</span>
+                  </button>
+
+                  <button
+                    onClick={() => openNaviForBuilding(selectedBuilding)}
+                    className="py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+                  >
+                    <Compass size={16} className="animate-spin" />
+                    <span>GPS 길찾기</span>
+                  </button>
+                </div>
 
                 {/* Entrances */}
                 <div className="space-y-1.5 pt-2">
@@ -499,17 +519,38 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
                 <span className="text-neutral-400">
                   시설 관련 문의: <strong>02-300-9999 (학사행정실)</strong>
                 </span>
-                <button
-                  onClick={() => setFloorModalBuilding(null)}
-                  className="px-5 py-2 bg-neutral-800 hover:bg-neutral-700 text-white font-bold rounded-xl transition-colors cursor-pointer"
-                >
-                  닫기
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (floorModalBuilding) {
+                        openNaviForBuilding(floorModalBuilding);
+                      }
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <Compass size={14} className="animate-spin" />
+                    <span>이 건물로 길찾기</span>
+                  </button>
+                  <button
+                    onClick={() => setFloorModalBuilding(null)}
+                    className="px-5 py-2 bg-neutral-800 hover:bg-neutral-700 text-white font-bold rounded-xl transition-colors cursor-pointer"
+                  >
+                    닫기
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
+      {/* STARFIELD STYLE CAMPUS NAVIGATION MODAL */}
+      <CampusNavigationModal
+        isOpen={naviModalOpen}
+        onClose={() => setNaviModalOpen(false)}
+        destinationBuilding={naviDestBuilding}
+        allBuildings={MOCK_BUILDINGS}
+      />
     </div>
   );
 }
