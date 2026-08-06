@@ -114,7 +114,7 @@ export const MOCK_TINDER_PROFILES: LoungeProfile[] = [
 export const MOCK_QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: 1,
-    question: '대학생들이 시험기간에 잠을 줄이고 밤을 새워 공부하는 것을 뜻하는 한국어 캠퍼스 용어는?',
+    question: '대학생들이 시험기간에 잠을 줄이고 밤을 새워 집중 공부하는 것을 뜻하는 한국어 캠퍼스 용어는?',
     category: '캠퍼스용어',
     options: ['벼락치기', '팀플', '학식', '꿀강'],
     correctIndex: 0,
@@ -122,11 +122,11 @@ export const MOCK_QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 2,
-    question: '다음 중 "알아서 잘 딱 깔끔하고 센스있게"의 줄임말인 신조어는 무엇일까요?',
+    question: '다음 중 "알아서 잘 딱 깔끔하고 센스있게"의 줄임말인 인싸 신조어는 무엇일까요?',
     category: '신조어',
     options: ['갓생', '알잘딱깔센', '삼귀다', '억까'],
     correctIndex: 1,
-    explanation: '알잘딱깔센은 상황에 맞게 센스 있게 처리한다는 인기 신조어입니다.',
+    explanation: '알잘딱깔센은 상황에 맞게 센스 있게 처리한다는 대표 인기 신조어입니다.',
   },
   {
     id: 3,
@@ -138,11 +138,43 @@ export const MOCK_QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 4,
-    question: '아직 정식으로 사귀는 단계는 아니지만, 사귀기 직전의 설레는 단계를 뜻하는 신조어 "스윗한 삼귀다"의 의미는?',
+    question: '아직 정식으로 사귀는 단계는 아니지만, 사귀기 직전의 설레는 단계를 뜻하는 신조어 "삼귀다"의 의미는?',
     category: '신조어',
-    options: ['3(삼)이 4(사)귀다 전 단계', '세 번 데이트함', '친구 3명 모임', '삼겹살 먹기'],
+    options: ['4(사)귀다 전 단계인 3(삼)귀다', '세 번 데이트함', '친구 3명 모임', '삼겹살 먹기'],
     correctIndex: 0,
     explanation: '숫자 4(사귀다)보다 하나 적은 숫자 3(삼귀다)으로 썸 타는 단계를 위트 있게 부르는 말입니다.',
+  },
+  {
+    id: 5,
+    question: '하루하루를 보람차고 부지런하게 살아가는 알찬 라이프스타일을 부르는 신조어는?',
+    category: '신조어',
+    options: ['갓생 (GOD+생)', '억지 텐션', '중꺾마', '갓성비'],
+    correctIndex: 0,
+    explanation: '갓생(GOD+生)은 계획적이고 열심히 성실히 사는 삶을 칭찬하는 단어입니다.',
+  },
+  {
+    id: 6,
+    question: '한국 식당에서 고기를 먹은 후 한국인들이 마무리를 위해 필수 코스로 꼭 볶아 먹는 음식은?',
+    category: '한국문화',
+    options: ['K-디저트 K-볶음밥', '냉면', '계란찜', '된장찌개'],
+    correctIndex: 0,
+    explanation: '한국에서는 삼겹살이나 닭갈비 등을 먹고 난 판에 밥을 볶아 먹는 볶음밥을 "한국인의 진정한 K-디저트"라고 부릅니다.',
+  },
+  {
+    id: 7,
+    question: '대학 교과목 중에서 과제나 시험 부담이 적고 성적(학점)을 잘 주는 인기 수강 과목을 부르는 단어는?',
+    category: '캠퍼스용어',
+    options: ['꿀강 (꿀+강의)', '전공필수', '체풀강', '학점포기'],
+    correctIndex: 0,
+    explanation: '꿀강은 달콤한 꿀처럼 학점을 잘 주고 강의 만족도가 높은 추천 수강 과목입니다.',
+  },
+  {
+    id: 8,
+    question: '다음 중 BTS와 K-POP 팬들이 콘서트나 응원 시 사용하는 빛나는 응원 도구는 무엇일까요?',
+    category: '한국문화',
+    options: ['응원봉 (Lightstick)', '풍선', '야광 띠', '슬로건 타월'],
+    correctIndex: 0,
+    explanation: 'K-POP 아이돌 팬덤은 각 그룹의 상징 색상과 디자인을 담은 중앙제어 응원봉(Lightstick)으로 콘서트를 빛냅니다.',
   },
 ];
 

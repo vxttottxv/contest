@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Coffee,
@@ -20,6 +20,10 @@ import {
   UserPlus,
   User,
   Edit3,
+  Flame,
+  Award,
+  AlertCircle,
+  Play,
 } from 'lucide-react';
 import {
   MOCK_TINDER_PROFILES,
@@ -27,7 +31,7 @@ import {
   MOCK_LEADERBOARD,
   MOCK_SOCIAL_EVENTS,
 } from '../services/loungeApi';
-import type { LoungeProfile, ChatMessage, SocialEvent } from '../services/loungeApi';
+import type { LoungeProfile, ChatMessage, SocialEvent, LeaderboardEntry } from '../services/loungeApi';
 
 interface LoungePageProps {
   onBack: () => void;
@@ -80,9 +84,8 @@ export default function LoungePage({ onBack }: LoungePageProps) {
   const [editBio, setEditBio] = useState(myProfile.bio);
   const [editAvatar, setEditAvatar] = useState(myProfile.avatar);
 
-  // Tinder Swiping States - CONTAINS ONLY OTHER STUDENTS' PROFILES (EXCLUDES USER'S OWN PROFILE)
+  // Tinder Swiping States - CONTAINS ONLY OTHER STUDENTS' PROFILES
   const [profiles] = useState<LoungeProfile[]>(MOCK_TINDER_PROFILES);
-
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [matchedProfile, setMatchedProfile] = useState<LoungeProfile | null>(null);
 
@@ -91,16 +94,60 @@ export default function LoungePage({ onBack }: LoungePageProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInputText, setChatInputText] = useState<string>('');
 
-  // Mini-Game Quiz States
+  // EXCITING ARCADE SPEED QUIZ ENGINE STATES
   const [currentQuizIndex, setCurrentQuizIndex] = useState<number>(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [userScore, setUserScore] = useState<number>(0);
+  const [comboCount, setComboCount] = useState<number>(0);
+  const [lastEarnedPoints, setLastEarnedPoints] = useState<number>(0);
+  const [timerSeconds, setTimerSeconds] = useState<number>(10);
   const [isQuizCompleted, setIsQuizCompleted] = useState<boolean>(false);
+  const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+
+  // Scoreboard Leaderboard List
+  const [leaderboardList, setLeaderboardList] = useState<LeaderboardEntry[]>(MOCK_LEADERBOARD);
 
   // Social Events State
   const [events, setEvents] = useState<SocialEvent[]>(MOCK_SOCIAL_EVENTS);
 
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentProfile = profiles[currentIndex] || profiles[0];
+
+  // 10-Second Countdown Timer for Speed Quiz
+  useEffect(() => {
+    if (activeTab === 'game' && isGameStarted && !isQuizCompleted && selectedOption === null) {
+      setTimerSeconds(10);
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+      timerIntervalRef.current = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+            // Time Out - Auto Select Wrong
+            setSelectedOption(-1);
+            setComboCount(0);
+            setLastEarnedPoints(0);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [activeTab, isGameStarted, currentQuizIndex, isQuizCompleted, selectedOption]);
+
+  const handleStartGame = () => {
+    setIsGameStarted(true);
+    setCurrentQuizIndex(0);
+    setSelectedOption(null);
+    setUserScore(0);
+    setComboCount(0);
+    setLastEarnedPoints(0);
+    setIsQuizCompleted(false);
+  };
 
   const handleSaveMyProfile = () => {
     const updatedProfile: LoungeProfile = {
@@ -170,7 +217,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
     setChatMessages((prev) => [...prev, userMsg]);
     setChatInputText('');
 
-    // Peer Auto Reply Simulation
     setTimeout(() => {
       const peerMsg: ChatMessage = {
         id: `msg-reply-${Date.now()}`,
@@ -182,14 +228,33 @@ export default function LoungePage({ onBack }: LoungePageProps) {
     }, 1000);
   };
 
-  // Quiz Handlers
+  // Speed Quiz Answer Handler
   const handleSelectOption = (idx: number) => {
     if (selectedOption !== null) return;
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     setSelectedOption(idx);
 
     const currentQuiz = MOCK_QUIZ_QUESTIONS[currentQuizIndex];
-    if (idx === currentQuiz.correctIndex) {
-      setUserScore((prev) => prev + 100);
+    const isCorrect = idx === currentQuiz.correctIndex;
+
+    if (isCorrect) {
+      const newCombo = comboCount + 1;
+      setComboCount(newCombo);
+
+      // Score Formula: Base 100 + Speed Bonus (Time * 15) + Combo Bonus (Combo * 50)
+      const speedBonus = timerSeconds * 15;
+      const comboBonus = (newCombo - 1) * 50;
+      const totalEarned = 100 + speedBonus + comboBonus;
+
+      setLastEarnedPoints(totalEarned);
+      setUserScore((prev) => prev + totalEarned);
+
+      if ('vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100]);
+      }
+    } else {
+      setComboCount(0);
+      setLastEarnedPoints(0);
     }
   };
 
@@ -202,11 +267,20 @@ export default function LoungePage({ onBack }: LoungePageProps) {
     }
   };
 
-  const handleResetQuiz = () => {
-    setCurrentQuizIndex(0);
-    setSelectedOption(null);
-    setUserScore(0);
-    setIsQuizCompleted(false);
+  const handleSubmitScoreToLeaderboard = () => {
+    const myEntry: LeaderboardEntry = {
+      rank: 1,
+      name: myProfile.name,
+      nationality: myProfile.nationality,
+      score: userScore,
+      badge: '🔥 NEW SPEED KING',
+    };
+
+    const newLeaderboard = [myEntry, ...leaderboardList]
+      .sort((a, b) => b.score - a.score)
+      .map((item, idx) => ({ ...item, rank: idx + 1 }));
+
+    setLeaderboardList(newLeaderboard);
   };
 
   // Social Event Apply Handler
@@ -251,14 +325,14 @@ export default function LoungePage({ onBack }: LoungePageProps) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-black tracking-tight">Lounge (라운지·교류 & 프렌즈)</h1>
+                <h1 className="text-lg font-black tracking-tight">Lounge (라운지·교류 & 아케이드)</h1>
                 <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
                   <Sparkles size={10} />
-                  AI Matching & Social
+                  AI Matching & Speed Arcade
                 </span>
               </div>
               <p className="text-xs text-neutral-400">
-                틴더 스타일 AI 프렌즈 매칭, 내 프로필 작성/수정, 한국어 퀴즈 & 밋업 소식
+                AI 프렌즈 매칭, 10초 스피드 어택 아케이드 퀴즈 & 밋업 소식
               </p>
             </div>
           </div>
@@ -310,7 +384,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
             }`}
           >
             <Gamepad2 size={16} />
-            <span>🎮 한국어 미니게임 & 랭킹</span>
+            <span>🎮 ⚡ 스피드 어택 퀴즈 & 랭킹</span>
           </button>
 
           <button
@@ -330,7 +404,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
         {activeTab === 'matching' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center space-y-6">
             {!isProfileCreated ? (
-              /* ONBOARDING STEP: IF PROFILE NOT CREATED YET, SHOW CREATE PROFILE ONBOARDING WIZARD FIRST */
               <div className="w-full max-w-xl p-8 rounded-3xl border-2 border-rose-500/50 bg-gradient-to-b from-neutral-900 via-neutral-900 to-rose-950/30 backdrop-blur-xl shadow-2xl space-y-6 text-center">
                 <div className="w-20 h-20 rounded-full bg-rose-600/20 border-2 border-rose-500 text-rose-400 mx-auto flex items-center justify-center animate-bounce">
                   <UserPlus size={40} />
@@ -377,21 +450,16 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                 </button>
               </div>
             ) : (
-              /* ONCE PROFILE IS CREATED, SHOW ONLY OTHER STUDENTS' SWIPE CARDS */
               <>
-                {/* Tinder Card Container */}
                 <div className="relative w-full max-w-md h-[540px] rounded-3xl border border-white/15 overflow-hidden shadow-2xl bg-neutral-950 flex flex-col justify-between group">
-                  {/* Profile Image Background */}
                   <img
                     src={currentProfile.avatar}
                     alt={currentProfile.name}
                     className="absolute inset-0 w-full h-full object-cover filter brightness-90 transition-transform duration-500 group-hover:scale-105"
                   />
 
-                  {/* Gradient Dark Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20" />
 
-                  {/* Top AI Match Badge */}
                   <div className="relative z-10 p-5 flex items-center justify-between">
                     <span className="px-3.5 py-1.5 rounded-full bg-rose-600/80 border border-rose-400/50 backdrop-blur-md text-white font-black text-xs shadow-xl flex items-center gap-1.5 animate-pulse">
                       <Zap size={14} className="text-amber-300 fill-amber-300" />
@@ -403,7 +471,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     </span>
                   </div>
 
-                  {/* Bottom Profile Info Details */}
                   <div className="relative z-10 p-6 space-y-3">
                     <div>
                       <div className="flex items-center gap-2">
@@ -421,7 +488,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       "{currentProfile.bio}"
                     </p>
 
-                    {/* Languages & Hobbies Badges */}
                     <div className="space-y-1.5 pt-1">
                       <div className="flex items-center gap-1.5 overflow-x-auto">
                         <span className="text-[10px] font-bold text-neutral-400 shrink-0">언어:</span>
@@ -444,7 +510,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   </div>
                 </div>
 
-                {/* TINDER SWIPE ACTION BUTTONS */}
                 <div className="flex items-center gap-6 z-20">
                   <button
                     onClick={handlePass}
@@ -467,14 +532,57 @@ export default function LoungePage({ onBack }: LoungePageProps) {
           </motion.div>
         )}
 
-        {/* TAB 2: KOREAN MINI-GAME QUIZ & SCOREBOARD LEADERBOARD */}
+        {/* TAB 2: EXCITING HIGH-QUALITY SPEED ATTACK ARCADE QUIZ */}
         {activeTab === 'game' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Left 2 Cols: Quiz Engine */}
-            <div className="md:col-span-2 p-6 md:p-8 rounded-3xl bg-neutral-900 border border-white/10 space-y-6">
-              {!isQuizCompleted ? (
+            {/* Left 2 Cols: Speed Arcade Quiz Arena */}
+            <div className="md:col-span-2 p-6 md:p-8 rounded-3xl bg-neutral-900 border border-white/10 space-y-6 shadow-2xl relative overflow-hidden">
+              {!isGameStarted ? (
+                /* GAME START LANDING SCREEN */
+                <div className="py-8 text-center space-y-6">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 p-1 mx-auto shadow-2xl shadow-purple-600/40 animate-pulse">
+                    <div className="w-full h-full bg-black rounded-full flex items-center justify-center">
+                      <Zap size={44} className="text-amber-400 fill-amber-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                      ⚡ 10초 스피드 어택 K-컬처 & 캠퍼스 아케이드 퀴즈!
+                    </h2>
+                    <p className="text-xs text-neutral-300 mt-2 max-w-md mx-auto leading-relaxed font-medium">
+                      문제당 주어진 시간은 오직 <strong className="text-amber-400">10초!</strong> 빠른 정답일수록 <strong className="text-purple-300">스피드 보너스</strong>가 팍팍!<br />
+                      연속 정답 시 <strong className="text-rose-400">🔥 COMBO 연타 스코어</strong> 폭발! 랭킹 1위에 도전하세요!
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 max-w-md mx-auto text-xs">
+                    <div className="p-3 rounded-2xl bg-purple-950/60 border border-purple-500/30">
+                      <span className="block font-black text-purple-300">⏱️ 스피드 보너스</span>
+                      <span className="text-[10px] text-neutral-400">남은 시간 × 15pt 추가</span>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-rose-950/60 border border-rose-500/30">
+                      <span className="block font-black text-rose-300">🔥 COMBO 연타</span>
+                      <span className="text-[10px] text-neutral-400">연속 정답 시 +50pt 콤보</span>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-amber-950/60 border border-amber-500/30">
+                      <span className="block font-black text-amber-300">🏆 랭킹 등록</span>
+                      <span className="text-[10px] text-neutral-400">명예의 전당 등극</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleStartGame}
+                    className="px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-600/30 flex items-center justify-center gap-2 mx-auto cursor-pointer transition-all active:scale-95"
+                  >
+                    <Play size={20} className="fill-white" />
+                    <span>🎮 퀴즈 게임 스타트!</span>
+                  </button>
+                </div>
+              ) : !isQuizCompleted ? (
+                /* IN-GAME QUIZ ARENA WITH 10-SECOND TIMER & COMBO SYSTEM */
                 <>
-                  {/* Quiz HUD Header */}
+                  {/* Top HUD Bar */}
                   <div className="flex items-center justify-between border-b border-white/10 pb-4">
                     <div className="flex items-center gap-2">
                       <span className="px-3 py-1 rounded-full bg-purple-600/30 text-purple-300 text-xs font-black border border-purple-400/40">
@@ -485,31 +593,64 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-amber-400 font-mono font-black text-sm">
-                      <Trophy size={18} />
-                      <span>내 점수: {userScore}점</span>
+                    {/* Combo Streak & Score HUD */}
+                    <div className="flex items-center gap-4">
+                      {comboCount >= 2 && (
+                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs font-black shadow-lg animate-bounce flex items-center gap-1">
+                          <Flame size={14} className="fill-white" />
+                          {comboCount} COMBO STREAK!
+                        </span>
+                      )}
+
+                      <div className="flex items-center gap-1.5 text-amber-400 font-mono font-black text-base">
+                        <Trophy size={18} />
+                        <span>{userScore} pt</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Question Text */}
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-black text-white leading-relaxed">
-                      Q. {MOCK_QUIZ_QUESTIONS[currentQuizIndex].question}
+                  {/* 10-SECOND SPEED COUNTDOWN BAR */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="flex items-center gap-1 text-amber-300">
+                        <Clock size={14} className="animate-spin" />
+                        <span>남은 시간: {timerSeconds}초</span>
+                      </span>
+                      <span className="text-neutral-400 text-[11px]">빠르게 맞힐수록 고득점!</span>
+                    </div>
+                    <div className="w-full h-3 bg-neutral-950 rounded-full overflow-hidden border border-white/10">
+                      <div
+                        className={`h-full transition-all duration-1000 ${
+                          timerSeconds > 5
+                            ? 'bg-gradient-to-r from-emerald-500 to-cyan-500'
+                            : timerSeconds > 2
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+                            : 'bg-gradient-to-r from-red-600 to-rose-600 animate-pulse'
+                        }`}
+                        style={{ width: `${(timerSeconds / 10) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Question Title */}
+                  <div className="space-y-2 pt-2">
+                    <h3 className="text-xl font-black text-white leading-relaxed tracking-tight">
+                      Q{currentQuizIndex + 1}. {MOCK_QUIZ_QUESTIONS[currentQuizIndex].question}
                     </h3>
                   </div>
 
-                  {/* 4 Options Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {/* 4 Arcade Option Buttons */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
                     {MOCK_QUIZ_QUESTIONS[currentQuizIndex].options.map((opt, idx) => {
                       const isSelected = selectedOption === idx;
                       const isCorrect = idx === MOCK_QUIZ_QUESTIONS[currentQuizIndex].correctIndex;
-                      let btnStyle = 'bg-neutral-950 border-white/10 hover:border-purple-500/50 text-white';
+                      let btnStyle = 'bg-neutral-950 border-white/10 hover:border-purple-500/50 hover:bg-neutral-900 text-white';
 
                       if (selectedOption !== null) {
                         if (isCorrect) {
-                          btnStyle = 'bg-emerald-950 border-emerald-500 text-emerald-200 ring-2 ring-emerald-400';
+                          btnStyle = 'bg-emerald-950 border-emerald-500 text-emerald-200 ring-2 ring-emerald-400 shadow-xl shadow-emerald-500/20';
                         } else if (isSelected) {
-                          btnStyle = 'bg-red-950 border-red-500 text-red-200';
+                          btnStyle = 'bg-red-950 border-red-500 text-red-200 ring-2 ring-red-400';
                         } else {
                           btnStyle = 'bg-neutral-950/40 border-white/5 opacity-40 text-neutral-500';
                         }
@@ -520,65 +661,104 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                           key={idx}
                           onClick={() => handleSelectOption(idx)}
                           disabled={selectedOption !== null}
-                          className={`p-4 rounded-2xl border text-left font-bold text-xs transition-all cursor-pointer flex items-center justify-between ${btnStyle}`}
+                          className={`p-4 rounded-2xl border text-left font-extrabold text-xs transition-all cursor-pointer flex items-center justify-between ${btnStyle}`}
                         >
                           <span>{idx + 1}. {opt}</span>
-                          {selectedOption !== null && isCorrect && <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />}
+                          {selectedOption !== null && isCorrect && (
+                            <span className="flex items-center gap-1 text-emerald-400 text-xs font-black">
+                              <CheckCircle2 size={18} /> 정답!
+                            </span>
+                          )}
+                          {selectedOption !== null && isSelected && !isCorrect && (
+                            <span className="flex items-center gap-1 text-red-400 text-xs font-black">
+                              <AlertCircle size={18} /> 오답
+                            </span>
+                          )}
                         </button>
                       );
                     })}
                   </div>
 
-                  {/* Explanation Banner & Next Button */}
+                  {/* Result & Explanation Banner */}
                   {selectedOption !== null && (
-                    <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 space-y-2">
-                      <p className="text-xs text-purple-200 font-medium">
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-5 rounded-2xl bg-neutral-950 border border-white/15 space-y-3 shadow-2xl">
+                      <div className="flex items-center justify-between">
+                        {selectedOption === MOCK_QUIZ_QUESTIONS[currentQuizIndex].correctIndex ? (
+                          <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
+                            <Sparkles size={18} />
+                            <span>정답입니다! (+{lastEarnedPoints}점 획득 🎉)</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 text-red-400 font-black text-sm">
+                            <X size={18} />
+                            <span>아쉽네요! 시간 초과 또는 오답입니다.</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-neutral-300 font-medium leading-relaxed">
                         💡 해설: {MOCK_QUIZ_QUESTIONS[currentQuizIndex].explanation}
                       </p>
+
                       <button
                         onClick={handleNextQuiz}
-                        className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black rounded-xl cursor-pointer shadow-lg shadow-purple-600/30 transition-all"
+                        className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black rounded-xl cursor-pointer shadow-lg shadow-purple-600/30 transition-all"
                       >
-                        {currentQuizIndex < MOCK_QUIZ_QUESTIONS.length - 1 ? '다음 퀴즈 풀기 ➔' : '최종 스코어 결과 보기 🏆'}
+                        {currentQuizIndex < MOCK_QUIZ_QUESTIONS.length - 1 ? '다음 문제 풀기 ➔' : '최종 🏆 아케이드 결과 보기'}
                       </button>
                     </motion.div>
                   )}
                 </>
               ) : (
-                /* Quiz Complete Result View */
-                <div className="py-12 text-center space-y-4">
-                  <div className="w-20 h-20 rounded-full bg-amber-500/20 border-2 border-amber-400 text-amber-400 mx-auto flex items-center justify-center animate-bounce">
-                    <Trophy size={40} />
+                /* GAME COMPLETE RESULT VIEW */
+                <div className="py-10 text-center space-y-6">
+                  <div className="w-24 h-24 rounded-full bg-amber-500/20 border-2 border-amber-400 text-amber-400 mx-auto flex items-center justify-center animate-bounce">
+                    <Trophy size={48} />
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-white">축하합니다! 퀴즈 완료!</h3>
-                    <p className="text-sm font-bold text-amber-300 mt-1">획득 점수: {userScore}점</p>
+
+                  <div className="space-y-1">
+                    <h3 className="text-2xl font-black text-white">🏆 아케이드 퀴즈 완료!</h3>
+                    <p className="text-base font-black text-amber-300">최종 획득 스코어: {userScore} 점</p>
                   </div>
-                  <button
-                    onClick={handleResetQuiz}
-                    className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-purple-600/30 flex items-center gap-1.5 mx-auto cursor-pointer"
-                  >
-                    <RotateCcw size={16} />
-                    <span>다시 도전하기</span>
-                  </button>
+
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={handleSubmitScoreToLeaderboard}
+                      className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-black rounded-xl shadow-lg shadow-amber-500/30 flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Award size={16} />
+                      <span>내 점수 랭킹 스코어보드에 등록!</span>
+                    </button>
+
+                    <button
+                      onClick={handleStartGame}
+                      className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-purple-600/30 flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <RotateCcw size={16} />
+                      <span>다시 도전하기</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Right 1 Col: Scoreboard Leaderboard */}
-            <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4">
-              <h3 className="text-base font-black text-amber-400 flex items-center gap-2 border-b border-white/10 pb-3">
-                <Trophy size={18} />
-                <span>유학생 퀴즈 랭킹 스코어보드</span>
+            <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4 shadow-xl">
+              <h3 className="text-base font-black text-amber-400 flex items-center justify-between border-b border-white/10 pb-3">
+                <span className="flex items-center gap-2">
+                  <Trophy size={18} />
+                  <span>유학생 명예의 전당 랭킹</span>
+                </span>
+                <span className="text-[10px] text-neutral-400">Live Board</span>
               </h3>
 
               <div className="space-y-3">
-                {MOCK_LEADERBOARD.map((item) => (
+                {leaderboardList.map((item) => (
                   <div
                     key={item.rank}
                     className={`p-3.5 rounded-2xl border flex items-center justify-between ${
                       item.rank === 1
-                        ? 'bg-amber-950/40 border-amber-500/50 text-amber-200'
+                        ? 'bg-amber-950/40 border-amber-500/50 text-amber-200 shadow-md'
                         : item.rank === 2
                         ? 'bg-neutral-800 border-white/20 text-white'
                         : 'bg-neutral-950 border-white/10 text-neutral-300'
@@ -587,7 +767,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     <div className="flex items-center gap-3">
                       <span className="font-mono font-black text-sm w-6 text-center">{item.rank}위</span>
                       <div>
-                        <h4 className="text-xs font-bold text-white">{item.name}</h4>
+                        <h4 className="text-xs font-bold text-white">{item.name} ({item.nationality})</h4>
                         <span className="text-[10px] text-neutral-400">{item.badge}</span>
                       </div>
                     </div>
@@ -609,7 +789,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   className="rounded-3xl border border-white/10 bg-neutral-900 overflow-hidden flex flex-col justify-between space-y-4 shadow-xl hover:border-white/20 transition-all group"
                 >
                   <div className="space-y-3">
-                    {/* Event Banner Image */}
                     <div className="relative h-44 overflow-hidden">
                       <img
                         src={evt.image}
@@ -621,7 +800,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       </div>
                     </div>
 
-                    {/* Content Details */}
                     <div className="px-5 space-y-2">
                       <h3 className="text-base font-black text-white group-hover:text-blue-300 transition-colors line-clamp-2">
                         {evt.title}
@@ -641,7 +819,6 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     </div>
                   </div>
 
-                  {/* Apply Action Bar */}
                   <div className="p-5 border-t border-white/10 flex items-center justify-between">
                     <span className="text-xs font-bold text-neutral-400">
                       참가 인원: <strong className="text-blue-400">{evt.currentParticipants}</strong> / {evt.maxParticipants}명
