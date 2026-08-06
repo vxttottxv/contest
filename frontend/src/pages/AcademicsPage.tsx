@@ -14,8 +14,6 @@ import {
   Filter,
   CheckCircle2,
   User,
-  MapPin,
-  Clock
 } from 'lucide-react';
 import {
   MOCK_ACADEMIC_EVENTS,
