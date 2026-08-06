@@ -13,6 +13,8 @@ import {
   Pause,
   RotateCcw,
   Sparkles,
+  LocateFixed,
+  Compass,
 } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
@@ -28,6 +30,8 @@ interface RoomDestination {
   roomName: string;
   floor: number;
   description: string;
+  xPercent: number; // Position on floor blueprint image
+  yPercent: number;
   pathSteps: {
     step: number;
     instruction: string;
@@ -43,6 +47,8 @@ const ROOM_DESTINATIONS: Record<string, RoomDestination[]> = {
       roomName: '1층 101호 유학생 지원 센터 & 학사행정실',
       floor: 1,
       description: '외국인등록증, 비자 체류 연장 및 학사 수강 상담 창구',
+      xPercent: 78,
+      yPercent: 45,
       pathSteps: [
         { step: 1, instruction: '본관 1층 정문 출입구 진입 후 로비 중앙으로 10m 이동하세요.', distance: '10m', icon: '⬆️' },
         { step: 2, instruction: '로비 오른쪽 유학생 지원 센터 전용 안내 창구로 진입하세요.', distance: '5m', icon: '↗️' },
@@ -54,6 +60,8 @@ const ROOM_DESTINATIONS: Record<string, RoomDestination[]> = {
       roomName: '지하 1층 푸드코트 학생식당',
       floor: -1,
       description: '한식/양식/글로벌 맞춤형 중앙 학생식당',
+      xPercent: 25,
+      yPercent: 80,
       pathSteps: [
         { step: 1, instruction: '본관 1층 로비 중앙 계단에서 지하 1층 방향 계단으로 내려가세요.', distance: '15m', icon: '⬇️' },
         { step: 2, instruction: '지하 계단에서 하차 후 좌측 식권 발권기 방향으로 직진하세요.', distance: '10m', icon: '↙️' },
@@ -65,6 +73,8 @@ const ROOM_DESTINATIONS: Record<string, RoomDestination[]> = {
       roomName: '3층 305호 글로벌 화상회의실',
       floor: 3,
       description: '글로벌 학술 발표 및 온라인 화상회의실',
+      xPercent: 45,
+      yPercent: 25,
       pathSteps: [
         { step: 1, instruction: '본관 1층 로비 중앙 엘리베이터 승강장으로 이동하여 3층 버튼을 누르세요.', distance: '12m', icon: '🛗' },
         { step: 2, instruction: '3층 엘리베이터에서 하차 후 우측 복도로 20m 직진하세요.', distance: '20m', icon: '➡️' },
@@ -78,6 +88,8 @@ const ROOM_DESTINATIONS: Record<string, RoomDestination[]> = {
       roomName: '1층 24시간 무인 프린트실 & CU 편의점',
       floor: 1,
       description: '24시간 무인 문서 출력, 복사 및 학생 편의점',
+      xPercent: 18,
+      yPercent: 65,
       pathSteps: [
         { step: 1, instruction: '공학관(B동) 동측 중앙 출입구로 진입하세요.', distance: '8m', icon: '⬆️' },
         { step: 2, instruction: '엘리베이터 우측 복도를 따라 15m 직진하세요.', distance: '15m', icon: '➡️' },
@@ -89,6 +101,8 @@ const ROOM_DESTINATIONS: Record<string, RoomDestination[]> = {
       roomName: '3층 301호 SW 코딩실습실',
       floor: 3,
       description: '컴퓨터공학과 메인 코딩 실습 & 프로젝트 랩실',
+      xPercent: 55,
+      yPercent: 35,
       pathSteps: [
         { step: 1, instruction: '공학관 1층 엘리베이터 탑승 후 3층으로 이동하세요.', distance: '15m', icon: '🛗' },
         { step: 2, instruction: '3층 내린 후 좌측 복도 끝 301호 방향으로 25m 직진하세요.', distance: '25m', icon: '⬅️' },
@@ -102,6 +116,8 @@ const ROOM_DESTINATIONS: Record<string, RoomDestination[]> = {
       roomName: '1층 종합 실내체육관 & 실버 돔',
       floor: 1,
       description: '농구, 배드민턴, 스포츠 교양 및 아치 돔 실내 체육관',
+      xPercent: 60,
+      yPercent: 60,
       pathSteps: [
         { step: 1, instruction: '예체능관(C동) 정문 출입구로 진입하세요.', distance: '10m', icon: '⬆️' },
         { step: 2, instruction: '로비 정면 실버 돔 체육관 아치 문으로 진입하세요.', distance: '12m', icon: '➡️' },
@@ -115,6 +131,8 @@ const ROOM_DESTINATIONS: Record<string, RoomDestination[]> = {
       roomName: '1층 유학생 다문화 커뮤니티 라운지',
       floor: 1,
       description: '글로벌 유학생 교류 및 스터디 전용 라운지',
+      xPercent: 35,
+      yPercent: 45,
       pathSteps: [
         { step: 1, instruction: '사회교육관(D동) 1층 카드키 출입문으로 진입하세요.', distance: '10m', icon: '⬆️' },
         { step: 2, instruction: '로비 좌측 유리벽 다문화 라운지로 들어오세요.', distance: '8m', icon: '↖️' },
@@ -134,7 +152,7 @@ export default function IndoorFloorNavigationModal({
   const [selectedRoom, setSelectedRoom] = useState<RoomDestination | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(0);
 
-  // Animation Engine
+  // Live Indoor Navigation Animation Engine
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [isVoiceMuted, setIsVoiceMuted] = useState<boolean>(false);
   const [progressPercent, setProgressPercent] = useState<number>(0);
@@ -178,7 +196,7 @@ export default function IndoorFloorNavigationModal({
     setCurrentStep(0);
     setProgressPercent(0);
 
-    const startMsg = `${selectedBld?.name.split('(')[0]} 실내 층별 길안내를 시작합니다. 목적지는 ${selectedRoom.roomName}입니다. ${selectedRoom.pathSteps[0].instruction}`;
+    const startMsg = `${selectedBld?.name.split('(')[0]} 실내 평면도 길안내를 시작합니다. 목적지는 ${selectedRoom.roomName}입니다. ${selectedRoom.pathSteps[0].instruction}`;
     speakText(startMsg);
 
     if (animTimerRef.current) clearInterval(animTimerRef.current);
@@ -190,7 +208,8 @@ export default function IndoorFloorNavigationModal({
           if (animTimerRef.current) clearInterval(animTimerRef.current);
           setIsNavigating(false);
           setCurrentStep(selectedRoom.pathSteps.length - 1);
-          speakText(`목적지인 ${selectedRoom.roomName}에 도착했습니다. 실내 길안내를 종료합니다.`);
+          speakText(`목적지인 ${selectedRoom.roomName}에 도착했습니다. 실내 평면도 길안내를 종료합니다.`);
+          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
           return 100;
         }
 
@@ -234,6 +253,15 @@ export default function IndoorFloorNavigationModal({
 
   const currentRoomsList = ROOM_DESTINATIONS[selectedBld.id] || [];
 
+  // Dynamic User Marker Position on Real Blueprint Plan Image
+  const startX = 15;
+  const startY = 85;
+  const targetX = selectedRoom.xPercent;
+  const targetY = selectedRoom.yPercent;
+
+  const currentMarkerX = startX + (targetX - startX) * (progressPercent / 100);
+  const currentMarkerY = startY + (targetY - startY) * (progressPercent / 100);
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
@@ -241,7 +269,7 @@ export default function IndoorFloorNavigationModal({
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative w-full max-w-5xl max-h-[92vh] bg-neutral-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-white flex flex-col space-y-4 overflow-hidden font-sans"
+          className="relative w-full max-w-5xl max-h-[94vh] bg-neutral-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-white flex flex-col space-y-4 overflow-hidden font-sans"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
@@ -251,14 +279,14 @@ export default function IndoorFloorNavigationModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black tracking-tight">건물 내부 층별 상세 길찾기 네비게이션</h3>
+                  <h3 className="text-lg font-black tracking-tight">학교 실제 평면도 기반 실내 길찾기 네비게이션</h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
                     <Sparkles size={10} />
-                    Indoor Floor Plan CAD
+                    Blueprint Map Image Overlay
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  건물 진입 후 로비, 엘리베이터/계단 층간 이동 및 실내 강의실 핀포인트 안내
+                  학교 실제 지적 평면도 사진을 배경으로 한 실내 핀포인트 도보 네비게이션
                 </p>
               </div>
             </div>
@@ -353,20 +381,44 @@ export default function IndoorFloorNavigationModal({
             </div>
           </div>
 
-          {/* INDOOR BLUEPRINT NAVIGATION CANVAS */}
-          <div className="flex-1 min-h-[340px] relative rounded-3xl border border-white/10 overflow-hidden shadow-2xl flex flex-col justify-between bg-neutral-950 p-6">
-            {/* CAD Floor Blueprint Grid */}
-            <div
-              className="absolute inset-0 opacity-20 pointer-events-none"
-              style={{
-                backgroundImage: `linear-gradient(rgba(147,51,234,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(147,51,234,0.4) 1px, transparent 1px)`,
-                backgroundSize: '24px 24px',
-              }}
+          {/* REAL SCHOOL BLUEPRINT IMAGE FLOOR PLAN NAVIGATION CANVAS */}
+          <div className="flex-1 min-h-[340px] relative rounded-3xl border border-white/10 overflow-hidden shadow-2xl flex flex-col justify-between bg-black">
+            {/* REAL SCHOOL BLUEPRINT PLAN IMAGE BACKGROUND */}
+            <img
+              src="/images/school_floor_blueprint.png"
+              alt="School Real Floor Blueprint Plan"
+              className="absolute inset-0 w-full h-full object-contain filter invert contrast-125 brightness-90 p-4"
             />
 
+            {/* Overlay for Contrast */}
+            <div className="absolute inset-0 bg-neutral-950/40 pointer-events-none" />
+
+            {/* ANIMATED NEON INDOOR PATH OVERLAY (SVG) */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+              <line
+                x1="15%"
+                y1="85%"
+                x2={`${selectedRoom.xPercent}%`}
+                y2={`${selectedRoom.yPercent}%`}
+                stroke="#a855f7"
+                strokeWidth="5"
+                strokeDasharray="8 8"
+                className="animate-[dash_12s_linear_infinite]"
+              />
+              <line
+                x1="15%"
+                y1="85%"
+                x2={`${selectedRoom.xPercent}%`}
+                y2={`${selectedRoom.yPercent}%`}
+                stroke="#c084fc"
+                strokeWidth="2"
+                opacity="0.8"
+              />
+            </svg>
+
             {/* Top Navigation Summary HUD */}
-            <div className="flex items-center justify-between text-xs z-20">
-              <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/80 border border-white/15 backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs p-4 z-20">
+              <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-black/85 border border-white/20 backdrop-blur-md shadow-2xl">
                 <span className="text-purple-400 font-extrabold flex items-center gap-1">
                   <Layers size={16} />
                   목적지: <strong>{selectedRoom.roomName}</strong>
@@ -374,7 +426,7 @@ export default function IndoorFloorNavigationModal({
                 <span className="text-neutral-500">|</span>
                 <span className="flex items-center gap-1 font-bold text-emerald-400">
                   <Footprints size={16} />
-                  실내 이동 거리: <strong>약 30m</strong>
+                  실내 도보: <strong>약 30m</strong>
                 </span>
               </div>
 
@@ -386,7 +438,7 @@ export default function IndoorFloorNavigationModal({
                     className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow-lg shadow-purple-600/30 flex items-center gap-1.5 cursor-pointer transition-all"
                   >
                     <Play size={14} />
-                    <span>실내 층별 길안내 시작</span>
+                    <span>실내 평면도 길안내 시작</span>
                   </button>
                 ) : (
                   <button
@@ -407,49 +459,55 @@ export default function IndoorFloorNavigationModal({
               </div>
             </div>
 
-            {/* INDOOR BLUEPRINT ROOM LAYOUT GRAPHIC */}
-            <div className="my-4 grid grid-cols-4 gap-3 z-20">
-              <div className={`p-4 rounded-2xl border text-center space-y-1 transition-all ${
-                currentStep === 0 ? 'bg-blue-900/60 border-blue-400 ring-2 ring-blue-400 shadow-xl' : 'bg-neutral-900/80 border-white/10'
-              }`}>
-                <span className="text-[10px] font-bold text-blue-400 block">START (1층 로비)</span>
-                <span className="text-xs font-bold text-white block">1F 정문 주 출입구</span>
-                <span className="text-[10px] text-neutral-400">안내데스크 / 승강장 진입</span>
+            {/* OVERLAID VISUAL PINS DIRECTLY ON BLUEPRINT IMAGE */}
+            <div className="relative w-full h-full flex-1 z-20">
+              {/* DYNAMIC USER MOVING MARKER ON BLUEPRINT */}
+              <div
+                className="absolute transition-all duration-150 -translate-x-1/2 -translate-y-1/2 z-30"
+                style={{
+                  left: `${currentMarkerX}%`,
+                  top: `${currentMarkerY}%`,
+                }}
+              >
+                <div className="relative flex flex-col items-center">
+                  <div className="p-3 rounded-full bg-blue-600 text-white shadow-2xl ring-4 ring-blue-400 animate-pulse">
+                    <LocateFixed size={20} className="animate-spin" />
+                  </div>
+                  <span className="mt-1 px-2.5 py-1 rounded-lg bg-blue-950/90 border border-blue-400 text-[10px] font-black text-blue-200 shadow-2xl whitespace-nowrap">
+                    🔵 내 위치 ({Math.round(progressPercent)}% 이동)
+                  </span>
+                </div>
               </div>
 
-              <div className={`p-4 rounded-2xl border text-center space-y-1 transition-all ${
-                currentStep === 1 ? 'bg-amber-900/60 border-amber-400 ring-2 ring-amber-400 shadow-xl' : 'bg-neutral-900/80 border-white/10'
-              }`}>
-                <span className="text-[10px] font-bold text-amber-400 block">TRANSITION (층간 이동)</span>
-                <span className="text-xs font-bold text-white block">
-                  {selectedRoom.floor === 1 ? '1층 복도 중앙' : `${selectedRoom.floor}층 엘리베이터`}
-                </span>
-                <span className="text-[10px] text-neutral-400">
-                  {selectedRoom.floor === 1 ? '직진 이동' : '엘리베이터/계단 이용'}
+              {/* START ENTRY PIN */}
+              <div className="absolute left-[15%] top-[85%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                <div className="p-2.5 rounded-full bg-blue-600 text-white shadow-xl ring-4 ring-blue-400/30">
+                  <Compass size={18} />
+                </div>
+                <span className="mt-1 px-2 py-0.5 rounded-lg bg-black/90 border border-blue-400 text-[10px] font-bold text-blue-300 shadow-xl whitespace-nowrap">
+                  📍 1층 메인 로비 출입구
                 </span>
               </div>
 
-              <div className={`p-4 rounded-2xl border text-center space-y-1 transition-all ${
-                currentStep === 2 ? 'bg-purple-900/60 border-purple-400 ring-2 ring-purple-400 shadow-xl' : 'bg-neutral-900/80 border-white/10'
-              }`}>
-                <span className="text-[10px] font-bold text-purple-400 block">CORRIDOR (복도)</span>
-                <span className="text-xs font-bold text-white block">
-                  {selectedRoom.floor < 0 ? '지하 1층 복도' : `${selectedRoom.floor}층 메인 복도`}
+              {/* TARGET ROOM PIN ON BLUEPRINT */}
+              <div
+                className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+                style={{
+                  left: `${selectedRoom.xPercent}%`,
+                  top: `${selectedRoom.yPercent}%`,
+                }}
+              >
+                <div className="p-3 rounded-full bg-purple-600 text-white shadow-2xl ring-4 ring-purple-400/50 animate-bounce">
+                  <MapPin size={20} />
+                </div>
+                <span className="mt-1 px-2.5 py-1 rounded-lg bg-black/90 border border-purple-400 text-[11px] font-black text-purple-300 shadow-xl whitespace-nowrap">
+                  🏁 도착: {selectedRoom.roomName.split(' ')[0]} {selectedRoom.roomName.split(' ')[1]}
                 </span>
-                <span className="text-[10px] text-neutral-400">목적 방 도어락 복도</span>
-              </div>
-
-              <div className={`p-4 rounded-2xl border text-center space-y-1 transition-all ${
-                progressPercent >= 95 ? 'bg-emerald-900/60 border-emerald-400 ring-2 ring-emerald-400 shadow-xl' : 'bg-neutral-900/80 border-white/10'
-              }`}>
-                <span className="text-[10px] font-bold text-emerald-400 block">DESTINATION (도착)</span>
-                <span className="text-xs font-bold text-white block truncate">{selectedRoom.roomName.split('호')[0]}호</span>
-                <span className="text-[10px] text-neutral-400">입실 완료</span>
               </div>
             </div>
 
             {/* Bottom Current Indoor Step Banner */}
-            <div className="p-4 bg-neutral-900/90 border border-white/10 backdrop-blur-md rounded-2xl z-20 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="p-4 bg-black/90 border-t border-white/20 backdrop-blur-md rounded-2xl z-20 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl p-2.5 rounded-2xl bg-purple-600/30 border border-purple-400/40 text-purple-300 font-bold">
                   {selectedRoom.pathSteps[currentStep]?.icon || '➡️'}
@@ -491,7 +549,7 @@ export default function IndoorFloorNavigationModal({
           {/* Modal Footer */}
           <div className="flex items-center justify-between pt-1 shrink-0">
             <span className="text-xs text-neutral-400">
-              실내 안내 관련 문의: <strong>02-300-9999 (학사행정실)</strong>
+              실내 평면도 관련 문의: <strong>02-300-9999 (학사행정실)</strong>
             </span>
             <button
               onClick={() => {
