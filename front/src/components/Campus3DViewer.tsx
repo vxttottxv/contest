@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { RotateCw, ZoomIn, ZoomOut, RefreshCw, Sparkles, Building2, Eye } from 'lucide-react';
+import { RotateCw, ZoomIn, ZoomOut, RefreshCw, Sparkles, Building2, Eye, Map } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
 interface Campus3DViewerProps {
   buildings: Building3D[];
   selectedBuilding: Building3D;
   onSelectBuilding: (building: Building3D) => void;
+  onOpenFloorMap?: (building: Building3D) => void;
 }
 
 export default function Campus3DViewer({
   buildings,
   selectedBuilding,
   onSelectBuilding,
+  onOpenFloorMap,
 }: Campus3DViewerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
@@ -35,7 +37,7 @@ export default function Campus3DViewer({
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(30, 22, 35);
+    camera.position.set(32, 24, 38);
     cameraRef.current = camera;
 
     // 3. Renderer Setup
@@ -53,9 +55,9 @@ export default function Campus3DViewer({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2 - 0.02; // Prevents camera from going under ground
+    controls.maxPolarAngle = Math.PI / 2 - 0.02;
     controls.minDistance = 10;
-    controls.maxDistance = 80;
+    controls.maxDistance = 85;
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = 1.8;
     controls.target.set(0, 4, 0);
@@ -111,10 +113,9 @@ export default function Campus3DViewer({
     frontWall.castShadow = true;
     scene.add(frontWall);
 
-    // 8. Procedural 3D Buildings (Matched with Photo Layout & 4 Main Categories)
+    // 8. Procedural 3D Buildings
     const buildingMeshes: { mesh: THREE.Group; buildingData: Building3D }[] = [];
 
-    // Helper to build window grids on a building block
     const addWindowGrid = (parent: THREE.Group, width: number, height: number, depth: number) => {
       const windowGeo = new THREE.BoxGeometry(0.8, 0.6, 0.1);
       for (let y = 1.5; y < height - 1; y += 1.8) {
@@ -130,7 +131,7 @@ export default function Campus3DViewer({
       }
     };
 
-    // --- A동: 본관 / 본부동 (Main Administration Building) ---
+    // --- A동: 본관 ---
     const aData = buildings.find((b) => b.id === 'bld-1') || buildings[0];
     const groupA = new THREE.Group();
     groupA.position.set(-12, 0, -5);
@@ -149,7 +150,7 @@ export default function Campus3DViewer({
     scene.add(groupA);
     buildingMeshes.push({ mesh: groupA, buildingData: aData });
 
-    // --- B동: 공학관 / IT융합관 (Engineering Building) ---
+    // --- B동: 공학관 ---
     const bData = buildings.find((b) => b.id === 'bld-2') || buildings[1];
     const groupB = new THREE.Group();
     groupB.position.set(-14, 0, 10);
@@ -168,12 +169,11 @@ export default function Campus3DViewer({
     scene.add(groupB);
     buildingMeshes.push({ mesh: groupB, buildingData: bData });
 
-    // --- C동: 중앙도서관 & Silver Curved Gym Dome (Matching Photo!) ---
+    // --- C동: 예체능관 ---
     const cData = buildings.find((b) => b.id === 'bld-3') || buildings[2];
     const groupC = new THREE.Group();
     groupC.position.set(10, 0, -6);
 
-    // Library Block
     const bodyC = new THREE.Mesh(new THREE.BoxGeometry(12, 8, 9), wallWhiteMat);
     bodyC.position.set(0, 4, 0);
     bodyC.castShadow = true;
@@ -181,7 +181,6 @@ export default function Campus3DViewer({
     groupC.add(bodyC);
     addWindowGrid(groupC, 12, 8, 9);
 
-    // Iconic Silver Curved Metallic Gym Dome (Matching Reference Photo!)
     const domeGeo = new THREE.CylinderGeometry(4.5, 4.5, 10, 32, 1, false, 0, Math.PI);
     const domeMesh = new THREE.Mesh(domeGeo, silverDomeMat);
     domeMesh.rotation.z = Math.PI / 2;
@@ -193,7 +192,7 @@ export default function Campus3DViewer({
     scene.add(groupC);
     buildingMeshes.push({ mesh: groupC, buildingData: cData });
 
-    // --- D동: 명지 국제 기숙사 (Global Dormitory Tower) ---
+    // --- D동: 사회교육관 ---
     const dData = buildings.find((b) => b.id === 'bld-4') || buildings[3];
     const groupD = new THREE.Group();
     groupD.position.set(-2, 0, -18);
@@ -212,7 +211,7 @@ export default function Campus3DViewer({
     scene.add(groupD);
     buildingMeshes.push({ mesh: groupD, buildingData: dData });
 
-    // 9. Trees Line (Matching Photo along front wall and playground border)
+    // 9. Trees Line
     const addTree = (x: number, z: number) => {
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2), treeTrunkMat);
       trunk.position.set(x, 1, z);
@@ -232,7 +231,7 @@ export default function Campus3DViewer({
       addTree(20.5, z);
     }
 
-    // 10. Raycasting for Mouse Hover & Building Click Selection
+    // 10. Raycasting for Mouse Hover & Building Selection
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -247,6 +246,9 @@ export default function Campus3DViewer({
         const intersects = raycaster.intersectObjects(item.mesh.children, true);
         if (intersects.length > 0) {
           onSelectBuilding(item.buildingData);
+          if (onOpenFloorMap) {
+            onOpenFloorMap(item.buildingData);
+          }
           break;
         }
       }
@@ -287,7 +289,6 @@ export default function Campus3DViewer({
 
     animate();
 
-    // Resize Handler
     const handleResize = () => {
       if (!container) return;
       const w = container.clientWidth;
@@ -311,7 +312,6 @@ export default function Campus3DViewer({
     };
   }, []);
 
-  // Update autoRotate when state changes
   useEffect(() => {
     if (controlsRef.current) {
       controlsRef.current.autoRotate = autoRotate;
@@ -320,7 +320,7 @@ export default function Campus3DViewer({
 
   const resetCamera = () => {
     if (cameraRef.current && controlsRef.current) {
-      cameraRef.current.position.set(30, 22, 35);
+      cameraRef.current.position.set(32, 24, 38);
       controlsRef.current.target.set(0, 4, 0);
       controlsRef.current.update();
       setAutoRotate(true);
@@ -333,7 +333,7 @@ export default function Campus3DViewer({
       <div className="p-4 flex items-center justify-between z-20 pointer-events-auto">
         <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-neutral-900/90 border border-white/10 text-xs font-bold backdrop-blur-md">
           <Sparkles size={16} className="text-blue-400" />
-          <span>명지전문대학 360° Three.js 3D WebGL 실물 캠퍼스 렌더러</span>
+          <span>명지전문대학 360° 3D 입체 캠퍼스 지형 (건물 선택 가능)</span>
         </div>
 
         {/* Camera Tools */}
@@ -383,26 +383,30 @@ export default function Campus3DViewer({
         <div className="flex items-center gap-2">
           <Eye size={16} className="text-blue-400" />
           <span>
-            마우스를 드래그하면 <strong>360도 자유 회전</strong>되며, 3D 건물을 직접 클릭하면 세부 정보가 동기화됩니다.
+            건물을 3D 뷰어에서 직접 클릭하거나 버튼을 누르면 <strong>건물 상세 지적도</strong>가 표시됩니다.
           </span>
         </div>
 
-        {/* Building Selector Badges */}
+        {/* Building Selector Badges with Exact Requested Names */}
         <div className="flex gap-2 overflow-x-auto max-w-full">
           {buildings.map((bld) => {
             const isSelected = selectedBuilding.id === bld.id;
             return (
               <button
                 key={bld.id}
-                onClick={() => onSelectBuilding(bld)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                onClick={() => {
+                  onSelectBuilding(bld);
+                  if (onOpenFloorMap) onOpenFloorMap(bld);
+                }}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                   isSelected
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-400'
                     : 'bg-neutral-900 border border-white/10 text-neutral-400 hover:text-white'
                 }`}
               >
                 <Building2 size={14} />
-                <span>{bld.code}</span>
+                <span>{bld.code}: {bld.name.split('(')[0].trim()}</span>
+                {onOpenFloorMap && <Map size={12} className="text-blue-300 ml-0.5" />}
               </button>
             );
           })}

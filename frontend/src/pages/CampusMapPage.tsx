@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Map as MapIcon,
   Building2,
@@ -13,6 +14,9 @@ import {
   Info,
   Phone,
   Layers,
+  Layers as LayersIcon,
+  X,
+  Compass,
 } from 'lucide-react';
 import {
   MOCK_BUILDINGS,
@@ -21,7 +25,6 @@ import {
   MOCK_FACILITY_GUIDES,
 } from '../services/campusMapApi';
 import type { Building3D } from '../services/campusMapApi';
-
 import Campus3DViewer from '../components/Campus3DViewer';
 
 interface CampusMapPageProps {
@@ -32,6 +35,10 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
   const [activeTab, setActiveTab] = useState<'3d-map' | 'dormitory' | 'hours'>('3d-map');
   const [selectedBuilding, setSelectedBuilding] = useState<Building3D>(MOCK_BUILDINGS[0]);
   const [facilityCategory, setFacilityCategory] = useState<string>('all');
+
+  // Detailed Floor Map Modal State
+  const [floorModalBuilding, setFloorModalBuilding] = useState<Building3D | null>(null);
+  const [selectedFloor, setSelectedFloor] = useState<number>(1);
 
   // Filtered facilities
   const filteredFacilities = facilityCategory === 'all'
@@ -74,7 +81,7 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
               </span>
             </div>
             <p className="text-xs text-neutral-400 mt-0.5">
-              명지전문대학 360° 3D 입체 모형 지도, 편의시설 및 기숙사 종합 안내
+              명지전문대학 360° 3D 입체 건물 지도, 층별 지적도 및 기숙사 종합 안내
             </p>
           </div>
         </div>
@@ -128,6 +135,10 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
                 buildings={MOCK_BUILDINGS}
                 selectedBuilding={selectedBuilding}
                 onSelectBuilding={(bld) => setSelectedBuilding(bld)}
+                onOpenFloorMap={(bld) => {
+                  setFloorModalBuilding(bld);
+                  setSelectedFloor(1);
+                }}
               />
 
               {/* Bottom Category Filter Bar */}
@@ -166,13 +177,25 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
               <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4 shadow-xl">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black px-3 py-1 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30">
-                    {selectedBuilding.code} ({selectedBuilding.floors}층 건물)
+                    {selectedBuilding.code}: {selectedBuilding.name.split('(')[0]}
                   </span>
-                  <span className="text-xs text-neutral-400">선택한 건물</span>
+                  <span className="text-xs text-neutral-400">{selectedBuilding.floors}층 건물</span>
                 </div>
 
                 <h2 className="text-xl font-black">{selectedBuilding.name}</h2>
                 <p className="text-xs text-neutral-400 leading-relaxed">{selectedBuilding.description}</p>
+
+                {/* Open Floor Map Button */}
+                <button
+                  onClick={() => {
+                    setFloorModalBuilding(selectedBuilding);
+                    setSelectedFloor(1);
+                  }}
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
+                >
+                  <MapIcon size={16} />
+                  <span>{selectedBuilding.code} 층별 상세 지도 열기</span>
+                </button>
 
                 {/* Entrances */}
                 <div className="space-y-1.5 pt-2">
@@ -239,7 +262,7 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
           <div className="w-full h-full p-8 overflow-y-auto space-y-8">
             <div className="max-w-5xl mx-auto space-y-6">
               <div>
-                <h2 className="text-2xl font-black">명지 국제 기숙사 종합 안내</h2>
+                <h2 className="text-2xl font-black">명지 사회교육관 & 국제 기숙사 종합 안내</h2>
                 <p className="text-xs text-neutral-400 mt-1">
                   모집 선발 공고, 입퇴사 일정, 공동생활 수칙 및 주간 식단표 안내
                 </p>
@@ -263,7 +286,7 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
                       <p className="text-xs text-neutral-300 leading-relaxed whitespace-pre-line">{dorm.content}</p>
                     </div>
 
-                    {/* Meal Menu Table if available */}
+                    {/* Meal Menu Table */}
                     {dorm.mealMenu && (
                       <div className="pt-2">
                         <span className="text-xs font-bold text-neutral-300 block mb-2">🍽️ 이번 주 주간 식단표</span>
@@ -305,7 +328,7 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
               <div>
                 <h2 className="text-2xl font-black">주요 시설 운영시간 & 행정 안내</h2>
                 <p className="text-xs text-neutral-400 mt-1">
-                  중앙도서관, 스포츠센터 체육관 및 오프라인 학사행정실/유학생센터 정보
+                  예체능관 실내체육관, 오프라인 학사행정실 및 유학생지원센터 운영 안내
                 </p>
               </div>
 
@@ -353,6 +376,140 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
           </div>
         )}
       </main>
+
+      {/* DETAILED FLOOR-BY-FLOOR BUILDING MAP MODAL */}
+      <AnimatePresence>
+        {floorModalBuilding && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-3xl max-h-[90vh] bg-neutral-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-white flex flex-col space-y-4 overflow-hidden"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setFloorModalBuilding(null)}
+                className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Modal Header */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30">
+                    {floorModalBuilding.code}
+                  </span>
+                  <h3 className="text-xl font-black">{floorModalBuilding.name} 층별 상세 지적도</h3>
+                </div>
+                <p className="text-xs text-neutral-400">
+                  선택하신 건물의 각 층별 강의실, 학과 사무실, 편의시설 및 출입구 정밀 지도입니다.
+                </p>
+              </div>
+
+              {/* Floor Switcher Tabs */}
+              <div className="flex items-center gap-1.5 p-1.5 bg-neutral-950 rounded-2xl border border-white/5 overflow-x-auto">
+                <span className="text-xs font-bold text-neutral-500 px-3 flex items-center gap-1 shrink-0">
+                  <LayersIcon size={14} className="text-blue-400" />
+                  층 선택:
+                </span>
+                {Array.from({ length: Math.min(5, floorModalBuilding.floors) }, (_, idx) => idx + 1).map((fNum) => (
+                  <button
+                    key={fNum}
+                    onClick={() => setSelectedFloor(fNum)}
+                    className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0 ${
+                      selectedFloor === fNum
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                        : 'bg-neutral-900 text-neutral-400 hover:text-white'
+                    }`}
+                  >
+                    {fNum}층
+                  </button>
+                ))}
+              </div>
+
+              {/* 2D Floor Plan Visual Canvas */}
+              <div className="flex-1 min-h-[300px] p-6 rounded-2xl bg-neutral-950 border border-white/10 flex flex-col justify-between relative overflow-hidden">
+                {/* Blueprint Grid & Compass */}
+                <div
+                  className="absolute inset-0 opacity-15 pointer-events-none"
+                  style={{
+                    backgroundImage: `linear-gradient(rgba(59,130,246,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.5) 1px, transparent 1px)`,
+                    backgroundSize: '20px 20px',
+                  }}
+                />
+
+                <div className="flex items-center justify-between text-xs text-neutral-400 z-10">
+                  <span className="font-mono text-blue-400 font-bold">
+                    FLOOR PLAN :: {floorModalBuilding.code} [{selectedFloor}F]
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px]">
+                    <Compass size={14} className="text-neutral-500" />
+                    북향(N) 정면 출입
+                  </span>
+                </div>
+
+                {/* Interactive Rooms Grid Blueprint */}
+                <div className="my-4 grid grid-cols-3 gap-3 z-10">
+                  <div className="p-4 rounded-xl bg-blue-900/30 border border-blue-500/40 text-center space-y-1">
+                    <span className="text-[10px] text-blue-400 font-bold block">
+                      {floorModalBuilding.code} {selectedFloor}01호
+                    </span>
+                    <span className="text-xs font-bold">
+                      {selectedFloor === 1 ? '메인 로비 & 종합 안내' : selectedFloor === 2 ? '대강당 / 세미나실' : '전공 이론 강의실'}
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-cyan-900/30 border border-cyan-500/40 text-center space-y-1">
+                    <span className="text-[10px] text-cyan-400 font-bold block">
+                      {floorModalBuilding.code} {selectedFloor}02호
+                    </span>
+                    <span className="text-xs font-bold">
+                      {selectedFloor === 1 ? '유학생 지원 센터' : selectedFloor === 2 ? '학과 실습실' : '컴퓨터 LAB실'}
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-purple-900/30 border border-purple-500/40 text-center space-y-1">
+                    <span className="text-[10px] text-purple-400 font-bold block">
+                      {floorModalBuilding.code} {selectedFloor}03호
+                    </span>
+                    <span className="text-xs font-bold">
+                      {selectedFloor === 1 ? '편의시설 (CU/카페)' : '교수 연구실'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Corridor & Exit Legend */}
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-neutral-400 z-10">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" /> 주 출입구 / 엘리베이터
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-400" /> 비상 계단 / 화장실
+                    </span>
+                  </div>
+                  <span className="text-neutral-500">실시간 층별 안내 시스템</span>
+                </div>
+              </div>
+
+              {/* Modal Footer Info */}
+              <div className="flex items-center justify-between pt-2 text-xs">
+                <span className="text-neutral-400">
+                  시설 관련 문의: <strong>02-300-9999 (학사행정실)</strong>
+                </span>
+                <button
+                  onClick={() => setFloorModalBuilding(null)}
+                  className="px-5 py-2 bg-neutral-800 hover:bg-neutral-700 text-white font-bold rounded-xl transition-colors cursor-pointer"
+                >
+                  닫기
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
