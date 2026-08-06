@@ -301,7 +301,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#080d14] text-white flex flex-col font-sans selection:bg-[#BADDFF]/30 relative selection:text-white pb-20">
+    <div className="min-h-screen bg-[#0b0b14] text-white flex flex-col font-sans selection:bg-[#A3A3CC]/30 relative selection:text-white pb-20">
       {/* Halftone Texture Overlay */}
       <div 
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.05] mix-blend-screen"
@@ -313,12 +313,12 @@ export default function LoungePage({ onBack }: LoungePageProps) {
 
       {/* Pastel Liquid Ambient Background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#496580]/40 rounded-[100%] blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
-        <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] bg-[#BADDFF]/15 rounded-[100%] blur-[120px] animate-[pulse_12s_ease-in-out_infinite_reverse]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#292966]/40 rounded-[100%] blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] bg-[#A3A3CC]/15 rounded-[100%] blur-[120px] animate-[pulse_12s_ease-in-out_infinite_reverse]" />
       </div>
 
       {/* HEADER */}
-      <header className="relative z-10 border-b border-white/10 bg-[#080d14]/70 backdrop-blur-3xl border-b border-[#BADDFF]/10 sticky top-0 px-6 py-4 flex items-center justify-between">
+      <header className="relative z-10 border-b border-white/10 bg-[#0b0b14]/70 backdrop-blur-3xl border-b border-[#A3A3CC]/10 sticky top-0 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -329,13 +329,13 @@ export default function LoungePage({ onBack }: LoungePageProps) {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-[#FFDBBB] shadow-lg shadow-[#FFDBBB]/20">
+            <div className="p-3 rounded-2xl bg-[#CCCCFF] shadow-lg shadow-[#CCCCFF]/20">
               <Coffee size={22} className="text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-black tracking-tight">Lounge (라운지·교류 & 아케이드)</h1>
-                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#FFDBBB]/20 text-[#FFDBBB] border border-[#FFDBBB]/30 flex items-center gap-1">
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#CCCCFF]/20 text-[#CCCCFF] border border-[#CCCCFF]/30 flex items-center gap-1">
                   <Sparkles size={10} />
                   AI Matching & Speed Arcade
                 </span>
@@ -362,7 +362,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
             setEditAvatar(myProfile.avatar);
             setIsEditProfileModalOpen(true);
           }}
-          className="px-4 py-2 bg-[#FFDBBB] hover:from-[#FFDBBB] hover:to-[#FFDBBB] text-white font-black text-xs rounded-2xl shadow-lg shadow-[#FFDBBB]/30 flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+          className="px-4 py-2 bg-[#CCCCFF] hover:from-[#CCCCFF] hover:to-[#CCCCFF] text-white font-black text-xs rounded-2xl shadow-lg shadow-[#CCCCFF]/30 flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
         >
           {isProfileCreated ? <Edit3 size={15} /> : <UserPlus size={15} />}
           <span>{isProfileCreated ? '내 프로필 수정' : '내 프로필 작성하기'}</span>
@@ -376,7 +376,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
             onClick={() => setActiveTab('matching')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'matching'
-                ? 'bg-[#FFDBBB] text-white shadow-lg shadow-[#FFDBBB]/30 font-black'
+                ? 'bg-[#CCCCFF] text-white shadow-lg shadow-[#CCCCFF]/30 font-black'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -388,7 +388,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
             onClick={() => setActiveTab('game')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'game'
-                ? 'bg-gradient-to-br from-[#FFDBBB] to-[#BADDFF] text-white shadow-lg shadow-[#FFDBBB]/30 font-black'
+                ? 'bg-gradient-to-br from-[#CCCCFF] to-[#A3A3CC] text-white shadow-lg shadow-[#CCCCFF]/30 font-black'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -400,7 +400,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
             onClick={() => setActiveTab('events')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'events'
-                ? 'bg-gradient-to-r from-[#BADDFF] to-cyan-600 text-white shadow-lg shadow-[#BADDFF]/30 font-black'
+                ? 'bg-gradient-to-r from-[#A3A3CC] to-cyan-600 text-white shadow-lg shadow-[#A3A3CC]/30 font-black'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -413,21 +413,21 @@ export default function LoungePage({ onBack }: LoungePageProps) {
         {activeTab === 'matching' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center space-y-6">
             {!isProfileCreated ? (
-              <div className="w-full max-w-xl p-8 rounded-3xl border-2 border-[#FFDBBB]/50 bg-gradient-to-b from-neutral-900 via-neutral-900 to-rose-950/30 backdrop-blur-xl shadow-2xl space-y-6 text-center">
-                <div className="w-20 h-20 rounded-full bg-[#FFDBBB]/20 border-2 border-[#FFDBBB] text-[#FFDBBB] mx-auto flex items-center justify-center animate-bounce">
+              <div className="w-full max-w-xl p-8 rounded-3xl border-2 border-[#CCCCFF]/50 bg-gradient-to-b from-neutral-900 via-neutral-900 to-rose-950/30 backdrop-blur-xl shadow-2xl space-y-6 text-center">
+                <div className="w-20 h-20 rounded-full bg-[#CCCCFF]/20 border-2 border-[#CCCCFF] text-[#CCCCFF] mx-auto flex items-center justify-center animate-bounce">
                   <UserPlus size={40} />
                 </div>
 
                 <div>
                   <h2 className="text-2xl font-black text-white tracking-tight">AI 프렌즈 매칭에 오신 것을 환영합니다! 🎉</h2>
                   <p className="text-xs text-neutral-300 mt-1.5 leading-relaxed font-medium">
-                    매칭을 시작하기 전, 상대방에게 보일 <strong className="text-[#FFDBBB]">본인의 내 프로필</strong>을 먼저 작성해주세요.<br />
+                    매칭을 시작하기 전, 상대방에게 보일 <strong className="text-[#CCCCFF]">본인의 내 프로필</strong>을 먼저 작성해주세요.<br />
                     작성이 완료되면 성향이 맞는 다른 유학생들의 프로필만 스와이프하며 매칭할 수 있습니다!
                   </p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-neutral-950 border border-white/10 text-left text-xs space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-[#FFDBBB]">
+                  <div className="flex items-center gap-2 font-bold text-[#CCCCFF]">
                     <CheckCircle2 size={16} />
                     <span>프로필 등록 시 제공되는 혜택:</span>
                   </div>
@@ -452,7 +452,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     setEditAvatar(myProfile.avatar);
                     setIsEditProfileModalOpen(true);
                   }}
-                  className="w-full py-4 bg-[#FFDBBB] hover:from-[#FFDBBB] hover:to-[#FFDBBB] text-white font-black text-sm rounded-2xl shadow-xl shadow-[#FFDBBB]/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full py-4 bg-[#CCCCFF] hover:from-[#CCCCFF] hover:to-[#CCCCFF] text-white font-black text-sm rounded-2xl shadow-xl shadow-[#CCCCFF]/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <UserPlus size={18} />
                   <span>💖 내 프로필 작성하고 매칭 시작하기!</span>
@@ -470,8 +470,8 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20" />
 
                   <div className="relative z-10 p-5 flex items-center justify-between">
-                    <span className="px-3.5 py-1.5 rounded-full bg-[#FFDBBB]/80 border border-[#FFDBBB]/50 backdrop-blur-md text-white font-black text-xs shadow-xl flex items-center gap-1.5 animate-pulse">
-                      <Zap size={14} className="text-[#FFDBBB] fill-amber-300" />
+                    <span className="px-3.5 py-1.5 rounded-full bg-[#CCCCFF]/80 border border-[#CCCCFF]/50 backdrop-blur-md text-white font-black text-xs shadow-xl flex items-center gap-1.5 animate-pulse">
+                      <Zap size={14} className="text-[#CCCCFF] fill-amber-300" />
                       ⚡ AI 성향 일치도 {currentProfile.aiMatchScore}%
                     </span>
 
@@ -488,7 +488,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                           {currentProfile.nationality}
                         </span>
                       </div>
-                      <p className="text-xs text-[#FFDBBB] font-bold mt-1">
+                      <p className="text-xs text-[#CCCCFF] font-bold mt-1">
                         📚 {currentProfile.major} | MBTI: {currentProfile.mbti}
                       </p>
                     </div>
@@ -501,7 +501,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       <div className="flex items-center gap-1.5 overflow-x-auto">
                         <span className="text-[10px] font-bold text-neutral-400 shrink-0">언어:</span>
                         {currentProfile.languages.map((lang, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded bg-[#BADDFF]/20 text-[#BADDFF] text-[10px] font-bold border border-[#BADDFF]/30 shrink-0">
+                          <span key={idx} className="px-2 py-0.5 rounded bg-[#A3A3CC]/20 text-[#A3A3CC] text-[10px] font-bold border border-[#A3A3CC]/30 shrink-0">
                             {lang}
                           </span>
                         ))}
@@ -510,7 +510,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       <div className="flex items-center gap-1.5 overflow-x-auto">
                         <span className="text-[10px] font-bold text-neutral-400 shrink-0">취미:</span>
                         {currentProfile.hobbies.map((hob, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded bg-[#FFDBBB]/20 text-[#FFDBBB] text-[10px] font-bold border border-[#FFDBBB]/30 shrink-0">
+                          <span key={idx} className="px-2 py-0.5 rounded bg-[#CCCCFF]/20 text-[#CCCCFF] text-[10px] font-bold border border-[#CCCCFF]/30 shrink-0">
                             #{hob}
                           </span>
                         ))}
@@ -530,7 +530,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
 
                   <button
                     onClick={handleLikeMatch}
-                    className="w-20 h-20 rounded-full bg-[#FFDBBB] hover:from-[#FFDBBB] hover:to-[#FFDBBB] text-white flex items-center justify-center shadow-2xl shadow-[#FFDBBB]/40 transition-all cursor-pointer active:scale-95 animate-bounce"
+                    className="w-20 h-20 rounded-full bg-[#CCCCFF] hover:from-[#CCCCFF] hover:to-[#CCCCFF] text-white flex items-center justify-center shadow-2xl shadow-[#CCCCFF]/40 transition-all cursor-pointer active:scale-95 animate-bounce"
                     title="좋아요 & AI 매칭하기 (MATCH)"
                   >
                     <Heart size={36} className="fill-white" />
@@ -545,13 +545,13 @@ export default function LoungePage({ onBack }: LoungePageProps) {
         {activeTab === 'game' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Left 2 Cols: Speed Arcade Quiz Arena */}
-            <div className="md:col-span-2 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-[#BADDFF]/5 to-transparent border border-[#BADDFF]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-6 shadow-2xl relative overflow-hidden">
+            <div className="md:col-span-2 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-[#A3A3CC]/5 to-transparent border border-[#A3A3CC]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-6 shadow-2xl relative overflow-hidden">
               {!isGameStarted ? (
                 /* GAME START LANDING SCREEN */
                 <div className="py-8 text-center space-y-6">
-                  <div className="w-24 h-24 rounded-full bg-[#FFDBBB] p-1 mx-auto shadow-2xl shadow-[#FFDBBB]/40 animate-pulse">
+                  <div className="w-24 h-24 rounded-full bg-[#CCCCFF] p-1 mx-auto shadow-2xl shadow-[#CCCCFF]/40 animate-pulse">
                     <div className="w-full h-full bg-black rounded-full flex items-center justify-center">
-                      <Zap size={44} className="text-[#FFDBBB] fill-amber-400" />
+                      <Zap size={44} className="text-[#CCCCFF] fill-amber-400" />
                     </div>
                   </div>
 
@@ -560,29 +560,29 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       ⚡ 10초 스피드 어택 K-컬처 & 캠퍼스 아케이드 퀴즈!
                     </h2>
                     <p className="text-xs text-neutral-300 mt-2 max-w-md mx-auto leading-relaxed font-medium">
-                      문제당 주어진 시간은 오직 <strong className="text-[#FFDBBB]">10초!</strong> 빠른 정답일수록 <strong className="text-[#FFDBBB]">스피드 보너스</strong>가 팍팍!<br />
-                      연속 정답 시 <strong className="text-[#FFDBBB]">🔥 COMBO 연타 스코어</strong> 폭발! 랭킹 1위에 도전하세요!
+                      문제당 주어진 시간은 오직 <strong className="text-[#CCCCFF]">10초!</strong> 빠른 정답일수록 <strong className="text-[#CCCCFF]">스피드 보너스</strong>가 팍팍!<br />
+                      연속 정답 시 <strong className="text-[#CCCCFF]">🔥 COMBO 연타 스코어</strong> 폭발! 랭킹 1위에 도전하세요!
                     </p>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3 max-w-md mx-auto text-xs">
-                    <div className="p-3 rounded-2xl bg-purple-950/60 border border-[#FFDBBB]/30">
-                      <span className="block font-black text-[#FFDBBB]">⏱️ 스피드 보너스</span>
+                    <div className="p-3 rounded-2xl bg-purple-950/60 border border-[#CCCCFF]/30">
+                      <span className="block font-black text-[#CCCCFF]">⏱️ 스피드 보너스</span>
                       <span className="text-[10px] text-neutral-400">남은 시간 × 15pt 추가</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-rose-950/60 border border-[#FFDBBB]/30">
-                      <span className="block font-black text-[#FFDBBB]">🔥 COMBO 연타</span>
+                    <div className="p-3 rounded-2xl bg-rose-950/60 border border-[#CCCCFF]/30">
+                      <span className="block font-black text-[#CCCCFF]">🔥 COMBO 연타</span>
                       <span className="text-[10px] text-neutral-400">연속 정답 시 +50pt 콤보</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-amber-950/60 border border-[#FFDBBB]/30">
-                      <span className="block font-black text-[#FFDBBB]">🏆 랭킹 등록</span>
+                    <div className="p-3 rounded-2xl bg-amber-950/60 border border-[#CCCCFF]/30">
+                      <span className="block font-black text-[#CCCCFF]">🏆 랭킹 등록</span>
                       <span className="text-[10px] text-neutral-400">명예의 전당 등극</span>
                     </div>
                   </div>
 
                   <button
                     onClick={handleStartGame}
-                    className="px-8 py-4 bg-gradient-to-r from-[#FFDBBB] via-pink-600 to-[#FFDBBB] hover:from-[#FFDBBB] hover:to-[#FFDBBB] text-white font-black text-sm rounded-2xl shadow-xl shadow-[#FFDBBB]/30 flex items-center justify-center gap-2 mx-auto cursor-pointer transition-all active:scale-95"
+                    className="px-8 py-4 bg-gradient-to-r from-[#CCCCFF] via-pink-600 to-[#CCCCFF] hover:from-[#CCCCFF] hover:to-[#CCCCFF] text-white font-black text-sm rounded-2xl shadow-xl shadow-[#CCCCFF]/30 flex items-center justify-center gap-2 mx-auto cursor-pointer transition-all active:scale-95"
                   >
                     <Play size={20} className="fill-white" />
                     <span>🎮 퀴즈 게임 스타트!</span>
@@ -594,7 +594,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   {/* Top HUD Bar */}
                   <div className="flex items-center justify-between border-b border-white/10 pb-4">
                     <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-[#FFDBBB]/30 text-[#FFDBBB] text-xs font-black border border-[#FFDBBB]/40">
+                      <span className="px-3 py-1 rounded-full bg-[#CCCCFF]/30 text-[#CCCCFF] text-xs font-black border border-[#CCCCFF]/40">
                         {MOCK_QUIZ_QUESTIONS[currentQuizIndex].category}
                       </span>
                       <span className="text-xs font-bold text-neutral-400">
@@ -605,13 +605,13 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     {/* Combo Streak & Score HUD */}
                     <div className="flex items-center gap-4">
                       {comboCount >= 2 && (
-                        <span className="px-3 py-1 rounded-full bg-[#FFDBBB] text-white text-xs font-black shadow-lg animate-bounce flex items-center gap-1">
+                        <span className="px-3 py-1 rounded-full bg-[#CCCCFF] text-white text-xs font-black shadow-lg animate-bounce flex items-center gap-1">
                           <Flame size={14} className="fill-white" />
                           {comboCount} COMBO STREAK!
                         </span>
                       )}
 
-                      <div className="flex items-center gap-1.5 text-[#FFDBBB] font-mono font-black text-base">
+                      <div className="flex items-center gap-1.5 text-[#CCCCFF] font-mono font-black text-base">
                         <Trophy size={18} />
                         <span>{userScore} pt</span>
                       </div>
@@ -621,7 +621,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   {/* 10-SECOND SPEED COUNTDOWN BAR */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="flex items-center gap-1 text-[#FFDBBB]">
+                      <span className="flex items-center gap-1 text-[#CCCCFF]">
                         <Clock size={14} className="animate-spin" />
                         <span>남은 시간: {timerSeconds}초</span>
                       </span>
@@ -631,10 +631,10 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       <div
                         className={`h-full transition-all duration-1000 ${
                           timerSeconds > 5
-                            ? 'bg-gradient-to-r from-[#BAFFF5] to-cyan-500'
+                            ? 'bg-gradient-to-r from-[#5C5C99] to-cyan-500'
                             : timerSeconds > 2
-                            ? 'bg-gradient-to-r from-[#FFDBBB] to-orange-500'
-                            : 'bg-gradient-to-r from-red-600 to-[#FFDBBB] animate-pulse'
+                            ? 'bg-gradient-to-r from-[#CCCCFF] to-orange-500'
+                            : 'bg-gradient-to-r from-red-600 to-[#CCCCFF] animate-pulse'
                         }`}
                         style={{ width: `${(timerSeconds / 10) * 100}%` }}
                       />
@@ -653,11 +653,11 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     {MOCK_QUIZ_QUESTIONS[currentQuizIndex].options.map((opt, idx) => {
                       const isSelected = selectedOption === idx;
                       const isCorrect = idx === MOCK_QUIZ_QUESTIONS[currentQuizIndex].correctIndex;
-                      let btnStyle = 'bg-neutral-950 border-white/10 hover:border-[#FFDBBB]/50 hover:bg-neutral-900 text-white';
+                      let btnStyle = 'bg-neutral-950 border-white/10 hover:border-[#CCCCFF]/50 hover:bg-neutral-900 text-white';
 
                       if (selectedOption !== null) {
                         if (isCorrect) {
-                          btnStyle = 'bg-emerald-950 border-[#BAFFF5] text-[#BAFFF5] ring-2 ring-emerald-400 shadow-xl shadow-[#BAFFF5]/20';
+                          btnStyle = 'bg-emerald-950 border-[#5C5C99] text-[#5C5C99] ring-2 ring-emerald-400 shadow-xl shadow-[#5C5C99]/20';
                         } else if (isSelected) {
                           btnStyle = 'bg-red-950 border-red-500 text-red-200 ring-2 ring-red-400';
                         } else {
@@ -674,7 +674,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                         >
                           <span>{idx + 1}. {opt}</span>
                           {selectedOption !== null && isCorrect && (
-                            <span className="flex items-center gap-1 text-[#BAFFF5] text-xs font-black">
+                            <span className="flex items-center gap-1 text-[#5C5C99] text-xs font-black">
                               <CheckCircle2 size={18} /> 정답!
                             </span>
                           )}
@@ -693,7 +693,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-5 rounded-2xl bg-neutral-950 border border-white/15 space-y-3 shadow-2xl">
                       <div className="flex items-center justify-between">
                         {selectedOption === MOCK_QUIZ_QUESTIONS[currentQuizIndex].correctIndex ? (
-                          <div className="flex items-center gap-2 text-[#BAFFF5] font-black text-sm">
+                          <div className="flex items-center gap-2 text-[#5C5C99] font-black text-sm">
                             <Sparkles size={18} />
                             <span>정답입니다! (+{lastEarnedPoints}점 획득 🎉)</span>
                           </div>
@@ -711,7 +711,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
 
                       <button
                         onClick={handleNextQuiz}
-                        className="w-full py-3 bg-[#FFDBBB] hover:from-[#FFDBBB] hover:to-[#FFDBBB] text-white text-xs font-black rounded-xl cursor-pointer shadow-lg shadow-[#FFDBBB]/30 transition-all"
+                        className="w-full py-3 bg-[#CCCCFF] hover:from-[#CCCCFF] hover:to-[#CCCCFF] text-white text-xs font-black rounded-xl cursor-pointer shadow-lg shadow-[#CCCCFF]/30 transition-all"
                       >
                         {currentQuizIndex < MOCK_QUIZ_QUESTIONS.length - 1 ? '다음 문제 풀기 ➔' : '최종 🏆 아케이드 결과 보기'}
                       </button>
@@ -721,19 +721,19 @@ export default function LoungePage({ onBack }: LoungePageProps) {
               ) : (
                 /* GAME COMPLETE RESULT VIEW */
                 <div className="py-10 text-center space-y-6">
-                  <div className="w-24 h-24 rounded-full bg-[#FFDBBB]/20 border-2 border-[#FFDBBB] text-[#FFDBBB] mx-auto flex items-center justify-center animate-bounce">
+                  <div className="w-24 h-24 rounded-full bg-[#CCCCFF]/20 border-2 border-[#CCCCFF] text-[#CCCCFF] mx-auto flex items-center justify-center animate-bounce">
                     <Trophy size={48} />
                   </div>
 
                   <div className="space-y-1">
                     <h3 className="text-2xl font-black text-white">🏆 아케이드 퀴즈 완료!</h3>
-                    <p className="text-base font-black text-[#FFDBBB]">최종 획득 스코어: {userScore} 점</p>
+                    <p className="text-base font-black text-[#CCCCFF]">최종 획득 스코어: {userScore} 점</p>
                   </div>
 
                   <div className="flex justify-center gap-3">
                     <button
                       onClick={handleSubmitScoreToLeaderboard}
-                      className="px-6 py-3 bg-gradient-to-r from-[#FFDBBB] to-orange-500 text-white text-xs font-black rounded-xl shadow-lg shadow-[#FFDBBB]/30 flex items-center gap-1.5 cursor-pointer"
+                      className="px-6 py-3 bg-gradient-to-r from-[#CCCCFF] to-orange-500 text-white text-xs font-black rounded-xl shadow-lg shadow-[#CCCCFF]/30 flex items-center gap-1.5 cursor-pointer"
                     >
                       <Award size={16} />
                       <span>내 점수 랭킹 스코어보드에 등록!</span>
@@ -741,7 +741,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
 
                     <button
                       onClick={handleStartGame}
-                      className="px-6 py-3 bg-[#FFDBBB] hover:bg-[#FFDBBB] text-white text-xs font-bold rounded-xl shadow-lg shadow-[#FFDBBB]/30 flex items-center gap-1.5 cursor-pointer"
+                      className="px-6 py-3 bg-[#CCCCFF] hover:bg-[#CCCCFF] text-white text-xs font-bold rounded-xl shadow-lg shadow-[#CCCCFF]/30 flex items-center gap-1.5 cursor-pointer"
                     >
                       <RotateCcw size={16} />
                       <span>다시 도전하기</span>
@@ -752,8 +752,8 @@ export default function LoungePage({ onBack }: LoungePageProps) {
             </div>
 
             {/* Right 1 Col: Scoreboard Leaderboard */}
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-[#BADDFF]/5 to-transparent border border-[#BADDFF]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-4 shadow-xl">
-              <h3 className="text-base font-black text-[#FFDBBB] flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-[#A3A3CC]/5 to-transparent border border-[#A3A3CC]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-4 shadow-xl">
+              <h3 className="text-base font-black text-[#CCCCFF] flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="flex items-center gap-2">
                   <Trophy size={18} />
                   <span>유학생 명예의 전당 랭킹</span>
@@ -767,7 +767,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     key={item.rank}
                     className={`p-3.5 rounded-2xl border flex items-center justify-between ${
                       item.rank === 1
-                        ? 'bg-amber-950/40 border-[#FFDBBB]/50 text-[#FFDBBB] shadow-md'
+                        ? 'bg-amber-950/40 border-[#CCCCFF]/50 text-[#CCCCFF] shadow-md'
                         : item.rank === 2
                         ? 'bg-neutral-800 border-white/20 text-white'
                         : 'bg-neutral-950 border-white/10 text-neutral-300'
@@ -780,7 +780,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                         <span className="text-[10px] text-neutral-400">{item.badge}</span>
                       </div>
                     </div>
-                    <span className="font-mono font-black text-xs text-[#FFDBBB]">{item.score}pt</span>
+                    <span className="font-mono font-black text-xs text-[#CCCCFF]">{item.score}pt</span>
                   </div>
                 ))}
               </div>
@@ -804,24 +804,24 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                         alt={evt.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#BADDFF]/90 text-white text-[10px] font-black border border-[#BADDFF]/50 backdrop-blur-md">
+                      <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#A3A3CC]/90 text-white text-[10px] font-black border border-[#A3A3CC]/50 backdrop-blur-md">
                         {evt.category}
                       </div>
                     </div>
 
                     <div className="px-5 space-y-2">
-                      <h3 className="text-base font-black text-white group-hover:text-[#BADDFF] transition-colors line-clamp-2">
+                      <h3 className="text-base font-black text-white group-hover:text-[#A3A3CC] transition-colors line-clamp-2">
                         {evt.title}
                       </h3>
                       <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">{evt.description}</p>
 
                       <div className="space-y-1 pt-2 text-xs text-neutral-300 border-t border-white/5">
                         <div className="flex items-center gap-1.5">
-                          <Clock size={14} className="text-[#BADDFF] shrink-0" />
+                          <Clock size={14} className="text-[#A3A3CC] shrink-0" />
                           <span>일시: {evt.date} ({evt.time})</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <MapPin size={14} className="text-[#FFDBBB] shrink-0" />
+                          <MapPin size={14} className="text-[#CCCCFF] shrink-0" />
                           <span>장소: {evt.location}</span>
                         </div>
                       </div>
@@ -830,15 +830,15 @@ export default function LoungePage({ onBack }: LoungePageProps) {
 
                   <div className="p-5 border-t border-white/10 flex items-center justify-between">
                     <span className="text-xs font-bold text-neutral-400">
-                      참가 인원: <strong className="text-[#BADDFF]">{evt.currentParticipants}</strong> / {evt.maxParticipants}명
+                      참가 인원: <strong className="text-[#A3A3CC]">{evt.currentParticipants}</strong> / {evt.maxParticipants}명
                     </span>
 
                     <button
                       onClick={() => handleToggleEventApply(evt.id)}
                       className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
                         evt.isApplied
-                          ? 'bg-[#BAFFF5] hover:bg-[#BAFFF5] text-white shadow-lg shadow-[#BAFFF5]/30'
-                          : 'bg-[#BADDFF] hover:bg-[#BADDFF] text-white shadow-lg shadow-[#BADDFF]/30'
+                          ? 'bg-[#5C5C99] hover:bg-[#5C5C99] text-white shadow-lg shadow-[#5C5C99]/30'
+                          : 'bg-[#A3A3CC] hover:bg-[#A3A3CC] text-white shadow-lg shadow-[#A3A3CC]/30'
                       }`}
                     >
                       {evt.isApplied ? (
@@ -869,11 +869,11 @@ export default function LoungePage({ onBack }: LoungePageProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg max-h-[90vh] bg-gradient-to-br from-[#BADDFF]/5 to-transparent border border-[#BADDFF]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] rounded-3xl p-6 shadow-2xl text-white space-y-4 overflow-y-auto"
+              className="w-full max-w-lg max-h-[90vh] bg-gradient-to-br from-[#A3A3CC]/5 to-transparent border border-[#A3A3CC]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] rounded-3xl p-6 shadow-2xl text-white space-y-4 overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-[#FFDBBB] text-white">
+                  <div className="p-2 rounded-xl bg-[#CCCCFF] text-white">
                     <User size={18} />
                   </div>
                   <h3 className="text-base font-black">내 AI 프렌즈 매칭 프로필 작성/수정</h3>
@@ -892,7 +892,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       placeholder="예: 윤제린 (Jerin Yoon)"
-                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                     />
                   </div>
                   <div className="space-y-1">
@@ -901,7 +901,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       type="number"
                       value={editAge}
                       onChange={(e) => setEditAge(Number(e.target.value))}
-                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                     />
                   </div>
                 </div>
@@ -914,7 +914,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       value={editNationality}
                       onChange={(e) => setEditNationality(e.target.value)}
                       placeholder="예: 🇰🇷 한국 / 🇻🇳 베트남 / 🇨🇳 중국"
-                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                     />
                   </div>
                   <div className="space-y-1">
@@ -924,7 +924,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                       value={editMbti}
                       onChange={(e) => setEditMbti(e.target.value)}
                       placeholder="예: ENFP / INFJ"
-                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                     />
                   </div>
                 </div>
@@ -936,7 +936,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     value={editMajor}
                     onChange={(e) => setEditMajor(e.target.value)}
                     placeholder="예: 컴퓨터공학과 3학년"
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                   />
                 </div>
 
@@ -947,7 +947,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     value={editLanguages}
                     onChange={(e) => setEditLanguages(e.target.value)}
                     placeholder="예: 한국어 (원어민), 영어 (상급), 베트남어 (초급)"
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                   />
                 </div>
 
@@ -958,7 +958,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     value={editHobbies}
                     onChange={(e) => setEditHobbies(e.target.value)}
                     placeholder="예: K-POP 댄스, 맛집 탐방, 운동, 카페 스터디"
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                   />
                 </div>
 
@@ -969,7 +969,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     onChange={(e) => setEditBio(e.target.value)}
                     rows={3}
                     placeholder="상대방에게 보여줄 매칭 자기소개를 적어주세요..."
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB] resize-none"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF] resize-none"
                   />
                 </div>
 
@@ -980,7 +980,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                     value={editAvatar}
                     onChange={(e) => setEditAvatar(e.target.value)}
                     placeholder="https://..."
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFDBBB]"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#CCCCFF]"
                   />
                 </div>
               </div>
@@ -994,7 +994,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                 </button>
                 <button
                   onClick={handleSaveMyProfile}
-                  className="flex-1 py-3 bg-[#FFDBBB] hover:from-[#FFDBBB] hover:to-[#FFDBBB] text-white font-black rounded-xl text-xs shadow-lg shadow-[#FFDBBB]/30 cursor-pointer"
+                  className="flex-1 py-3 bg-[#CCCCFF] hover:from-[#CCCCFF] hover:to-[#CCCCFF] text-white font-black rounded-xl text-xs shadow-lg shadow-[#CCCCFF]/30 cursor-pointer"
                 >
                   💖 프로필 등록 완료 및 매칭 시작하기!
                 </button>
@@ -1012,15 +1012,15 @@ export default function LoungePage({ onBack }: LoungePageProps) {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="w-full max-w-sm bg-neutral-900 border-2 border-[#FFDBBB]/60 rounded-3xl p-6 shadow-2xl text-center space-y-4"
+              className="w-full max-w-sm bg-neutral-900 border-2 border-[#CCCCFF]/60 rounded-3xl p-6 shadow-2xl text-center space-y-4"
             >
-              <div className="w-16 h-16 rounded-full bg-[#FFDBBB]/20 border-2 border-[#FFDBBB] text-[#FFDBBB] mx-auto flex items-center justify-center animate-bounce">
+              <div className="w-16 h-16 rounded-full bg-[#CCCCFF]/20 border-2 border-[#CCCCFF] text-[#CCCCFF] mx-auto flex items-center justify-center animate-bounce">
                 <Heart size={32} className="fill-rose-500" />
               </div>
 
               <div>
                 <h3 className="text-2xl font-black text-white">IT'S A MATCH! 🎉</h3>
-                <p className="text-xs text-[#FFDBBB] mt-1 font-bold">
+                <p className="text-xs text-[#CCCCFF] mt-1 font-bold">
                   {matchedProfile.name}님과 서로에게 관심을 표시했습니다!
                 </p>
               </div>
@@ -1036,7 +1036,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
               <div className="space-y-2 pt-2">
                 <button
                   onClick={() => handleOpenChat(matchedProfile)}
-                  className="w-full py-3 bg-[#FFDBBB] hover:from-[#FFDBBB] hover:to-[#FFDBBB] text-white font-black text-xs rounded-xl shadow-lg shadow-[#FFDBBB]/30 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-3 bg-[#CCCCFF] hover:from-[#CCCCFF] hover:to-[#CCCCFF] text-white font-black text-xs rounded-xl shadow-lg shadow-[#CCCCFF]/30 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <MessageCircle size={16} />
                   <span>💬 1:1 라이브 채팅 시작하기</span>
@@ -1069,7 +1069,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   <img src={activeChatProfile.avatar} alt={activeChatProfile.name} className="w-10 h-10 rounded-full object-cover" />
                   <div>
                     <h3 className="text-sm font-bold text-white">{activeChatProfile.name}</h3>
-                    <span className="text-[10px] text-[#FFDBBB] font-extrabold">{activeChatProfile.nationality} | AI Match {activeChatProfile.aiMatchScore}%</span>
+                    <span className="text-[10px] text-[#CCCCFF] font-extrabold">{activeChatProfile.nationality} | AI Match {activeChatProfile.aiMatchScore}%</span>
                   </div>
                 </div>
                 <button onClick={() => setActiveChatProfile(null)} className="text-neutral-400 hover:text-white cursor-pointer">
@@ -1086,7 +1086,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   >
                     <div className={`max-w-[80%] p-3 rounded-2xl text-xs font-medium leading-relaxed ${
                       msg.sender === 'user'
-                        ? 'bg-[#FFDBBB] text-white rounded-br-none'
+                        ? 'bg-[#CCCCFF] text-white rounded-br-none'
                         : 'bg-neutral-800 text-neutral-200 rounded-bl-none border border-white/10'
                     }`}>
                       {msg.text}
@@ -1104,11 +1104,11 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   onChange={(e) => setChatInputText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendChatMessage()}
                   placeholder="메시지를 입력하세요..."
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-br from-[#BADDFF]/5 to-transparent border border-[#BADDFF]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] rounded-2xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFDBBB]"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-br from-[#A3A3CC]/5 to-transparent border border-[#A3A3CC]/10 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] rounded-2xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#CCCCFF]"
                 />
                 <button
                   onClick={handleSendChatMessage}
-                  className="p-2.5 bg-[#FFDBBB] hover:bg-[#FFDBBB] text-white rounded-2xl cursor-pointer transition-colors"
+                  className="p-2.5 bg-[#CCCCFF] hover:bg-[#CCCCFF] text-white rounded-2xl cursor-pointer transition-colors"
                 >
                   <Send size={16} />
                 </button>
