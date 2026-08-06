@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import {
   GraduationCap,
@@ -30,6 +30,14 @@ interface AcademicsPageProps {
 }
 
 export default function AcademicsPage({ onBack }: AcademicsPageProps) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Calendar State: Year & Month (Defaults to 2026-08 August)
   const [currentYear, setCurrentYear] = useState<number>(2026);
   const [currentMonth, setCurrentMonth] = useState<number>(8); // 8 = August
@@ -116,7 +124,13 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
       </div>
 
       {/* HEADER BAR (Minimalist) */}
-      <header className="relative z-10 bg-transparent sticky top-0 px-6 py-6 flex items-center justify-between">
+      <header 
+        className={`relative z-30 sticky top-0 px-6 flex items-center justify-between transition-all duration-300 ${
+          scrolled 
+            ? 'py-4 bg-[#0d0d12]/70 backdrop-blur-3xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
+            : 'py-6 bg-transparent'
+        }`}
+      >
         <div className="flex items-center gap-6">
           <button
             onClick={onBack}
