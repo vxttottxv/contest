@@ -449,21 +449,14 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
                 ))}
               </div>
 
-              {/* 2D Floor Plan Visual Canvas with Real Blueprint Background */}
-              <div className="flex-1 min-h-[300px] p-6 rounded-2xl bg-black border border-white/10 flex flex-col justify-between relative overflow-hidden">
-                {/* Real School Floor Blueprint Image Background (Black Theme) */}
-                <img
-                  src="/images/school_floor_blueprint.png"
-                  alt="School Architectural Blueprint Black Theme"
-                  className="absolute inset-0 w-full h-full object-contain filter invert contrast-150 brightness-90 opacity-85 p-4"
-                />
-
-                {/* Blueprint Grid Overlay */}
+              {/* 2D Floor Plan Visual Canvas with Pure Black Theme */}
+              <div className="flex-1 min-h-[300px] p-6 rounded-2xl bg-neutral-950 border border-white/10 flex flex-col justify-between relative overflow-hidden">
+                {/* Clean Blueprint Grid Overlay */}
                 <div
-                  className="absolute inset-0 opacity-15 pointer-events-none"
+                  className="absolute inset-0 opacity-20 pointer-events-none"
                   style={{
-                    backgroundImage: `linear-gradient(rgba(59,130,246,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.5) 1px, transparent 1px)`,
-                    backgroundSize: '20px 20px',
+                    backgroundImage: `linear-gradient(rgba(59,130,246,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.4) 1px, transparent 1px)`,
+                    backgroundSize: '24px 24px',
                   }}
                 />
 
