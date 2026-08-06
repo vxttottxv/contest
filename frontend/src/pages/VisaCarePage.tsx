@@ -132,15 +132,25 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col font-sans selection:bg-purple-500 selection:text-white pb-20">
-      {/* Background Neon Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-30">
-        <div className="absolute top-10 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-1/4 w-[30rem] h-[30rem] bg-indigo-600/20 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-[#080b13] text-white flex flex-col font-sans selection:bg-[#A49A87]/30 selection:text-white pb-20 relative">
+      
+      {/* Halftone Texture Overlay */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.05] mix-blend-screen"
+        style={{
+          backgroundImage: 'radial-gradient(circle at center, #ffffff 1.5px, transparent 1.5px)',
+          backgroundSize: '16px 16px',
+        }}
+      />
+
+      {/* Mysterious Blue Liquid Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#A49A87]/15 rounded-[100%] blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
+        <div className="absolute bottom-[-10%] right-[-20%] w-[60%] h-[60%] bg-[#968F83]/15 rounded-[100%] blur-[120px] animate-[pulse_12s_ease-in-out_infinite_reverse]" />
       </div>
 
       {/* HEADER BAR */}
-      <header className="relative z-10 border-b border-white/10 bg-black/60 backdrop-blur-md sticky top-0 px-6 py-4 flex items-center justify-between">
+      <header className="relative z-30 border-b border-white/[0.1] bg-[#080b13]/70 backdrop-blur-3xl sticky top-0 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -151,13 +161,13 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-600/20">
+            <div className="p-3 rounded-2xl bg-[#968F83] shadow-lg shadow-[#968F83]/20">
               <ShieldCheck size={22} className="text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-black tracking-tight">Visa Care (비자·행정 케어)</h1>
-                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[#968F83]/20 text-[#E8E5DF] border border-[#968F83]/30 flex items-center gap-1">
                   <Sparkles size={10} />
                   Auto Immigration Assistant
                 </span>
@@ -171,9 +181,9 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
 
         <button
           onClick={() => setIsEditModalOpen(true)}
-          className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-white/10 rounded-xl text-xs font-bold text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer shadow-md"
+          className="px-4 py-2 bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] hover:from-white/[0.12] rounded-xl text-xs font-bold text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer shadow-md"
         >
-          <Edit3 size={14} className="text-purple-400" />
+          <Edit3 size={14} className="text-[#E8E5DF]" />
           <span>내 비자 정보 수정</span>
         </button>
       </header>
@@ -194,7 +204,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             {/* Left Info */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-600/30 border border-purple-400/40 text-purple-200">
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#968F83]/30 border border-[#968F83]/40 text-[#E8E5DF]">
                   {visaProfile.visaName}
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">ARC: {visaProfile.arcNumber}</span>
@@ -203,10 +213,10 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
               <div>
                 <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
                   <span>비자 만료예정일:</span>
-                  <span className="text-purple-400 font-mono">{visaProfile.expiryDate}</span>
+                  <span className="text-[#E8E5DF] font-mono">{visaProfile.expiryDate}</span>
                 </h2>
                 <p className="text-xs md:text-sm text-neutral-300 mt-1.5 font-medium flex items-center gap-2">
-                  <Info size={14} className="text-purple-400 shrink-0" />
+                  <Info size={14} className="text-[#E8E5DF] shrink-0" />
                   <span>{dDayInfo.recommendedText}</span>
                 </p>
               </div>
@@ -216,10 +226,10 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             <div className="flex items-center gap-4 shrink-0">
               <div className={`px-6 py-4 rounded-2xl border text-center shadow-2xl transition-all ${
                 dDayInfo.status === 'CRITICAL' || dDayInfo.status === 'EXPIRED'
-                  ? 'bg-red-950/80 border-red-500/50 text-red-300 shadow-red-600/20'
+                  ? 'bg-red-950/80 border-[#A49A87]/50 text-[#A49A87] shadow-[#A49A87]/20'
                   : dDayInfo.status === 'WARNING'
-                  ? 'bg-amber-950/80 border-amber-500/50 text-amber-300 shadow-amber-600/20'
-                  : 'bg-purple-950/80 border-purple-500/50 text-purple-200 shadow-purple-600/20'
+                  ? 'bg-amber-950/80 border-[#A49A87]/50 text-[#A49A87] shadow-[#A49A87]/20'
+                  : 'bg-purple-950/80 border-[#968F83]/50 text-[#E8E5DF] shadow-[#968F83]/20'
               }`}>
                 <span className="text-xs font-extrabold uppercase tracking-wider block opacity-80">
                   {dDayInfo.statusLabel}
@@ -238,7 +248,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             onClick={() => setActiveTab('ai-coach')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
               activeTab === 'ai-coach'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30 font-black'
+                ? 'bg-gradient-to-r from-[#A5A58D] to-[] text-white shadow-lg shadow-[#A5A58D]/30 font-black'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -250,7 +260,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             onClick={() => setActiveTab('d-day')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'd-day'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 font-black'
+                ? 'bg-[#968F83] text-white shadow-lg shadow-[#968F83]/30 font-black'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -262,7 +272,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             onClick={() => setActiveTab('checklist')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'checklist'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 font-black'
+                ? 'bg-[#968F83] text-white shadow-lg shadow-[#968F83]/30 font-black'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -274,7 +284,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             onClick={() => setActiveTab('qna')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
               activeTab === 'qna'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 font-black'
+                ? 'bg-[#968F83] text-white shadow-lg shadow-[#968F83]/30 font-black'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -288,12 +298,12 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
             
             {/* Coach Request Card */}
-            <div className="p-6 md:p-8 rounded-3xl bg-neutral-900 border border-emerald-500/30 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-[#A5A58D]/10 to-transparent border border-[#A5A58D]/30 backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#A5A58D]/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex-1 space-y-4">
-                  <div className="flex items-center gap-2 text-emerald-400">
+                  <div className="flex items-center gap-2 text-[#A5A58D]">
                     <Bot size={24} />
                     <h2 className="text-xl font-black text-white">AI 신입생 적응 코치</h2>
                   </div>
@@ -313,7 +323,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                     <button
                       onClick={handleGenerateCoach}
                       disabled={isCoachLoading}
-                      className="w-full md:w-auto px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                      className="w-full md:w-auto px-6 py-4 bg-gradient-to-r from-[#A5A58D] to-[] hover:from-[#A5A58D] hover:to-[] text-white font-black rounded-2xl shadow-lg shadow-[#A5A58D]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isCoachLoading ? (
                         <>
@@ -328,7 +338,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                       )}
                     </button>
                   ) : (
-                    <div className="px-6 py-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-black text-sm flex items-center gap-2">
+                    <div className="px-6 py-3 rounded-2xl bg-[#A5A58D]/20 border border-[#A5A58D]/40 text-[#A5A58D] font-black text-sm flex items-center gap-2">
                       <CheckCircle2 size={18} />
                       <span>생성 완료됨</span>
                     </div>
@@ -351,18 +361,18 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                     
                     {/* Step 1: Pre-arrival */}
                     <div className="relative">
-                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-amber-500 rounded-full z-10" />
-                      <h4 className="text-sm font-black text-amber-400 mb-3">입학 전 (D-30 ~ D-7)</h4>
+                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-[#A49A87] rounded-full z-10" />
+                      <h4 className="text-sm font-black text-[#A49A87] mb-3">입학 전 (D-30 ~ D-7)</h4>
                       <div className="space-y-2">
-                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
-                          <input type="checkbox" checked={!!coachChecklist['t1']} onChange={() => toggleCoachCheck('t1')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.1)] cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t1']} onChange={() => toggleCoachCheck('t1')} className="mt-1 w-4 h-4 rounded text-[#A5A58D] bg-neutral-950 border-white/20" />
                           <div>
                             <span className={`text-sm font-bold block ${coachChecklist['t1'] ? 'text-neutral-500 line-through' : 'text-white'}`}>기숙사 입사 서류 준비 (결핵검사 진단서)</span>
                             <span className="text-xs text-neutral-400">입사 시 제출 필수. 영문 또는 국문 진단서 준비</span>
                           </div>
                         </label>
-                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
-                          <input type="checkbox" checked={!!coachChecklist['t2']} onChange={() => toggleCoachCheck('t2')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.1)] cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t2']} onChange={() => toggleCoachCheck('t2')} className="mt-1 w-4 h-4 rounded text-[#A5A58D] bg-neutral-950 border-white/20" />
                           <div>
                             <span className={`text-sm font-bold block ${coachChecklist['t2'] ? 'text-neutral-500 line-through' : 'text-white'}`}>2학기 수강신청 진행</span>
                             <span className="text-xs text-neutral-400">학사 포털에서 본인 전공 필수 과목 신청</span>
@@ -373,21 +383,21 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
 
                     {/* Step 2: Week 1 */}
                     <div className="relative">
-                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-emerald-500 rounded-full z-10" />
-                      <h4 className="text-sm font-black text-emerald-400 mb-3">입학 1주차 (D+1 ~ D+7)</h4>
+                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-[#A5A58D] rounded-full z-10" />
+                      <h4 className="text-sm font-black text-[#A5A58D] mb-3">입학 1주차 (D+1 ~ D+7)</h4>
                       <div className="space-y-2">
-                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 cursor-pointer group hover:bg-emerald-950/40 transition-colors">
-                          <input type="checkbox" checked={!!coachChecklist['t3']} onChange={() => toggleCoachCheck('t3')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-emerald-950/20 border border-[#A5A58D]/30 cursor-pointer group hover:bg-emerald-950/40 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t3']} onChange={() => toggleCoachCheck('t3')} className="mt-1 w-4 h-4 rounded text-[#A5A58D] bg-neutral-950 border-white/20" />
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className={`text-sm font-black ${coachChecklist['t3'] ? 'text-neutral-500 line-through' : 'text-emerald-300'}`}>외국인 등록증(ARC) 신청서 제출</span>
-                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">법적 필수</span>
+                              <span className={`text-sm font-black ${coachChecklist['t3'] ? 'text-neutral-500 line-through' : 'text-[#A5A58D]'}`}>외국인 등록증(ARC) 신청서 제출</span>
+                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-[#A49A87]/20 text-[#A49A87] border border-[#A49A87]/30">법적 필수</span>
                             </div>
                             <span className="text-xs text-neutral-400">출입국관리사무소 방문 예약 또는 대학 단체 접수 확인</span>
                           </div>
                         </label>
-                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
-                          <input type="checkbox" checked={!!coachChecklist['t4']} onChange={() => toggleCoachCheck('t4')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.1)] cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t4']} onChange={() => toggleCoachCheck('t4')} className="mt-1 w-4 h-4 rounded text-[#A5A58D] bg-neutral-950 border-white/20" />
                           <div>
                             <span className={`text-sm font-bold block ${coachChecklist['t4'] ? 'text-neutral-500 line-through' : 'text-white'}`}>한국 은행 계좌 개설</span>
                             <span className="text-xs text-neutral-400">교내 우리은행 지점 방문 (여권, 입학허가서 지참)</span>
@@ -398,18 +408,18 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
 
                     {/* Step 3: Week 2+ */}
                     <div className="relative">
-                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-blue-500 rounded-full z-10" />
-                      <h4 className="text-sm font-black text-blue-400 mb-3">입학 2주차 ~ 한 달 (D+14 ~ D+30)</h4>
+                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-[#A49A87] rounded-full z-10" />
+                      <h4 className="text-sm font-black text-[#A49A87] mb-3">입학 2주차 ~ 한 달 (D+14 ~ D+30)</h4>
                       <div className="space-y-2">
-                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
-                          <input type="checkbox" checked={!!coachChecklist['t5']} onChange={() => toggleCoachCheck('t5')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.1)] cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t5']} onChange={() => toggleCoachCheck('t5')} className="mt-1 w-4 h-4 rounded text-[#A5A58D] bg-neutral-950 border-white/20" />
                           <div>
                             <span className={`text-sm font-bold block ${coachChecklist['t5'] ? 'text-neutral-500 line-through' : 'text-white'}`}>모바일 학생증 발급 및 도서관 출입 등록</span>
                             <span className="text-xs text-neutral-400">종합정보시스템 사진 등록 후 앱 다운로드</span>
                           </div>
                         </label>
-                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
-                          <input type="checkbox" checked={!!coachChecklist['t6']} onChange={() => toggleCoachCheck('t6')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.1)] cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t6']} onChange={() => toggleCoachCheck('t6')} className="mt-1 w-4 h-4 rounded text-[#A5A58D] bg-neutral-950 border-white/20" />
                           <div>
                             <span className={`text-sm font-bold block ${coachChecklist['t6'] ? 'text-neutral-500 line-through' : 'text-white'}`}>유학생 의무 건강보험 고지서 확인</span>
                             <span className="text-xs text-neutral-400">국민건강보험 우편물 주소지(기숙사) 수령 확인</span>
@@ -429,8 +439,8 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
         {activeTab === 'd-day' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
             {/* Timeline Roadmap */}
-            <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4">
-              <h3 className="text-base font-black flex items-center gap-2 text-purple-300">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-4">
+              <h3 className="text-base font-black flex items-center gap-2 text-[#E8E5DF]">
                 <Calendar size={18} />
                 <span>체류기간 연장 권장 타임라인</span>
               </h3>
@@ -438,7 +448,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                 <div className="p-4 rounded-2xl bg-neutral-950 border border-white/10 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-blue-400">STAGE 1</span>
+                    <span className="font-extrabold text-[#A49A87]">STAGE 1</span>
                     <span className="text-neutral-400">만료 4개월 전</span>
                   </div>
                   <h4 className="text-sm font-bold text-white">연장 신청 가능 오픈</h4>
@@ -447,23 +457,23 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/30 space-y-2">
+                <div className="p-4 rounded-2xl bg-amber-950/40 border border-[#A49A87]/30 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-amber-400">STAGE 2</span>
+                    <span className="font-extrabold text-[#A49A87]">STAGE 2</span>
                     <span className="text-neutral-400">만료 45일 전 (★추천)</span>
                   </div>
-                  <h4 className="text-sm font-bold text-amber-200">서류 접수 권장 기간</h4>
+                  <h4 className="text-sm font-bold text-[#A49A87]">서류 접수 권장 기간</h4>
                   <p className="text-xs text-neutral-300 leading-relaxed">
                     출입국 방문예약 또는 온라인 서류 심사가 3~4주 소요되므로 이 시기에 접수하세요.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-red-950/40 border border-red-500/30 space-y-2">
+                <div className="p-4 rounded-2xl bg-red-950/40 border border-[#A49A87]/30 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-red-400">STAGE 3</span>
+                    <span className="font-extrabold text-[#A49A87]">STAGE 3</span>
                     <span className="text-neutral-400">만료 당일</span>
                   </div>
-                  <h4 className="text-sm font-bold text-red-200">체류기간 최종 마감</h4>
+                  <h4 className="text-sm font-bold text-[#A49A87]">체류기간 최종 마감</h4>
                   <p className="text-xs text-neutral-300 leading-relaxed">
                     당일까지 서류 미접수 시 불법체류로 처리되어 출국 조치됩니다.
                   </p>
@@ -477,25 +487,25 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                 href="https://www.hikorea.go.kr"
                 target="_blank"
                 rel="noreferrer"
-                className="p-5 rounded-2xl bg-gradient-to-r from-blue-900/60 to-indigo-900/60 border border-blue-500/40 hover:border-blue-400 transition-all flex items-center justify-between group cursor-pointer"
+                className="p-5 rounded-2xl bg-gradient-to-r from-[#A49A87]/60 to-[#968F83]/60 border border-[#A49A87]/40 hover:border-[#A49A87] transition-all flex items-center justify-between group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-blue-600 text-white">
+                  <div className="p-3 rounded-xl bg-[#A49A87] text-white">
                     <ExternalLink size={20} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">
+                    <h4 className="text-sm font-bold text-white group-hover:text-[#A49A87] transition-colors">
                       하이코리아 (HiKorea) 방문예약 접수
                     </h4>
                     <p className="text-xs text-neutral-400 mt-0.5">대한민국 출입국·외국인청 공식 온라인 전자민원</p>
                   </div>
                 </div>
-                <ChevronRight size={18} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={18} className="text-[#A49A87] group-hover:translate-x-1 transition-transform" />
               </a>
 
-              <div className="p-5 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-between">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-purple-600/30 border border-purple-400/40 text-purple-300">
+                  <div className="p-3 rounded-xl bg-[#968F83]/30 border border-[#968F83]/40 text-[#E8E5DF]">
                     <PhoneCall size={20} />
                   </div>
                   <div>
@@ -505,7 +515,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                 </div>
                 <a
                   href="tel:02-300-9999"
-                  className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-colors"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#968F83] hover:bg-[#968F83] text-white text-xs font-bold transition-colors"
                 >
                   전화 상담
                 </a>
@@ -525,8 +535,8 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                   onClick={() => setChecklistCategory(grp.category)}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
                     checklistCategory === grp.category
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                      : 'bg-neutral-900 text-neutral-400 hover:text-white border border-white/5'
+                      ? 'bg-[#968F83] text-white shadow-lg shadow-[#968F83]/30'
+                      : 'bg-gradient-to-br from-white/[0.05] to-transparent border border-white/[0.1] backdrop-blur-xl shadow-[inset_0_1px_1px_0_rgba(255,255,255,0.1)] text-neutral-400 hover:text-white hover:from-white/[0.1]'
                   }`}
                 >
                   {grp.title.split('(')[0]}
@@ -535,7 +545,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             </div>
 
             {/* Active Group Progress Bar & Notice */}
-            <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-4">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-white/10 pb-4">
                 <div>
                   <h3 className="text-base font-black text-white">{activeChecklistGroup.title}</h3>
@@ -543,20 +553,20 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-neutral-400">
-                    준비 완료: <strong className="text-purple-400">{completedItemsCount}</strong> / {activeItemsCount}
+                    준비 완료: <strong className="text-[#E8E5DF]">{completedItemsCount}</strong> / {activeItemsCount}
                   </span>
                   <div className="w-32 h-2.5 bg-neutral-800 rounded-full overflow-hidden border border-white/10">
                     <div
-                      className="h-full bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-300"
+                      className="h-full bg-[#968F83] transition-all duration-300"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
-                  <span className="text-xs font-extrabold text-purple-300">{progressPercent}%</span>
+                  <span className="text-xs font-extrabold text-[#E8E5DF]">{progressPercent}%</span>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-amber-950/40 border border-amber-500/30 text-amber-200 text-xs font-medium flex items-center gap-2">
-                <AlertTriangle size={16} className="text-amber-400 shrink-0" />
+              <div className="p-3.5 rounded-2xl bg-amber-950/40 border border-[#A49A87]/30 text-[#A49A87] text-xs font-medium flex items-center gap-2">
+                <AlertTriangle size={16} className="text-[#A49A87] shrink-0" />
                 <span>{activeChecklistGroup.notice}</span>
               </div>
 
@@ -570,13 +580,13 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                       onClick={() => toggleCheckItem(item.id)}
                       className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-4 ${
                         isChecked
-                          ? 'bg-purple-950/30 border-purple-500/50 text-neutral-300'
+                          ? 'bg-purple-950/30 border-[#968F83]/50 text-neutral-300'
                           : 'bg-neutral-950 border-white/10 hover:border-white/20 text-white'
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`p-1 rounded-lg mt-0.5 transition-colors ${
-                          isChecked ? 'bg-purple-600 text-white' : 'bg-neutral-800 border border-white/20 text-transparent'
+                          isChecked ? 'bg-[#968F83] text-white' : 'bg-neutral-800 border border-white/20 text-transparent'
                         }`}>
                           <CheckCircle2 size={16} />
                         </div>
@@ -586,7 +596,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                               {item.title}
                             </span>
                             {item.required ? (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#A49A87]/20 text-[#A49A87] border border-[#A49A87]/30">
                                 필수 서류
                               </span>
                             ) : (
@@ -603,7 +613,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                         <a
                           href={item.downloadUrl}
                           onClick={(e) => e.stopPropagation()}
-                          className="px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-bold transition-colors flex items-center gap-1 shrink-0"
+                          className="px-3 py-1.5 rounded-xl bg-[#968F83]/20 hover:bg-[#968F83]/30 text-[#E8E5DF] border border-[#968F83]/30 text-xs font-bold transition-colors flex items-center gap-1 shrink-0"
                         >
                           <Download size={14} />
                           <span>양식 다운로드</span>
@@ -623,9 +633,9 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             {/* HiKorea & ARC Step-by-Step Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* HiKorea Visit Reservation Guide */}
-              <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4">
+              <div className="p-6 rounded-3xl bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h3 className="text-base font-black text-blue-400 flex items-center gap-2">
+                  <h3 className="text-base font-black text-[#A49A87] flex items-center gap-2">
                     <Building size={18} />
                     <span>하이코리아(HiKorea) 방문예약 방법</span>
                   </h3>
@@ -635,7 +645,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                   {MOCK_HIKOREA_STEPS.map((st) => (
                     <div key={st.stepNumber} className="p-3.5 rounded-2xl bg-neutral-950 border border-white/10 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-black flex items-center justify-center">
+                        <span className="w-5 h-5 rounded-full bg-[#A49A87] text-white text-[10px] font-black flex items-center justify-center">
                           {st.stepNumber}
                         </span>
                         <h4 className="text-xs font-bold text-white">{st.title}</h4>
@@ -646,7 +656,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                           href={st.linkUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-400 hover:underline pl-7 mt-1"
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#A49A87] hover:underline pl-7 mt-1"
                         >
                           {st.linkLabel}
                         </a>
@@ -657,9 +667,9 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
               </div>
 
               {/* ARC Card Procedure Guide */}
-              <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4">
+              <div className="p-6 rounded-3xl bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h3 className="text-base font-black text-purple-400 flex items-center gap-2">
+                  <h3 className="text-base font-black text-[#E8E5DF] flex items-center gap-2">
                     <UserCheck size={18} />
                     <span>외국인등록증(ARC) 발급 절차</span>
                   </h3>
@@ -669,7 +679,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                   {MOCK_ARC_STEPS.map((st) => (
                     <div key={st.stepNumber} className="p-3.5 rounded-2xl bg-neutral-950 border border-white/10 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] font-black flex items-center justify-center">
+                        <span className="w-5 h-5 rounded-full bg-[#968F83] text-white text-[10px] font-black flex items-center justify-center">
                           {st.stepNumber}
                         </span>
                         <h4 className="text-xs font-bold text-white">{st.title}</h4>
@@ -682,10 +692,10 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             </div>
 
             {/* Searchable FAQ Accordion */}
-            <div className="p-6 rounded-3xl bg-neutral-900 border border-white/10 space-y-4">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] space-y-4">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-4">
                 <h3 className="text-base font-black text-white flex items-center gap-2">
-                  <HelpCircle size={18} className="text-purple-400" />
+                  <HelpCircle size={18} className="text-[#E8E5DF]" />
                   <span>출입국 & 학적 자주 묻는 질문 (FAQ)</span>
                 </h3>
 
@@ -697,7 +707,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                     value={faqSearchQuery}
                     onChange={(e) => setFaqSearchQuery(e.target.value)}
                     placeholder="Q&A 질문 검색 (예: 알바, 비자연장, 주소...)"
-                    className="w-full pl-9 pr-3 py-1.5 bg-neutral-950 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-9 pr-3 py-1.5 bg-neutral-950 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#968F83] transition-colors"
                   />
                 </div>
               </div>
@@ -712,14 +722,14 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                         className="w-full p-4 text-left flex items-center justify-between gap-3 hover:bg-white/5 transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="px-2.5 py-0.5 text-[10px] font-bold rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          <span className="px-2.5 py-0.5 text-[10px] font-bold rounded bg-[#968F83]/20 text-[#E8E5DF] border border-[#968F83]/30">
                             {faq.category}
                           </span>
                           <span className="text-xs font-bold text-white">Q. {faq.question}</span>
                         </div>
                         <ChevronDown
                           size={16}
-                          className={`text-neutral-400 transition-transform ${isExpanded ? 'rotate-180 text-purple-400' : ''}`}
+                          className={`text-neutral-400 transition-transform ${isExpanded ? 'rotate-180 text-[#E8E5DF]' : ''}`}
                         />
                       </button>
 
@@ -729,9 +739,9 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="border-t border-white/5 bg-neutral-900/60 p-4 text-xs text-neutral-300 leading-relaxed font-medium"
+                            className="border-t border-white/5 bg-white/[0.03] p-4 text-xs text-neutral-300 leading-relaxed font-medium"
                           >
-                            <strong className="text-purple-400 block mb-1">A. 안내 답변:</strong>
+                            <strong className="text-[#E8E5DF] block mb-1">A. 안내 답변:</strong>
                             {faq.answer}
                           </motion.div>
                         )}
@@ -753,7 +763,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md bg-neutral-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-white space-y-4"
+              className="w-full max-w-md bg-gradient-to-br from-white/[0.08] to-transparent border border-white/[0.15] backdrop-blur-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.6),inset_0_1px_2px_0_rgba(255,255,255,0.2)] rounded-3xl p-6 shadow-2xl text-white space-y-4"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <h3 className="text-base font-black">내 비자 체류 정보 설정</h3>
@@ -768,7 +778,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                   <select
                     value={editVisaType}
                     onChange={(e) => setEditVisaType(e.target.value as any)}
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#968F83]"
                   >
                     <option value="D-2">D-2 (유학 / Regular Academic)</option>
                     <option value="D-4">D-4 (어학연수 / Language Training)</option>
@@ -784,7 +794,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                     value={editArcNumber}
                     onChange={(e) => setEditArcNumber(e.target.value)}
                     placeholder="예: 040315-4******"
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#968F83]"
                   />
                 </div>
 
@@ -794,7 +804,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                     type="date"
                     value={editExpiryDate}
                     onChange={(e) => setEditExpiryDate(e.target.value)}
-                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#968F83]"
                   />
                 </div>
               </div>
@@ -808,7 +818,7 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
                 </button>
                 <button
                   onClick={handleSaveVisaProfile}
-                  className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-purple-600/30"
+                  className="flex-1 py-2.5 bg-[#968F83] hover:bg-[#968F83] text-white font-bold rounded-xl text-xs shadow-lg shadow-[#968F83]/30"
                 >
                   저장하기
                 </button>
