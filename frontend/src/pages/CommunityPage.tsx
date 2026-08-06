@@ -311,7 +311,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
 
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="px-5 py-2.5 bg-[#BADDFF] hover:from-[#BADDFF] hover:to-[#BADDFF] text-white font-black text-xs rounded-2xl shadow-lg shadow-[#BADDFF]/30 flex items-center gap-1.5 transition-all cursor-pointer"
+          className="px-5 py-2.5 bg-black hover:bg-neutral-900 border border-white/20 text-white font-black text-xs rounded-2xl shadow-lg flex items-center gap-1.5 transition-all cursor-pointer"
         >
           <Plus size={16} />
           <span>새 글 작성하기</span>
