@@ -145,7 +145,7 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
           {/* 1. PROFILE WIDGET (4 cols) */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="md:col-span-4 p-6 rounded-3xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between hover:bg-neutral-900/60 transition-colors"
+            className="md:col-span-4 p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between hover:bg-neutral-900/60 transition-colors"
           >
             <div className="flex items-start justify-between mb-6">
               <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
@@ -178,7 +178,7 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
           {/* 2. AI NOTICES WIDGET (8 cols) */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="md:col-span-8 p-6 md:p-8 rounded-3xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.3)] flex flex-col hover:bg-neutral-900/60 transition-colors relative overflow-hidden"
+            className="md:col-span-8 p-6 md:p-8 rounded-3xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.5)] flex flex-col hover:bg-neutral-900/60 transition-colors relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
             
@@ -228,7 +228,7 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
           {/* 3. INTERACTIVE CALENDAR GRID (7 cols) */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="md:col-span-7 p-6 rounded-3xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.3)] flex flex-col hover:bg-neutral-900/60 transition-colors"
+            className="md:col-span-7 p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.5)] flex flex-col hover:bg-neutral-900/60 transition-colors"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -297,7 +297,7 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
           {/* 4. CALENDAR DETAILS (5 cols) */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="md:col-span-5 p-6 rounded-3xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.3)] flex flex-col hover:bg-neutral-900/60 transition-colors"
+            className="md:col-span-5 p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.5)] flex flex-col hover:bg-neutral-900/60 transition-colors"
           >
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
               <h3 className="text-sm font-medium text-neutral-400">
@@ -333,7 +333,7 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
           {/* 5. SCHOLARSHIPS (6 cols) */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-            className="md:col-span-6 p-6 rounded-3xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.3)] flex flex-col hover:bg-neutral-900/60 transition-colors"
+            className="md:col-span-6 p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.5)] flex flex-col hover:bg-neutral-900/60 transition-colors"
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
@@ -365,7 +365,7 @@ export default function AcademicsPage({ onBack }: AcademicsPageProps) {
           {/* 6. COMPETITIONS (6 cols) */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-            className="md:col-span-6 p-6 rounded-3xl bg-white/[0.05] border border-white/[0.08] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_8px_32px_rgba(0,0,0,0.3)] flex flex-col hover:bg-neutral-900/60 transition-colors"
+            className="md:col-span-6 p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_32px_rgba(0,0,0,0.5)] flex flex-col hover:bg-neutral-900/60 transition-colors"
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
