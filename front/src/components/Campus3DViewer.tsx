@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { RotateCw, ZoomIn, ZoomOut, RefreshCw, Sparkles, Building2, Eye, Map } from 'lucide-react';
+import { RotateCw, ZoomIn, ZoomOut, RefreshCw, Sparkles, Building2, Eye, Map, MousePointerClick } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
 interface Campus3DViewerProps {
@@ -9,6 +9,15 @@ interface Campus3DViewerProps {
   selectedBuilding: Building3D;
   onSelectBuilding: (building: Building3D) => void;
   onOpenFloorMap?: (building: Building3D) => void;
+}
+
+interface BuildingPinScreenPos {
+  id: string;
+  code: string;
+  name: string;
+  x: number;
+  y: number;
+  building: Building3D;
 }
 
 export default function Campus3DViewer({
@@ -22,6 +31,7 @@ export default function Campus3DViewer({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
 
   const [autoRotate, setAutoRotate] = useState(true);
+  const [pinPositions, setPinPositions] = useState<BuildingPinScreenPos[]>([]);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -32,7 +42,7 @@ export default function Campus3DViewer({
 
     // 1. Three.js Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x18181b); // Dark slate background matching reference photo
+    scene.background = new THREE.Color(0x18181b); // Dark slate background
     scene.fog = new THREE.FogExp2(0x18181b, 0.008);
 
     // 2. Camera Setup
@@ -96,7 +106,7 @@ export default function Campus3DViewer({
     baseGround.receiveShadow = true;
     scene.add(baseGround);
 
-    // Front Playground / Yard (Matching Photo)
+    // Front Playground / Yard
     const playground = new THREE.Mesh(new THREE.BoxGeometry(28, 0.2, 18), yardMat);
     playground.position.set(6, 0.1, 12);
     playground.receiveShadow = true;
@@ -107,14 +117,14 @@ export default function Campus3DViewer({
     trackBorder.receiveShadow = true;
     scene.add(trackBorder);
 
-    // Front Entrance Brick Wall (Matching Photo)
+    // Front Entrance Brick Wall
     const frontWall = new THREE.Mesh(new THREE.BoxGeometry(32, 2.5, 1), wallBrickMat);
     frontWall.position.set(6, 1.25, 23);
     frontWall.castShadow = true;
     scene.add(frontWall);
 
     // 8. Procedural 3D Buildings
-    const buildingMeshes: { mesh: THREE.Group; buildingData: Building3D }[] = [];
+    const buildingMeshes: { mesh: THREE.Group; buildingData: Building3D; height: number }[] = [];
 
     const addWindowGrid = (parent: THREE.Group, width: number, height: number, depth: number) => {
       const windowGeo = new THREE.BoxGeometry(0.8, 0.6, 0.1);
@@ -148,7 +158,7 @@ export default function Campus3DViewer({
     addWindowGrid(groupA, 14, 10, 8);
 
     scene.add(groupA);
-    buildingMeshes.push({ mesh: groupA, buildingData: aData });
+    buildingMeshes.push({ mesh: groupA, buildingData: aData, height: 11 });
 
     // --- B동: 공학관 ---
     const bData = buildings.find((b) => b.id === 'bld-2') || buildings[1];
@@ -167,7 +177,7 @@ export default function Campus3DViewer({
     addWindowGrid(groupB, 12, 12, 10);
 
     scene.add(groupB);
-    buildingMeshes.push({ mesh: groupB, buildingData: bData });
+    buildingMeshes.push({ mesh: groupB, buildingData: bData, height: 13 });
 
     // --- C동: 예체능관 ---
     const cData = buildings.find((b) => b.id === 'bld-3') || buildings[2];
@@ -190,7 +200,7 @@ export default function Campus3DViewer({
     groupC.add(domeMesh);
 
     scene.add(groupC);
-    buildingMeshes.push({ mesh: groupC, buildingData: cData });
+    buildingMeshes.push({ mesh: groupC, buildingData: cData, height: 10 });
 
     // --- D동: 사회교육관 ---
     const dData = buildings.find((b) => b.id === 'bld-4') || buildings[3];
@@ -209,7 +219,7 @@ export default function Campus3DViewer({
     addWindowGrid(groupD, 14, 16, 8);
 
     scene.add(groupD);
-    buildingMeshes.push({ mesh: groupD, buildingData: dData });
+    buildingMeshes.push({ mesh: groupD, buildingData: dData, height: 17 });
 
     // 9. Trees Line
     const addTree = (x: number, z: number) => {
@@ -279,12 +289,41 @@ export default function Campus3DViewer({
     renderer.domElement.addEventListener('click', handleCanvasClick);
     renderer.domElement.addEventListener('mousemove', handleCanvasMouseMove);
 
-    // 11. Animation Loop
+    // 11. Animation Loop & Screen Pin Projection
+    const tempVec = new THREE.Vector3();
     let animationFrameId: number;
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
+
+      // Project 3D building positions to 2D HTML Pin coordinates
+      if (mountRef.current) {
+        const w = mountRef.current.clientWidth;
+        const h = mountRef.current.clientHeight;
+
+        const updatedPositions: BuildingPinScreenPos[] = buildingMeshes.map((item) => {
+          tempVec.setFromMatrixPosition(item.mesh.matrixWorld);
+          tempVec.y += item.height; // Position pin on roof top
+
+          tempVec.project(camera);
+
+          const x = (tempVec.x * 0.5 + 0.5) * w;
+          const y = (-(tempVec.y * 0.5) + 0.5) * h;
+
+          return {
+            id: item.buildingData.id,
+            code: item.buildingData.code,
+            name: item.buildingData.name.split('(')[0].trim(),
+            x,
+            y,
+            building: item.buildingData,
+          };
+        });
+
+        setPinPositions(updatedPositions);
+      }
     };
 
     animate();
@@ -329,11 +368,11 @@ export default function Campus3DViewer({
 
   return (
     <div className="relative w-full h-full flex flex-col justify-between overflow-hidden bg-neutral-950 select-none">
-      {/* Top 3D Control Bar */}
+      {/* Top 3D Control & Guidance Header Bar */}
       <div className="p-4 flex items-center justify-between z-20 pointer-events-auto">
-        <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-neutral-900/90 border border-white/10 text-xs font-bold backdrop-blur-md">
+        <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-neutral-900/90 border border-blue-500/30 text-xs font-bold backdrop-blur-md shadow-lg shadow-blue-500/10">
           <Sparkles size={16} className="text-blue-400" />
-          <span>명지전문대학 360° 3D 입체 캠퍼스 지형 (건물 선택 가능)</span>
+          <span className="text-blue-300">💡 3D 건물을 클릭하면 층별 상세 지도 및 강의실 안내가 표시됩니다!</span>
         </div>
 
         {/* Camera Tools */}
@@ -376,14 +415,52 @@ export default function Campus3DViewer({
       </div>
 
       {/* WebGL 3D Canvas Container */}
-      <div ref={mountRef} className="w-full flex-1 relative z-10" />
+      <div ref={mountRef} className="w-full flex-1 relative z-10">
+        {/* Floating 3D Building Hotspot Pin Badges Overlaid Directly on Top of Buildings */}
+        {pinPositions.map((pin) => {
+          const isSelected = selectedBuilding.id === pin.id;
+          return (
+            <div
+              key={pin.id}
+              onClick={() => {
+                onSelectBuilding(pin.building);
+                if (onOpenFloorMap) onOpenFloorMap(pin.building);
+              }}
+              style={{
+                left: `${pin.x}px`,
+                top: `${pin.y}px`,
+              }}
+              className="absolute -translate-x-1/2 -translate-y-full z-30 cursor-pointer group"
+            >
+              <div
+                className={`px-3 py-1.5 rounded-2xl border text-xs font-black shadow-2xl backdrop-blur-md flex items-center gap-1.5 transition-all ${
+                  isSelected
+                    ? 'bg-blue-600 text-white border-blue-300 ring-4 ring-blue-500/40 scale-110'
+                    : 'bg-black/90 text-neutral-200 border-white/30 group-hover:border-blue-400 group-hover:scale-105'
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                <span className="font-extrabold text-blue-400 group-hover:text-white">{pin.code}:</span>
+                <span className="font-extrabold">{pin.name}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-300 font-bold border border-blue-500/40 ml-1 flex items-center gap-1">
+                  <MousePointerClick size={10} />
+                  클릭하여 상세보기
+                </span>
+              </div>
+
+              {/* Pin Pointer Arrow Indicator */}
+              <div className="w-2.5 h-2.5 bg-neutral-900 border-r border-b border-white/30 rotate-45 mx-auto -mt-1 shadow-md" />
+            </div>
+          );
+        })}
+      </div>
 
       {/* Building Hotspots Quick Selector & Info Bar */}
       <div className="p-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs bg-neutral-950/90 border-t border-white/10 backdrop-blur-md z-20">
         <div className="flex items-center gap-2">
           <Eye size={16} className="text-blue-400" />
           <span>
-            건물을 3D 뷰어에서 직접 클릭하거나 버튼을 누르면 <strong>건물 상세 지적도</strong>가 표시됩니다.
+            3D 핀 또는 건물을 클릭하면 <strong>{selectedBuilding.name} 층별 상세 지도</strong>가 팝업됩니다.
           </span>
         </div>
 
