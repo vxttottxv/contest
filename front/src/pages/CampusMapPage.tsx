@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
 import {
   Map as MapIcon,
   Building2,
@@ -14,7 +13,6 @@ import {
   Info,
   Phone,
   Layers,
-  Sparkles,
 } from 'lucide-react';
 import {
   MOCK_BUILDINGS,
@@ -23,6 +21,8 @@ import {
   MOCK_FACILITY_GUIDES,
 } from '../services/campusMapApi';
 import type { Building3D } from '../services/campusMapApi';
+
+import Campus3DViewer from '../components/Campus3DViewer';
 
 interface CampusMapPageProps {
   onBack: () => void;
@@ -74,7 +74,7 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
               </span>
             </div>
             <p className="text-xs text-neutral-400 mt-0.5">
-              명지전문대학 3D 지형 지도, 편의시설 및 기숙사 종합 안내
+              명지전문대학 360° 3D 입체 모형 지도, 편의시설 및 기숙사 종합 안내
             </p>
           </div>
         </div>
@@ -90,7 +90,7 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
             }`}
           >
             <Layers size={16} />
-            <span>3D 지형 & 편의시설</span>
+            <span>360° 3D 지형 & 편의시설</span>
           </button>
           <button
             onClick={() => setActiveTab('dormitory')}
@@ -122,74 +122,17 @@ export default function CampusMapPage({ onBack }: CampusMapPageProps) {
         {/* TAB 1: 3D MAP & FACILITIES */}
         {activeTab === '3d-map' && (
           <div className="w-full h-full flex flex-col md:flex-row overflow-hidden">
-            {/* Left 3D Map Canvas Simulator */}
-            <div className="flex-1 relative bg-gradient-to-b from-neutral-950 via-neutral-900 to-black p-6 flex flex-col justify-between overflow-hidden border-r border-white/10">
-              {/* Map Controls */}
-              <div className="flex items-center justify-between z-10">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-white/10 text-xs font-semibold backdrop-blur-md">
-                  <Sparkles size={14} className="text-blue-400" />
-                  <span>3D Interactive Campus Canvas</span>
-                </div>
-                <div className="text-xs text-neutral-400">
-                  건물 마커를 클릭하면 입구 및 강의실 정보를 보실 수 있습니다.
-                </div>
-              </div>
-
-              {/* Visual Interactive Map Area */}
-              <div className="relative w-full flex-1 my-4 rounded-3xl border border-white/10 bg-neutral-900/60 overflow-hidden shadow-2xl flex items-center justify-center">
-                {/* Background Map Grid & Isometric Campus Art */}
-                <div
-                  className="absolute inset-0 opacity-20 pointer-events-none"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)`,
-                    backgroundSize: '24px 24px',
-                  }}
-                />
-
-                {/* Campus Contour Lines SVG Decor */}
-                <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
-                  <path d="M 50 100 Q 200 50 400 200 T 800 300" fill="none" stroke="#2563eb" strokeWidth="2" strokeDasharray="6 6" />
-                  <path d="M 100 400 Q 300 250 600 450" fill="none" stroke="#06b6d4" strokeWidth="2" strokeDasharray="4 4" />
-                </svg>
-
-                {/* 4 Interactive Building Markers */}
-                {MOCK_BUILDINGS.map((bld) => {
-                  const isSelected = selectedBuilding.id === bld.id;
-                  return (
-                    <motion.div
-                      key={bld.id}
-                      onClick={() => setSelectedBuilding(bld)}
-                      style={{
-                        left: `${bld.coordinates.x}%`,
-                        top: `${bld.coordinates.y}%`,
-                      }}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 group"
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <div
-                        className={`px-4 py-2.5 rounded-2xl border transition-all backdrop-blur-md flex items-center gap-2 shadow-2xl ${
-                          isSelected
-                            ? 'bg-blue-600 text-white border-blue-400 shadow-blue-500/40 ring-4 ring-blue-500/20'
-                            : 'bg-neutral-900/90 text-neutral-200 border-white/20 hover:border-blue-400 hover:text-white'
-                        }`}
-                      >
-                        <Building2 size={18} className={isSelected ? 'text-white' : 'text-blue-400'} />
-                        <div>
-                          <p className="text-xs font-black leading-none">{bld.code}</p>
-                          <p className="text-[10px] font-semibold text-neutral-300 mt-1 whitespace-nowrap">
-                            {bld.name.split('(')[0]}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+            {/* Left 360 Interactive 3D Model Viewer */}
+            <div className="flex-1 relative flex flex-col overflow-hidden border-r border-white/10">
+              <Campus3DViewer
+                buildings={MOCK_BUILDINGS}
+                selectedBuilding={selectedBuilding}
+                onSelectBuilding={(bld) => setSelectedBuilding(bld)}
+              />
 
               {/* Bottom Category Filter Bar */}
-              <div className="flex items-center justify-between gap-2 p-2 rounded-2xl bg-neutral-950 border border-white/10 z-10 overflow-x-auto">
-                <span className="text-xs font-bold text-neutral-400 px-3 flex items-center gap-1 shrink-0">
+              <div className="flex items-center justify-between gap-2 p-3 bg-neutral-950 border-t border-white/10 z-10 overflow-x-auto">
+                <span className="text-xs font-bold text-neutral-400 px-2 flex items-center gap-1 shrink-0">
                   <MapPin size={14} className="text-blue-400" />
                   편의시설 분류:
                 </span>
