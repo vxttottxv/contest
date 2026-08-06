@@ -1,14 +1,31 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Mail, Lock, User, Globe, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Globe, CheckCircle2, Eye, EyeOff, AlertCircle, Sparkles } from 'lucide-react';
+
+export interface User {
+  name: string;
+  studentId: string;
+  nationality: string;
+  email: string;
+}
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup';
+  onLoginSuccess: (user: User) => void;
 }
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+const STORAGE_USERS_KEY = 'mjc_registered_users';
+const DEMO_USER: User & { password: string } = {
+  email: 'student@mjc.ac.kr',
+  password: 'password123',
+  name: '김명지 (Alex)',
+  studentId: '20260001',
+  nationality: 'South Korea',
+};
+
+export default function AuthModal({ isOpen, onClose, initialMode = 'login', onLoginSuccess }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
 
   // initialMode prop이 변경될 때 내부 mode 동기화
@@ -17,6 +34,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   }, [initialMode]);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Form states
   const [email, setEmail] = useState('');
@@ -25,16 +43,131 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const [studentId, setStudentId] = useState('');
   const [nationality, setNationality] = useState('South Korea');
 
+  // Sync mode with initialMode prop when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setErrorMessage('');
+      setIsSubmitted(false);
+      setEmail('');
+      setPassword('');
+      setName('');
+      setStudentId('');
+    }
+  }, [isOpen, initialMode]);
+
   if (!isOpen) return null;
+
+  // Helper to get registered users from localStorage
+  const getRegisteredUsers = (): (User & { password: string })[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_USERS_KEY);
+      if (!stored) {
+        return [DEMO_USER];
+      }
+      const users = JSON.parse(stored);
+      // Ensure DEMO_USER is included if empty
+      if (!users.some((u: any) => u.email === DEMO_USER.email)) {
+        return [DEMO_USER, ...users];
+      }
+      return users;
+    } catch {
+      return [DEMO_USER];
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // 백엔드 연동 전 프론트엔드 모의 동작
+    setErrorMessage('');
+
+    const users = getRegisteredUsers();
+
+    if (mode === 'login') {
+      const foundUser = users.find(
+        (u) => u.email.trim().toLowerCase() === email.trim().toLowerCase()
+      );
+
+      if (!foundUser) {
+        setErrorMessage('가입되지 않은 이메일 주소입니다.');
+        return;
+      }
+
+      if (foundUser.password !== password) {
+        setErrorMessage('비밀번호가 일치하지 않습니다.');
+        return;
+      }
+
+      const loggedInUser: User = {
+        name: foundUser.name,
+        studentId: foundUser.studentId,
+        nationality: foundUser.nationality,
+        email: foundUser.email,
+      };
+
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onLoginSuccess(loggedInUser);
+        onClose();
+      }, 1200);
+    } else {
+      // Signup flow
+      const existingUser = users.find(
+        (u) => u.email.trim().toLowerCase() === email.trim().toLowerCase()
+      );
+
+      if (existingUser) {
+        setErrorMessage('이미가입된 이메일 주소입니다.');
+        return;
+      }
+
+      const newUser = {
+        email: email.trim(),
+        password,
+        name: name.trim(),
+        studentId: studentId.trim(),
+        nationality,
+      };
+
+      const updatedUsers = [...users, newUser];
+      try {
+        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(updatedUsers));
+      } catch (err) {
+        console.error('Failed to save user to localStorage', err);
+      }
+
+      const loggedInUser: User = {
+        name: newUser.name,
+        studentId: newUser.studentId,
+        nationality: newUser.nationality,
+        email: newUser.email,
+      };
+
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onLoginSuccess(loggedInUser);
+        onClose();
+      }, 1200);
+    }
+  };
+
+  const handleDemoLogin = () => {
+    setEmail(DEMO_USER.email);
+    setPassword(DEMO_USER.password);
+    setErrorMessage('');
+
     setIsSubmitted(true);
     setTimeout(() => {
       setIsSubmitted(false);
+      onLoginSuccess({
+        name: DEMO_USER.name,
+        studentId: DEMO_USER.studentId,
+        nationality: DEMO_USER.nationality,
+        email: DEMO_USER.email,
+      });
       onClose();
-    }, 1500);
+    }, 1200);
   };
 
   return (
@@ -52,7 +185,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         {/* Close / Back button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+          className="absolute top-6 right-6 p-2 text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
         >
           ✕
         </button>
@@ -70,13 +203,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             <p className="text-sm text-neutral-400">
               {mode === 'login'
                 ? '환영합니다. 글로벌 캠퍼스로 이동합니다.'
-                : '회원가입이 성공적으로 완료되었습니다.'}
+                : '회원가입이 성공적으로 완료되어 자동 로그인되었습니다.'}
             </p>
           </motion.div>
         ) : (
           <>
             {/* Header */}
-            <div className="mb-8 text-center">
+            <div className="mb-6 text-center">
               <span className="text-xs font-bold tracking-[0.2em] text-neutral-500 uppercase">
                 Myongji College International Hub
               </span>
@@ -94,8 +227,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             <div className="flex bg-neutral-800/60 p-1 rounded-2xl mb-6 border border-white/5">
               <button
                 type="button"
-                onClick={() => setMode('login')}
-                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+                onClick={() => {
+                  setMode('login');
+                  setErrorMessage('');
+                }}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   mode === 'login'
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'text-neutral-400 hover:text-white'
@@ -105,8 +241,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               </button>
               <button
                 type="button"
-                onClick={() => setMode('signup')}
-                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+                onClick={() => {
+                  setMode('signup');
+                  setErrorMessage('');
+                }}
+                className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   mode === 'signup'
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'text-neutral-400 hover:text-white'
@@ -116,6 +255,18 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               </button>
             </div>
 
+            {/* Error banner */}
+            {errorMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-2 text-xs text-red-400"
+              >
+                <AlertCircle size={16} className="shrink-0" />
+                <span>{errorMessage}</span>
+              </motion.div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === 'signup' && (
@@ -124,7 +275,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-300">이름 (Full Name)</label>
                     <div className="relative">
-                      <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
+                      <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
                       <input
                         type="text"
                         required
@@ -207,7 +358,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -217,14 +368,29 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98]"
+                className="w-full py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer"
               >
                 {mode === 'login' ? '로그인하기' : '회원가입하기'}
               </button>
             </form>
+
+            {/* Quick Demo Login Option */}
+            {mode === 'login' && (
+              <div className="mt-4 pt-4 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={handleDemoLogin}
+                  className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold text-neutral-300 hover:text-white flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Sparkles size={14} className="text-cyan-400" />
+                  <span>데모 계정으로 즉시 로그인</span>
+                </button>
+              </div>
+            )}
           </>
         )}
       </motion.div>
     </div>
   );
 }
+

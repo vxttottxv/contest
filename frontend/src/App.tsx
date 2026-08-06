@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee } from 'lucide-react';
-import AuthModal from './components/AuthModal';
+import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee, UserCheck, LogOut } from 'lucide-react';
+import AuthModal, { type User } from './components/AuthModal';
 
 const CATEGORIES = [
   {
@@ -172,29 +172,89 @@ function CircularMenu() {
 export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  // Restore active logged-in user session on load
+  useEffect(() => {
+    try {
+      const storedActiveUser = localStorage.getItem('mjc_active_user');
+      if (storedActiveUser) {
+        setCurrentUser(JSON.parse(storedActiveUser));
+      }
+    } catch {
+      // Ignore JSON parse errors
+    }
+  }, []);
 
   const openAuth = (mode: 'login' | 'signup') => {
     setAuthMode(mode);
     setAuthModalOpen(true);
   };
 
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    try {
+      localStorage.setItem('mjc_active_user', JSON.stringify(user));
+    } catch (err) {
+      console.error('Failed to save active user session', err);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('mjc_active_user');
+    } catch (err) {
+      console.error('Failed to clear active user session', err);
+    }
+  };
+
   return (
     <div className="w-screen h-screen flex flex-col items-center pt-16 md:pt-24 relative overflow-hidden bg-[#0a0a0a]">
        
-       {/* Top Auth Navigation */}
-       <div className="absolute top-6 left-8 flex gap-3 z-50">
-         <button 
-           onClick={() => openAuth('login')}
-           className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
-         >
-           로그인
-         </button>
-         <button 
-           onClick={() => openAuth('signup')}
-           className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
-         >
-           회원가입
-         </button>
+       {/* Top Auth Navigation / User Profile Header */}
+       <div className="absolute top-6 left-8 flex items-center gap-3 z-50">
+         {currentUser ? (
+           <div className="flex items-center gap-3 bg-neutral-900/80 border border-white/15 backdrop-blur-md pl-4 pr-2 py-1.5 rounded-full shadow-lg">
+             <div className="flex items-center gap-2">
+               <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white">
+                 <UserCheck size={16} />
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs font-bold text-white leading-tight">
+                   {currentUser.name}
+                 </span>
+                 <span className="text-[10px] text-neutral-400 font-mono leading-tight">
+                   {currentUser.studentId}
+                 </span>
+               </div>
+             </div>
+
+             <button
+               onClick={handleLogout}
+               title="로그아웃"
+               className="ml-2 p-2 text-neutral-400 hover:text-red-400 hover:bg-white/10 rounded-full transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
+             >
+               <LogOut size={14} />
+               <span className="hidden sm:inline">로그아웃</span>
+             </button>
+           </div>
+         ) : (
+           <>
+             <button 
+               onClick={() => openAuth('login')}
+               className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
+             >
+               로그인
+             </button>
+             <button 
+               onClick={() => openAuth('signup')}
+               className="px-5 py-2 text-sm font-bold text-white bg-transparent border border-white/20 rounded-full hover:bg-white/10 transition-colors tracking-wide cursor-pointer"
+             >
+               회원가입
+             </button>
+           </>
+         )}
        </div>
 
        <div className="text-center z-10 shrink-0 mt-8 md:mt-0">
@@ -212,7 +272,9 @@ export default function App() {
          isOpen={authModalOpen} 
          onClose={() => setAuthModalOpen(false)} 
          initialMode={authMode} 
+         onLoginSuccess={handleLoginSuccess}
        />
     </div>
   );
 }
+
