@@ -4,6 +4,7 @@ import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee, LogOut, UserChe
 import AuthModal from './components/AuthModal';
 import type { UserSession } from './components/AuthModal';
 import AcademicsPage from './pages/AcademicsPage';
+import CampusMapPage from './pages/CampusMapPage';
 
 const CATEGORIES = [
   {
@@ -176,7 +177,7 @@ function CircularMenu({ onSelectCategory }: CircularMenuProps) {
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'academics'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'academics' | 'campus-map'>('home');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
@@ -206,11 +207,17 @@ export default function App() {
   const handleCategorySelect = (id: string) => {
     if (id === 'academics') {
       setCurrentPage('academics');
+    } else if (id === 'campus-map') {
+      setCurrentPage('campus-map');
     }
   };
 
   if (currentPage === 'academics') {
     return <AcademicsPage onBack={() => setCurrentPage('home')} />;
+  }
+
+  if (currentPage === 'campus-map') {
+    return <CampusMapPage onBack={() => setCurrentPage('home')} />;
   }
 
   return (
