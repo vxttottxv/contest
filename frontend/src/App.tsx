@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee, LogOut, UserCheck } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import type { UserSession } from './components/AuthModal';
+import AcademicsPage from './pages/AcademicsPage';
 
 const CATEGORIES = [
   {
@@ -47,7 +48,11 @@ const CATEGORIES = [
   },
 ];
 
-function CircularMenu() {
+interface CircularMenuProps {
+  onSelectCategory: (id: string) => void;
+}
+
+function CircularMenu({ onSelectCategory }: CircularMenuProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -94,10 +99,10 @@ function CircularMenu() {
         const y = Math.sin(angleRad) * radius;
 
         return (
-          <motion.a
-            href={`#${cat.id}`}
+          <motion.div
             key={cat.id}
-            className="absolute top-[90%] left-1/2 rounded-3xl overflow-hidden cursor-pointer bg-neutral-900 border border-white/10 shadow-2xl origin-center"
+            onClick={() => onSelectCategory(cat.id)}
+            className="absolute top-[90%] left-1/2 rounded-3xl overflow-hidden cursor-pointer bg-neutral-900 border border-white/10 shadow-2xl origin-center group"
             style={{
               width: 160,
               height: 200,
@@ -120,7 +125,7 @@ function CircularMenu() {
           >
             {/* Background Image */}
             <div 
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-1000"
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
               style={{ 
                 backgroundImage: `url(${cat.image})`,
                 transform: isCenter ? 'scale(1.1)' : 'scale(1)'
@@ -163,7 +168,7 @@ function CircularMenu() {
                 )}
               </AnimatePresence>
             </div>
-          </motion.a>
+          </motion.div>
         );
       })}
     </div>
@@ -171,6 +176,7 @@ function CircularMenu() {
 }
 
 export default function App() {
+  const [currentPage, setCurrentPage] = useState<'home' | 'academics'>('home');
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
@@ -196,6 +202,16 @@ export default function App() {
     localStorage.removeItem('mjc_current_user');
     setCurrentUser(null);
   };
+
+  const handleCategorySelect = (id: string) => {
+    if (id === 'academics') {
+      setCurrentPage('academics');
+    }
+  };
+
+  if (currentPage === 'academics') {
+    return <AcademicsPage onBack={() => setCurrentPage('home')} />;
+  }
 
   return (
     <div className="w-screen h-screen flex flex-col items-center pt-16 md:pt-24 relative overflow-hidden bg-[#0a0a0a]">
@@ -240,11 +256,11 @@ export default function App() {
        <div className="text-center z-10 shrink-0 mt-8 md:mt-0">
          <p className="text-neutral-500 text-sm tracking-[0.2em] uppercase mb-4 font-bold">For International Students</p>
          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">MYONGJI COLLEGE</h2>
-         <p className="text-neutral-500 text-xs tracking-[0.2em] uppercase mt-4 font-bold">"Hover over the category"</p>
+         <p className="text-neutral-500 text-xs tracking-[0.2em] uppercase mt-4 font-bold">"Click category to enter"</p>
        </div>
        
        <div className="w-full flex justify-center mt-12 md:mt-16 shrink-0">
-          <CircularMenu />
+          <CircularMenu onSelectCategory={handleCategorySelect} />
        </div>
 
        {/* Auth Modal */}
