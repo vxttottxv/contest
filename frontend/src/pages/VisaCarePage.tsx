@@ -18,9 +18,10 @@ import {
   UserCheck,
   Sparkles,
   Info,
-  ChevronRight,
   PhoneCall,
   X,
+  Bot,
+  Loader2,
 } from 'lucide-react';
 import {
   MOCK_DEFAULT_VISA,
@@ -37,7 +38,24 @@ interface VisaCarePageProps {
 }
 
 export default function VisaCarePage({ onBack }: VisaCarePageProps) {
-  const [activeTab, setActiveTab] = useState<'d-day' | 'checklist' | 'qna'>('d-day');
+  const [activeTab, setActiveTab] = useState<'ai-coach' | 'd-day' | 'checklist' | 'qna'>('ai-coach');
+
+  // AI Coach state
+  const [isCoachLoading, setIsCoachLoading] = useState(false);
+  const [coachGenerated, setCoachGenerated] = useState(false);
+  const [coachChecklist, setCoachChecklist] = useState<Record<string, boolean>>({});
+
+  const handleGenerateCoach = () => {
+    setIsCoachLoading(true);
+    setTimeout(() => {
+      setIsCoachLoading(false);
+      setCoachGenerated(true);
+    }, 1500);
+  };
+  
+  const toggleCoachCheck = (id: string) => {
+    setCoachChecklist(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   // Visa Profile State
   const [visaProfile, setVisaProfile] = useState<VisaProfile>(() => {
@@ -214,7 +232,19 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
         </div>
 
         {/* DOMAIN NAVIGATION TABS */}
-        <div className="flex items-center gap-2 border-b border-white/10 pb-1">
+        <div className="flex items-center gap-2 border-b border-white/10 pb-1 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('ai-coach')}
+            className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'ai-coach'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30 font-black'
+                : 'text-neutral-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Bot size={16} />
+            <span>🤖 AI 적응 코치</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('d-day')}
             className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
@@ -251,6 +281,148 @@ export default function VisaCarePage({ onBack }: VisaCarePageProps) {
             <span>출입국 & ARC 발급 Q&A</span>
           </button>
         </div>
+
+        {/* TAB 0: AI ADAPTATION COACH */}
+        {activeTab === 'ai-coach' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            
+            {/* Coach Request Card */}
+            <div className="p-6 md:p-8 rounded-3xl bg-neutral-900 border border-emerald-500/30 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-2 text-emerald-400">
+                    <Bot size={24} />
+                    <h2 className="text-xl font-black text-white">AI 신입생 적응 코치</h2>
+                  </div>
+                  <p className="text-sm text-neutral-400">
+                    회원님의 현재 상황(입학 시기, 비자, 거주지)을 분석하여 시기별 맞춤 행정/학사 체크리스트를 생성해 드립니다.
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-950 border border-white/10 text-neutral-300">🎓 9월 입학 (가을학기)</span>
+                    <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-950 border border-white/10 text-neutral-300">🛂 D-2 유학 비자</span>
+                    <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-neutral-950 border border-white/10 text-neutral-300">🏢 교내 기숙사 거주</span>
+                  </div>
+                </div>
+
+                <div className="shrink-0 w-full md:w-auto">
+                  {!coachGenerated ? (
+                    <button
+                      onClick={handleGenerateCoach}
+                      disabled={isCoachLoading}
+                      className="w-full md:w-auto px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      {isCoachLoading ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          <span>AI 맞춤 타임라인 생성 중...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={18} />
+                          <span>맞춤형 체크리스트 생성하기</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="px-6 py-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-black text-sm flex items-center gap-2">
+                      <CheckCircle2 size={18} />
+                      <span>생성 완료됨</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Generated Timeline Checklist */}
+            <AnimatePresence>
+              {coachGenerated && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="space-y-4"
+                >
+                  <h3 className="text-base font-black text-white px-2">나만의 필수 행정 타임라인 🗓️</h3>
+                  
+                  <div className="relative pl-6 md:pl-8 space-y-6 before:absolute before:inset-y-0 before:left-[11px] md:before:left-[15px] before:w-[2px] before:bg-white/10">
+                    
+                    {/* Step 1: Pre-arrival */}
+                    <div className="relative">
+                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-amber-500 rounded-full z-10" />
+                      <h4 className="text-sm font-black text-amber-400 mb-3">입학 전 (D-30 ~ D-7)</h4>
+                      <div className="space-y-2">
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t1']} onChange={() => toggleCoachCheck('t1')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                          <div>
+                            <span className={`text-sm font-bold block ${coachChecklist['t1'] ? 'text-neutral-500 line-through' : 'text-white'}`}>기숙사 입사 서류 준비 (결핵검사 진단서)</span>
+                            <span className="text-xs text-neutral-400">입사 시 제출 필수. 영문 또는 국문 진단서 준비</span>
+                          </div>
+                        </label>
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t2']} onChange={() => toggleCoachCheck('t2')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                          <div>
+                            <span className={`text-sm font-bold block ${coachChecklist['t2'] ? 'text-neutral-500 line-through' : 'text-white'}`}>2학기 수강신청 진행</span>
+                            <span className="text-xs text-neutral-400">학사 포털에서 본인 전공 필수 과목 신청</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Step 2: Week 1 */}
+                    <div className="relative">
+                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-emerald-500 rounded-full z-10" />
+                      <h4 className="text-sm font-black text-emerald-400 mb-3">입학 1주차 (D+1 ~ D+7)</h4>
+                      <div className="space-y-2">
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 cursor-pointer group hover:bg-emerald-950/40 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t3']} onChange={() => toggleCoachCheck('t3')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-sm font-black ${coachChecklist['t3'] ? 'text-neutral-500 line-through' : 'text-emerald-300'}`}>외국인 등록증(ARC) 신청서 제출</span>
+                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">법적 필수</span>
+                            </div>
+                            <span className="text-xs text-neutral-400">출입국관리사무소 방문 예약 또는 대학 단체 접수 확인</span>
+                          </div>
+                        </label>
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t4']} onChange={() => toggleCoachCheck('t4')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                          <div>
+                            <span className={`text-sm font-bold block ${coachChecklist['t4'] ? 'text-neutral-500 line-through' : 'text-white'}`}>한국 은행 계좌 개설</span>
+                            <span className="text-xs text-neutral-400">교내 우리은행 지점 방문 (여권, 입학허가서 지참)</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Step 3: Week 2+ */}
+                    <div className="relative">
+                      <div className="absolute -left-6 md:-left-8 top-1.5 w-3 h-3 bg-neutral-900 border-2 border-blue-500 rounded-full z-10" />
+                      <h4 className="text-sm font-black text-blue-400 mb-3">입학 2주차 ~ 한 달 (D+14 ~ D+30)</h4>
+                      <div className="space-y-2">
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t5']} onChange={() => toggleCoachCheck('t5')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                          <div>
+                            <span className={`text-sm font-bold block ${coachChecklist['t5'] ? 'text-neutral-500 line-through' : 'text-white'}`}>모바일 학생증 발급 및 도서관 출입 등록</span>
+                            <span className="text-xs text-neutral-400">종합정보시스템 사진 등록 후 앱 다운로드</span>
+                          </div>
+                        </label>
+                        <label className="flex items-start gap-3 p-4 rounded-2xl bg-neutral-900 border border-white/5 cursor-pointer group hover:bg-neutral-800 transition-colors">
+                          <input type="checkbox" checked={!!coachChecklist['t6']} onChange={() => toggleCoachCheck('t6')} className="mt-1 w-4 h-4 rounded text-emerald-500 bg-neutral-950 border-white/20" />
+                          <div>
+                            <span className={`text-sm font-bold block ${coachChecklist['t6'] ? 'text-neutral-500 line-through' : 'text-white'}`}>유학생 의무 건강보험 고지서 확인</span>
+                            <span className="text-xs text-neutral-400">국민건강보험 우편물 주소지(기숙사) 수령 확인</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
         {/* TAB 1: VISA D-DAY & AUTOMATIC CARE */}
         {activeTab === 'd-day' && (
