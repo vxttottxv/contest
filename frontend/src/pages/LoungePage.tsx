@@ -17,6 +17,8 @@ import {
   Clock,
   MapPin,
   Check,
+  UserPlus,
+  User,
 } from 'lucide-react';
 import {
   MOCK_TINDER_PROFILES,
@@ -33,8 +35,50 @@ interface LoungePageProps {
 export default function LoungePage({ onBack }: LoungePageProps) {
   const [activeTab, setActiveTab] = useState<'matching' | 'game' | 'events'>('matching');
 
+  // User's Own Lounge Profile State (Saved in LocalStorage)
+  const [myProfile, setMyProfile] = useState<LoungeProfile>(() => {
+    const saved = localStorage.getItem('user_my_lounge_profile');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return {
+      id: 'my-profile',
+      name: 'Jerin Yoon (윤제린)',
+      age: 22,
+      gender: 'female',
+      nationality: '🇰🇷 한국',
+      major: '컴퓨터공학과 3학년',
+      mbti: 'ENFP',
+      languages: ['한국어 (원어민)', '영어 (상급)', '베트남어 (초급)'],
+      hobbies: ['K-POP 댄스', '코딩', '맛집 탐방'],
+      bio: '외국인 유학생 친구들과 언어교환 스터디 및 맛집 탐방 가고 싶어요! 편하게 스와이프 해주세요 💖',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
+      aiMatchScore: 99,
+    };
+  });
+
+  // Edit My Profile Modal State
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState<boolean>(false);
+  const [editName, setEditName] = useState(myProfile.name);
+  const [editAge, setEditAge] = useState(myProfile.age);
+  const [editGender, setEditGender] = useState(myProfile.gender);
+  const [editNationality, setEditNationality] = useState(myProfile.nationality);
+  const [editMajor, setEditMajor] = useState(myProfile.major);
+  const [editMbti, setEditMbti] = useState(myProfile.mbti);
+  const [editLanguages, setEditLanguages] = useState(myProfile.languages.join(', '));
+  const [editHobbies, setEditHobbies] = useState(myProfile.hobbies.join(', '));
+  const [editBio, setEditBio] = useState(myProfile.bio);
+  const [editAvatar, setEditAvatar] = useState(myProfile.avatar);
+
   // Tinder Swiping States
-  const [profiles] = useState<LoungeProfile[]>(MOCK_TINDER_PROFILES);
+  const [profiles, setProfiles] = useState<LoungeProfile[]>(() => {
+    return [myProfile, ...MOCK_TINDER_PROFILES];
+  });
+
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [matchedProfile, setMatchedProfile] = useState<LoungeProfile | null>(null);
 
@@ -49,10 +93,35 @@ export default function LoungePage({ onBack }: LoungePageProps) {
   const [userScore, setUserScore] = useState<number>(0);
   const [isQuizCompleted, setIsQuizCompleted] = useState<boolean>(false);
 
-  // Social Events Application State
+  // Social Events State
   const [events, setEvents] = useState<SocialEvent[]>(MOCK_SOCIAL_EVENTS);
 
-  const currentProfile = profiles[currentIndex];
+  const currentProfile = profiles[currentIndex] || profiles[0];
+
+  const handleSaveMyProfile = () => {
+    const updatedProfile: LoungeProfile = {
+      ...myProfile,
+      name: editName,
+      age: Number(editAge),
+      gender: editGender,
+      nationality: editNationality,
+      major: editMajor,
+      mbti: editMbti,
+      languages: editLanguages.split(',').map((s) => s.trim()).filter(Boolean),
+      hobbies: editHobbies.split(',').map((s) => s.trim()).filter(Boolean),
+      bio: editBio,
+      avatar: editAvatar || myProfile.avatar,
+    };
+
+    setMyProfile(updatedProfile);
+    localStorage.setItem('user_my_lounge_profile', JSON.stringify(updatedProfile));
+
+    // Update profiles array with updated myProfile at front
+    const filteredOther = profiles.filter((p) => p.id !== 'my-profile');
+    setProfiles([updatedProfile, ...filteredOther]);
+
+    setIsEditProfileModalOpen(false);
+  };
 
   // Swipe Action Handlers
   const handlePass = () => {
@@ -188,11 +257,32 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                 </span>
               </div>
               <p className="text-xs text-neutral-400">
-                틴더 스타일 AI 프렌즈 매칭, 한국어 미니게임 퀴즈 및 교내 소셜 밋업 이벤트
+                틴더 스타일 AI 프렌즈 매칭, 내 프로필 등록/수정, 한국어 퀴즈 & 밋업 소식
               </p>
             </div>
           </div>
         </div>
+
+        {/* UPLOAD / EDIT MY PROFILE BUTTON */}
+        <button
+          onClick={() => {
+            setEditName(myProfile.name);
+            setEditAge(myProfile.age);
+            setEditGender(myProfile.gender);
+            setEditNationality(myProfile.nationality);
+            setEditMajor(myProfile.major);
+            setEditMbti(myProfile.mbti);
+            setEditLanguages(myProfile.languages.join(', '));
+            setEditHobbies(myProfile.hobbies.join(', '));
+            setEditBio(myProfile.bio);
+            setEditAvatar(myProfile.avatar);
+            setIsEditProfileModalOpen(true);
+          }}
+          className="px-4 py-2 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-rose-600/30 flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+        >
+          <UserPlus size={15} />
+          <span>내 매칭 프로필 등록/수정</span>
+        </button>
       </header>
 
       <main className="relative z-10 max-w-5xl w-full mx-auto px-6 pt-8 space-y-6 flex-1">
@@ -257,9 +347,16 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   ⚡ AI 성향 일치도 {currentProfile.aiMatchScore}%
                 </span>
 
-                <span className="px-3 py-1 rounded-full bg-black/60 border border-white/20 text-xs font-bold backdrop-blur-md text-white">
-                  {currentIndex + 1} / {profiles.length}
-                </span>
+                <div className="flex items-center gap-2">
+                  {currentProfile.id === 'my-profile' && (
+                    <span className="px-3 py-1 rounded-full bg-emerald-600/90 border border-emerald-400 text-[10px] font-black text-white backdrop-blur-md">
+                      👤 내 프로필 카드
+                    </span>
+                  )}
+                  <span className="px-3 py-1 rounded-full bg-black/60 border border-white/20 text-xs font-bold backdrop-blur-md text-white">
+                    {currentIndex + 1} / {profiles.length}
+                  </span>
+                </div>
               </div>
 
               {/* Bottom Profile Info Details */}
@@ -531,6 +628,149 @@ export default function LoungePage({ onBack }: LoungePageProps) {
           </motion.div>
         )}
       </main>
+
+      {/* EDIT MY PROFILE MODAL */}
+      <AnimatePresence>
+        {isEditProfileModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg max-h-[90vh] bg-neutral-900 border border-white/10 rounded-3xl p-6 shadow-2xl text-white space-y-4 overflow-y-auto"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-rose-600 text-white">
+                    <User size={18} />
+                  </div>
+                  <h3 className="text-base font-black">내 AI 프렌즈 매칭 프로필 등록/수정</h3>
+                </div>
+                <button onClick={() => setIsEditProfileModalOpen(false)} className="text-neutral-400 hover:text-white cursor-pointer">
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-neutral-300 block">이름 (Name)</label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="예: 윤제린 (Jerin Yoon)"
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-neutral-300 block">나이 (Age)</label>
+                    <input
+                      type="number"
+                      value={editAge}
+                      onChange={(e) => setEditAge(Number(e.target.value))}
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-neutral-300 block">국적 (Nationality)</label>
+                    <input
+                      type="text"
+                      value={editNationality}
+                      onChange={(e) => setEditNationality(e.target.value)}
+                      placeholder="예: 🇰🇷 한국 / 🇻🇳 베트남 / 🇨🇳 중국"
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-neutral-300 block">MBTI</label>
+                    <input
+                      type="text"
+                      value={editMbti}
+                      onChange={(e) => setEditMbti(e.target.value)}
+                      placeholder="예: ENFP / INFJ"
+                      className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-300 block">학과 및 학년 (Major & Year)</label>
+                  <input
+                    type="text"
+                    value={editMajor}
+                    onChange={(e) => setEditMajor(e.target.value)}
+                    placeholder="예: 컴퓨터공학과 3학년"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-300 block">구사 가능 언어 (쉼표 구분)</label>
+                  <input
+                    type="text"
+                    value={editLanguages}
+                    onChange={(e) => setEditLanguages(e.target.value)}
+                    placeholder="예: 한국어 (원어민), 영어 (상급), 베트남어 (초급)"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-300 block">취미 및 관심사 (쉼표 구분)</label>
+                  <input
+                    type="text"
+                    value={editHobbies}
+                    onChange={(e) => setEditHobbies(e.target.value)}
+                    placeholder="예: K-POP 댄스, 맛집 탐방, 운동, 카페 스터디"
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-300 block">자기소개 (Bio)</label>
+                  <textarea
+                    value={editBio}
+                    onChange={(e) => setEditBio(e.target.value)}
+                    rows={3}
+                    placeholder="상대방에게 보여줄 매칭 자기소개를 적어주세요..."
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500 resize-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-neutral-300 block">프로필 사진 이미지 URL</label>
+                  <input
+                    type="text"
+                    value={editAvatar}
+                    onChange={(e) => setEditAvatar(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full p-3 bg-neutral-950 border border-white/10 rounded-xl text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setIsEditProfileModalOpen(false)}
+                  className="flex-1 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleSaveMyProfile}
+                  className="flex-1 py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-600/30 cursor-pointer"
+                >
+                  프로필 등록 & 저장하기
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* MATCH CELEBRATION MODAL */}
       <AnimatePresence>
