@@ -21,6 +21,10 @@ import {
   ShoppingBag,
   Home,
   BookOpen,
+  Bot,
+  Star,
+  ArrowRight,
+  Loader2,
 } from 'lucide-react';
 import { MOCK_POSTS } from '../services/communityApi';
 import type { Post, Comment } from '../services/communityApi';
@@ -30,9 +34,67 @@ interface CommunityPageProps {
 }
 
 export default function CommunityPage({ onBack }: CommunityPageProps) {
-  const [activeTab, setActiveTab] = useState<'hot' | 'board' | 'anonymous'>('hot');
+  const [activeTab, setActiveTab] = useState<'ai-coach' | 'hot' | 'board' | 'anonymous'>('hot');
   const [boardCategoryFilter, setBoardCategoryFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // AI Culture Coach State
+  const [coachInput, setCoachInput] = useState<string>('');
+  const [isCoachLoading, setIsCoachLoading] = useState<boolean>(false);
+  const [coachResult, setCoachResult] = useState<{
+    politeness: number;
+    politenessLabel: string;
+    natural: string;
+    polite: string;
+    comment: string;
+  } | null>(null);
+
+  const handleCoachAnalyze = () => {
+    if (!coachInput.trim()) return;
+    setIsCoachLoading(true);
+    setCoachResult(null);
+
+    // Mock API Delay
+    setTimeout(() => {
+      const query = coachInput.trim().toLowerCase();
+      
+      if (query.includes('사주세요') || query.includes('사 줘') || query.includes('사줘') || query.includes('밥 사')) {
+        setCoachResult({
+          politeness: 1,
+          politenessLabel: '다소 무례할 수 있음 ⚠️',
+          natural: '교수님, 혹시 시간 되실 때 식사 한 번 같이 할 수 있을까요?',
+          polite: '교수님, 바쁘시겠지만 괜찮으실 때 식사 한 번 모시고 싶습니다.',
+          comment: '한국에서는 윗사람에게 "사주세요"라고 직접적으로 요구하는 것이 다소 무례하게 느껴질 수 있습니다. "식사를 대접하고 싶다" 혹은 "시간 되실 때 식사하고 싶다"고 정중하게 여쭤보는 것이 더 좋습니다.',
+        });
+      } else if (query.includes('언제까지') || query.includes('기한') || query.includes('언제')) {
+        setCoachResult({
+          politeness: 3,
+          politenessLabel: '보통 (약간 직설적) 😐',
+          natural: '교수님, 이번 과제 제출 기한이 언제까지인지 알 수 있을까요?',
+          polite: '교수님, 이번 과제 제출 마감일에 대해 다시 한 번 확인 부탁드려도 될까요?',
+          comment: '문법적으로는 맞지만 다소 직설적입니다. "알 수 있을까요?" 혹은 "확인 부탁드려도 될까요?"와 같이 부드러운 의문형을 사용하면 훨씬 정중하게 들립니다.',
+        });
+      } else if (query.includes('무례한가요') || query.includes('이 문장이')) {
+        setCoachResult({
+          politeness: 2,
+          politenessLabel: '주의 필요 🤔',
+          natural: '교수님, 이 부분에 대해 다시 설명해주실 수 있을까요?',
+          polite: '교수님, 번거로우시겠지만 이 부분에 대해 다시 한 번 가르침을 주실 수 있으실지요?',
+          comment: '한국에서는 직설적인 질문보다 상대방의 수고를 배려하는 쿠션어("번거로우시겠지만", "바쁘시겠지만")를 앞에 붙이는 것이 문화적으로 권장됩니다.',
+        });
+      } else {
+        setCoachResult({
+          politeness: 4,
+          politenessLabel: '공손하고 좋음 🙇‍♂️',
+          natural: '교수님, 질문이 있는데 혹시 언제 시간 되시나요?',
+          polite: '교수님, 바쁘신 와중에 죄송합니다. 혹시 질문 드릴 시간이 있으실지 여쭤봐도 될까요?',
+          comment: '입력하신 문장도 충분히 좋습니다! 하지만 조금 더 격식을 갖추면 교수님께 훨씬 좋은 인상을 줄 수 있습니다.',
+        });
+      }
+      setIsCoachLoading(false);
+    }, 1500);
+  };
+
 
   // Posts State (Loaded from LocalStorage or MOCK)
   const [posts, setPosts] = useState<Post[]>(() => {
@@ -252,7 +314,19 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-3">
             {/* Main Tabs */}
-            <div className="flex items-center gap-2 bg-neutral-950 p-1.5 rounded-2xl border border-white/10 w-full md:w-auto">
+            <div className="flex items-center gap-2 bg-neutral-950 p-1.5 rounded-2xl border border-white/10 w-full md:w-auto overflow-x-auto">
+              <button
+                onClick={() => setActiveTab('ai-coach')}
+                className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 ${
+                  activeTab === 'ai-coach'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30 font-black'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <Bot size={15} />
+                <span>🤖 AI 문화 코치</span>
+              </button>
+
               <button
                 onClick={() => setActiveTab('hot')}
                 className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
@@ -330,7 +404,117 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
           )}
         </div>
 
+        {/* AI CULTURE COACH FEED */}
+        {activeTab === 'ai-coach' && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="p-6 md:p-8 rounded-3xl bg-neutral-900 border border-emerald-500/30 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="relative z-10 flex flex-col items-center text-center space-y-4 mb-8">
+                <div className="p-4 rounded-full bg-emerald-500/20 border border-emerald-500/40">
+                  <Bot size={32} className="text-emerald-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-white">AI 문화 코치</h2>
+                  <p className="text-sm text-neutral-400 mt-2">
+                    한국 교수님이나 선배에게 메시지를 보낼 때 망설여지시나요? <br/>
+                    문장을 입력하면 한국 문화에 맞는 자연스럽고 공손한 표현으로 교정해 드립니다.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4 relative z-10 max-w-2xl mx-auto w-full">
+                <textarea
+                  value={coachInput}
+                  onChange={(e) => setCoachInput(e.target.value)}
+                  placeholder="예: 교수님 밥 사주세요 / 과제 언제까지인가요?"
+                  className="w-full h-32 p-4 bg-neutral-950 border border-white/10 rounded-2xl text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                />
+                <button
+                  onClick={handleCoachAnalyze}
+                  disabled={isCoachLoading || !coachInput.trim()}
+                  className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {isCoachLoading ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>AI가 문화를 분석하고 있습니다...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={18} />
+                      <span>한국 문화 기준으로 교정하기</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* AI Result Card */}
+            <AnimatePresence>
+              {coachResult && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-6 md:p-8 rounded-3xl bg-neutral-950 border border-emerald-500/40 shadow-xl space-y-6">
+                    <div className="flex items-center gap-2 border-b border-white/10 pb-4">
+                      <h3 className="text-lg font-black text-emerald-400">분석 결과</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <span className="text-xs font-bold text-neutral-400">예의 수준 (Politeness)</span>
+                        <div className="flex items-center gap-3">
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                size={18}
+                                className={star <= coachResult.politeness ? 'fill-amber-400 text-amber-400' : 'text-neutral-700'}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm font-black text-white">{coachResult.politenessLabel}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-xs font-bold text-neutral-400">AI 문화 팁 (Culture Tip)</span>
+                        <p className="text-sm text-neutral-300 leading-relaxed bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                          {coachResult.comment}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-4">
+                      <div className="p-5 rounded-2xl bg-neutral-900 border border-white/5">
+                        <span className="text-xs font-bold text-neutral-500 block mb-2">자연스러운 표현 (Natural)</span>
+                        <p className="text-base font-medium text-white">{coachResult.natural}</p>
+                      </div>
+                      
+                      <div className="flex justify-center">
+                        <ArrowRight size={24} className="text-emerald-500 rotate-90 md:rotate-0" />
+                      </div>
+
+                      <div className="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 shadow-inner">
+                        <span className="text-xs font-black text-emerald-400 flex items-center gap-1.5 mb-2">
+                          <Sparkles size={14} /> 더 공손한 표현 (Highly Recommended)
+                        </span>
+                        <p className="text-lg font-black text-white">{coachResult.polite}</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
         {/* POSTS LIST FEED */}
+        {activeTab !== 'ai-coach' && (
         <div className="space-y-4">
           {filteredPosts.length === 0 ? (
             <div className="p-12 text-center rounded-3xl border border-white/10 bg-neutral-950 space-y-3">
@@ -451,6 +635,7 @@ export default function CommunityPage({ onBack }: CommunityPageProps) {
             })
           )}
         </div>
+        )}
       </main>
 
       {/* POST DETAIL & COMMENTS MODAL */}
