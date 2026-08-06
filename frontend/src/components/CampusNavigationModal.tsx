@@ -14,6 +14,8 @@ import {
   Pause,
   RotateCcw,
   Search,
+  Sparkles,
+  Bot,
 } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
@@ -34,19 +36,20 @@ export interface DetailedPlace {
   description: string;
   xPercent: number; // Blueprint X percent position
   yPercent: number; // Blueprint Y percent position
+  aiTip?: string;
 }
 
 export const DETAILED_PLACES: DetailedPlace[] = [
-  { id: 'p-1', name: 'C동 2층 블루라인 북카페', buildingId: 'bld-3', buildingCode: 'C동', floor: '2층', category: '카페', description: '도서관 로비 앞 커피, 디저트 및 스터디 공간', xPercent: 75, yPercent: 40 },
-  { id: 'p-2', name: 'A동 지하1층 푸드코트 학생식당', buildingId: 'bld-1', buildingCode: 'A동', floor: '지하1층', category: '식당', description: '한식, 중식, 분식 및 글로벌 식단 배식대', xPercent: 25, yPercent: 80 },
-  { id: 'p-3', name: 'B동 1층 24시간 무인 프린트실', buildingId: 'bld-2', buildingCode: 'B동', floor: '1층', category: '프린트실', description: '24시간 학생증 결제 무인 컬러/흑백 인쇄기', xPercent: 18, yPercent: 65 },
-  { id: 'p-4', name: 'A동 1층 101호 유학생 지원 센터', buildingId: 'bld-1', buildingCode: 'A동', floor: '1층', category: '행정', description: '외국인등록증, 비자 연장, 수강신청 원스톱 상담 창구', xPercent: 78, yPercent: 45 },
-  { id: 'p-5', name: 'B동 3층 301호 SW 코딩실습실', buildingId: 'bld-2', buildingCode: 'B동', floor: '3층', category: '강의실', description: '컴퓨터공학과 메인 듀얼모니터 코딩 실습실', xPercent: 55, yPercent: 35 },
-  { id: 'p-6', name: 'C동 1층 종합 실내체육관 & 실버 돔', buildingId: 'bld-3', buildingCode: 'C동', floor: '1층', category: '강의실', description: '농구, 배드민턴, 스포츠 교양 및 대강당 아치 돔', xPercent: 60, yPercent: 60 },
-  { id: 'p-7', name: 'D동 1층 유학생 커뮤니티 라운지', buildingId: 'bld-4', buildingCode: 'D동', floor: '1층', category: '카페', description: '외국인 유학생 다문화 버디 교류 라운지', xPercent: 35, yPercent: 45 },
-  { id: 'p-8', name: 'B동 1층 104호 AI 컴퓨터랩', buildingId: 'bld-2', buildingCode: 'B동', floor: '1층', category: '강의실', description: '인공지능 GPU 서버 및 AI 실습실', xPercent: 40, yPercent: 30 },
-  { id: 'p-9', name: 'A동 3층 305호 글로벌 화상회의실', buildingId: 'bld-1', buildingCode: 'A동', floor: '3층', category: '강의실', description: '국제 학술 발표 및 화상 강의실', xPercent: 45, yPercent: 25 },
-  { id: 'p-10', name: 'B동 1층 CU 편의점', buildingId: 'bld-2', buildingCode: 'B동', floor: '1층', category: '식당', description: '학생 편의점 및 도시락 삼각김밥 코너', xPercent: 22, yPercent: 70 },
+  { id: 'p-1', name: 'C동 2층 블루라인 북카페', buildingId: 'bld-3', buildingCode: 'C동', floor: '2층', category: '카페', description: '도서관 로비 앞 커피, 디저트 및 스터디 공간', xPercent: 75, yPercent: 40, aiTip: '🤖 북카페로 가는 길에 종합 체육관(C동 1층)을 지나갑니다. 입구에 부착된 유학생 풋살 동아리 모집 공고를 확인해보는 건 어떨까요?' },
+  { id: 'p-2', name: 'A동 지하1층 푸드코트 학생식당', buildingId: 'bld-1', buildingCode: 'A동', floor: '지하1층', category: '식당', description: '한식, 중식, 분식 및 글로벌 식단 배식대', xPercent: 25, yPercent: 80, aiTip: '🤖 식당(지하 1층)으로 이동하시네요! 식사 후 바로 위층(A동 1층) 유학생 지원 센터에 들러 외국인등록 관련 서류를 미리 제출하시면 동선을 절약할 수 있어요.' },
+  { id: 'p-3', name: 'B동 1층 24시간 무인 프린트실', buildingId: 'bld-2', buildingCode: 'B동', floor: '1층', category: '프린트실', description: '24시간 학생증 결제 무인 컬러/흑백 인쇄기', xPercent: 18, yPercent: 65, aiTip: '🤖 프린트실 방문 전, 모바일 학생증에 인쇄 포인트를 미리 충전해 두시면 대기 시간 없이 바로 출력 가능합니다.' },
+  { id: 'p-4', name: 'A동 1층 101호 유학생 지원 센터', buildingId: 'bld-1', buildingCode: 'A동', floor: '1층', category: '행정', description: '외국인등록증, 비자 연장, 수강신청 원스톱 상담 창구', xPercent: 78, yPercent: 45, aiTip: '🤖 유학생 지원 센터 방문 시, 여권과 외국인등록증을 반드시 지참해 주세요. 또한 가는 길(A동 1층 로비)에 설치된 무인 발급기에서 성적증명서를 바로 뽑을 수 있습니다.' },
+  { id: 'p-5', name: 'B동 3층 301호 SW 코딩실습실', buildingId: 'bld-2', buildingCode: 'B동', floor: '3층', category: '강의실', description: '컴퓨터공학과 메인 듀얼모니터 코딩 실습실', xPercent: 55, yPercent: 35, aiTip: '🤖 B동 코딩실습실로 가는 동선에 B동 1층 CU 편의점이 있습니다. 실습이 길어질 수 있으니 물이나 간식을 미리 준비해 가시길 추천합니다!' },
+  { id: 'p-6', name: 'C동 1층 종합 실내체육관 & 실버 돔', buildingId: 'bld-3', buildingCode: 'C동', floor: '1층', category: '강의실', description: '농구, 배드민턴, 스포츠 교양 및 대강당 아치 돔', xPercent: 60, yPercent: 60, aiTip: '🤖 체육관 출입 시 실내용 운동화 지참이 필수입니다. C동 1층 입구 좌측에 있는 유학생 전용 무료 락커룸에서 환복하실 수 있습니다.' },
+  { id: 'p-7', name: 'D동 1층 유학생 커뮤니티 라운지', buildingId: 'bld-4', buildingCode: 'D동', floor: '1층', category: '카페', description: '외국인 유학생 다문화 버디 교류 라운지', xPercent: 35, yPercent: 45, aiTip: '🤖 라운지로 가시는 길에 D동 로비 글로벌 게시판을 꼭 확인해 보세요. 이번 주말 서울 시티투어 문화 체험 프로그램 신청서가 부착되어 있습니다.' },
+  { id: 'p-8', name: 'B동 1층 104호 AI 컴퓨터랩', buildingId: 'bld-2', buildingCode: 'B동', floor: '1층', category: '강의실', description: '인공지능 GPU 서버 및 AI 실습실', xPercent: 40, yPercent: 30, aiTip: '🤖 AI 컴퓨터랩 맞은편에 자연 채광이 좋은 학생 휴게실이 있습니다. 코딩 중 눈이 피로할 때 잠시 들러 휴식하기 좋은 장소입니다.' },
+  { id: 'p-9', name: 'A동 3층 305호 글로벌 화상회의실', buildingId: 'bld-1', buildingCode: 'A동', floor: '3층', category: '강의실', description: '국제 학술 발표 및 화상 강의실', xPercent: 45, yPercent: 25, aiTip: '🤖 A동 3층은 와이파이(Eduroam) 신호가 매우 강한 구역입니다. 화상회의실 입실 전, 복도 라운지에서 미리 네트워크 상태를 점검해 보세요.' },
+  { id: 'p-10', name: 'B동 1층 CU 편의점', buildingId: 'bld-2', buildingCode: 'B동', floor: '1층', category: '식당', description: '학생 편의점 및 도시락 삼각김밥 코너', xPercent: 22, yPercent: 70, aiTip: '🤖 편의점에서 글로벌 모바일 학생증 바코드를 제시하면 결제 금액의 5% 할인을 받을 수 있습니다.' },
 ];
 
 export default function CampusNavigationModal({
@@ -424,6 +427,31 @@ export default function CampusNavigationModal({
                   🏁 도착: {selectedPlace.name}
                 </span>
               </div>
+
+              {/* AI Smart Navigation Tip Overlay */}
+              <AnimatePresence>
+                {selectedPlace.aiTip && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className="absolute bottom-4 left-4 right-4 z-40 mx-auto max-w-2xl px-5 py-3.5 bg-gradient-to-r from-emerald-950/95 to-teal-950/95 border border-emerald-500/50 rounded-2xl shadow-2xl shadow-emerald-900/20 backdrop-blur-md flex items-start gap-4"
+                  >
+                    <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 shrink-0 ring-1 ring-emerald-500/30">
+                      <Sparkles size={20} className="animate-pulse" />
+                    </div>
+                    <div className="pt-0.5">
+                      <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                        <Bot size={14} />
+                        AI 맞춤 캠퍼스 가이드
+                      </h4>
+                      <p className="text-sm font-bold text-white leading-relaxed">
+                        {selectedPlace.aiTip}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Bottom Current Step & Guidance Banner */}
