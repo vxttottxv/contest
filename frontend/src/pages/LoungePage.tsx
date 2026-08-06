@@ -57,17 +57,17 @@ export default function LoungePage({ onBack }: LoungePageProps) {
     }
     return {
       id: 'my-profile',
-      name: 'Jerin Yoon (윤제린)',
-      age: 22,
-      gender: 'female',
-      nationality: '🇰🇷 한국',
-      major: '컴퓨터공학과 3학년',
-      mbti: 'ENFP',
-      languages: ['한국어 (원어민)', '영어 (상급)', '베트남어 (초급)'],
-      hobbies: ['K-POP 댄스', '코딩', '맛집 탐방'],
-      bio: '외국인 유학생 친구들과 언어교환 스터디 및 맛집 탐방 가고 싶어요! 💖',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
-      aiMatchScore: 99,
+      name: '',
+      age: 0,
+      gender: '',
+      nationality: '',
+      major: '',
+      mbti: '',
+      languages: [],
+      hobbies: [],
+      bio: '',
+      avatar: '',
+      aiMatchScore: 0,
     };
   });
 
