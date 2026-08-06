@@ -4,7 +4,6 @@ import {
   Navigation,
   MapPin,
   Footprints,
-  Clock,
   X,
   Building2,
   CheckCircle,
@@ -16,6 +15,7 @@ import {
   Pause,
   RotateCcw,
   Search,
+  Mic,
 } from 'lucide-react';
 import type { Building3D } from '../services/campusMapApi';
 
@@ -67,9 +67,20 @@ export default function CampusNavigationModal({
   const [isVoiceMuted, setIsVoiceMuted] = useState<boolean>(false);
   const [progressPercent, setProgressPercent] = useState<number>(0);
   const [remainingDistance, setRemainingDistance] = useState<number>(140);
+  const [speakingText, setSpeakingText] = useState<string | null>(null);
   const walkingSpeed = 4.2;
 
   const animTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Pre-fetch & ensure Web Speech API voices are loaded for female Korean voice
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
 
   useEffect(() => {
     if (destinationBuilding) {
@@ -84,16 +95,35 @@ export default function CampusNavigationModal({
     return matchCat && matchQuery;
   });
 
+  // Dedicated High Quality Female Korean Voice TTS Engine
   const speakText = (text: string) => {
+    setSpeakingText(text);
     if (isVoiceMuted || !('speechSynthesis' in window)) return;
+
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ko-KR';
-      utterance.rate = 1.0;
+      utterance.rate = 1.05;
+      utterance.pitch = 1.25; // Bright clear female navigation voice pitch
+
+      const voices = window.speechSynthesis.getVoices();
+      const femaleKoVoice = voices.find(
+        (v) => (v.lang.includes('ko') || v.lang.includes('KO')) &&
+          (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami'))
+      ) || voices.find((v) => v.lang.includes('ko') || v.lang.includes('KO'));
+
+      if (femaleKoVoice) {
+        utterance.voice = femaleKoVoice;
+      }
+
+      utterance.onend = () => {
+        setSpeakingText(null);
+      };
+
       window.speechSynthesis.speak(utterance);
     } catch (e) {
-      console.error(e);
+      console.error('Speech Synthesis Error:', e);
     }
   };
 
@@ -103,7 +133,7 @@ export default function CampusNavigationModal({
     setProgressPercent(0);
     setRemainingDistance(140);
 
-    const startMsg = `네비게이션 길안내를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 정문 출입구에서 직진하세요.`;
+    const startMsg = `안녕하세요! 명지전문대학 여성 음성 네비게이션 안내를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 정문 출입구에서 직진하세요.`;
     speakText(startMsg);
 
     if (animTimerRef.current) clearInterval(animTimerRef.current);
@@ -116,7 +146,7 @@ export default function CampusNavigationModal({
           setIsNavigating(false);
           setRemainingDistance(0);
           setCurrentStep(2);
-          const arriveMsg = `목적지인 ${selectedPlace.name}에 도착했습니다. 길안내를 종료합니다.`;
+          const arriveMsg = `축하합니다! 목적지인 ${selectedPlace.name}에 도착했습니다. 길안내 서비스를 종료합니다.`;
           speakText(arriveMsg);
           if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
           return 100;
@@ -141,6 +171,7 @@ export default function CampusNavigationModal({
   const stopLiveNavigation = () => {
     if (animTimerRef.current) clearInterval(animTimerRef.current);
     setIsNavigating(false);
+    setSpeakingText(null);
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   };
 
@@ -222,14 +253,14 @@ export default function CampusNavigationModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black tracking-tight">학교 평면도 기반 블랙 테마 핀포인트 길안내</h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                    <LocateFixed size={10} />
-                    GPS Live Tracking
+                  <h3 className="text-lg font-black tracking-tight">여성 음성 네비게이션 길안내 시스템</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30 flex items-center gap-1">
+                    <Mic size={10} className="animate-pulse" />
+                    여성 성우 음성 (ko-KR Voice)
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  블랙 스타일 평면도 도면 사진 기반 디테일 장소(강의실·카페·프린트실) 핀포인트 길안내
+                  학교 평면도 기반 실시간 여성 음성 턴바이턴 보이스 길안내 서비스
                 </p>
               </div>
             </div>
@@ -242,6 +273,18 @@ export default function CampusNavigationModal({
               >
                 <MapPin size={14} />
                 <span>GPS 위치 갱신</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  const testText = `여성 네비게이션 음성 테스트입니다. 목적지는 ${selectedPlace.name}입니다.`;
+                  speakText(testText);
+                }}
+                className="px-3 py-1.5 bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                title="여성 음성 테스트"
+              >
+                <Volume2 size={14} className="animate-bounce" />
+                <span>🔊 여성 음성 테스트</span>
               </button>
 
               <button
@@ -332,7 +375,7 @@ export default function CampusNavigationModal({
             </div>
           </div>
 
-          {/* REAL SCHOOL BLUEPRINT MAP VISUAL NAVIGATION CANVAS (STRICT BLACK BLUEPRINT THEME) */}
+          {/* REAL SCHOOL BLUEPRINT MAP VISUAL NAVIGATION CANVAS */}
           <div className="flex-1 min-h-[300px] relative rounded-3xl border border-white/10 overflow-hidden shadow-2xl flex flex-col justify-between bg-black">
             {/* BLACK BLUEPRINT PLAN IMAGE BACKGROUND */}
             <img
@@ -380,9 +423,9 @@ export default function CampusNavigationModal({
                   {walkingSpeed} km/h (도보)
                 </span>
                 <span className="text-neutral-500">|</span>
-                <span className="flex items-center gap-1 font-bold text-cyan-300">
-                  <Clock size={16} />
-                  약 {Math.max(1, Math.ceil(remainingDistance / 70))}분 소요
+                <span className="flex items-center gap-1 font-bold text-pink-300">
+                  <Mic size={16} className="animate-pulse" />
+                  여성 음성 수신중
                 </span>
               </div>
 
@@ -414,6 +457,14 @@ export default function CampusNavigationModal({
                 </button>
               </div>
             </div>
+
+            {/* LIVE VOICE PROMPT CAPTION TOAST OVER CANVAS */}
+            {speakingText && (
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 px-5 py-2.5 rounded-2xl bg-pink-950/90 border border-pink-500/50 text-pink-200 text-xs font-extrabold shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce">
+                <Volume2 size={16} className="text-pink-400 animate-pulse shrink-0" />
+                <span>🔊 여성 음성 안내: "{speakingText}"</span>
+              </div>
+            )}
 
             {/* OVERLAID VISUAL LANDMARK & DYNAMIC USER GPS MARKER ON BLUEPRINT */}
             <div className="relative w-full h-full flex-1 z-20">
@@ -486,14 +537,22 @@ export default function CampusNavigationModal({
               {/* Step Navigation manual buttons */}
               <div className="flex gap-1.5 shrink-0">
                 <button
-                  onClick={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
+                  onClick={() => {
+                    const prevStep = Math.max(0, currentStep - 1);
+                    setCurrentStep(prevStep);
+                    speakText(routeSteps[prevStep].instruction);
+                  }}
                   disabled={currentStep === 0}
                   className="px-4 py-2 bg-neutral-800 disabled:opacity-40 text-xs font-bold rounded-xl hover:bg-neutral-700 transition-colors cursor-pointer"
                 >
                   이전
                 </button>
                 <button
-                  onClick={() => setCurrentStep((prev) => Math.min(routeSteps.length - 1, prev + 1))}
+                  onClick={() => {
+                    const nextStep = Math.min(routeSteps.length - 1, currentStep + 1);
+                    setCurrentStep(nextStep);
+                    speakText(routeSteps[nextStep].instruction);
+                  }}
                   disabled={currentStep === routeSteps.length - 1}
                   className="px-4 py-2 bg-blue-600 disabled:opacity-40 text-xs font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer shadow-lg shadow-blue-600/30"
                 >
@@ -507,7 +566,7 @@ export default function CampusNavigationModal({
           <div className="flex items-center justify-between pt-1 shrink-0">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Eye size={16} className="text-blue-400" />
-              <span>선택하신 [{selectedPlace.name}] 블랙 지적 평면도 핀포인트 길안내가 가동 중입니다.</span>
+              <span>선택하신 [{selectedPlace.name}] 한국어 여성 네비게이션 음성이 실시간으로 송출 중입니다.</span>
             </div>
             <button
               onClick={() => {
