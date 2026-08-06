@@ -19,6 +19,7 @@ import {
   Check,
   UserPlus,
   User,
+  Edit3,
 } from 'lucide-react';
 import {
   MOCK_TINDER_PROFILES,
@@ -34,6 +35,11 @@ interface LoungePageProps {
 
 export default function LoungePage({ onBack }: LoungePageProps) {
   const [activeTab, setActiveTab] = useState<'matching' | 'game' | 'events'>('matching');
+
+  // Track if user has completed initial profile creation onboarding
+  const [isProfileCreated, setIsProfileCreated] = useState<boolean>(() => {
+    return localStorage.getItem('user_my_lounge_profile_created') === 'true';
+  });
 
   // User's Own Lounge Profile State (Saved in LocalStorage)
   const [myProfile, setMyProfile] = useState<LoungeProfile>(() => {
@@ -55,7 +61,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
       mbti: 'ENFP',
       languages: ['한국어 (원어민)', '영어 (상급)', '베트남어 (초급)'],
       hobbies: ['K-POP 댄스', '코딩', '맛집 탐방'],
-      bio: '외국인 유학생 친구들과 언어교환 스터디 및 맛집 탐방 가고 싶어요! 편하게 스와이프 해주세요 💖',
+      bio: '외국인 유학생 친구들과 언어교환 스터디 및 맛집 탐방 가고 싶어요! 💖',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
       aiMatchScore: 99,
     };
@@ -74,10 +80,8 @@ export default function LoungePage({ onBack }: LoungePageProps) {
   const [editBio, setEditBio] = useState(myProfile.bio);
   const [editAvatar, setEditAvatar] = useState(myProfile.avatar);
 
-  // Tinder Swiping States
-  const [profiles, setProfiles] = useState<LoungeProfile[]>(() => {
-    return [myProfile, ...MOCK_TINDER_PROFILES];
-  });
+  // Tinder Swiping States - CONTAINS ONLY OTHER STUDENTS' PROFILES (EXCLUDES USER'S OWN PROFILE)
+  const [profiles] = useState<LoungeProfile[]>(MOCK_TINDER_PROFILES);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [matchedProfile, setMatchedProfile] = useState<LoungeProfile | null>(null);
@@ -115,11 +119,8 @@ export default function LoungePage({ onBack }: LoungePageProps) {
 
     setMyProfile(updatedProfile);
     localStorage.setItem('user_my_lounge_profile', JSON.stringify(updatedProfile));
-
-    // Update profiles array with updated myProfile at front
-    const filteredOther = profiles.filter((p) => p.id !== 'my-profile');
-    setProfiles([updatedProfile, ...filteredOther]);
-
+    localStorage.setItem('user_my_lounge_profile_created', 'true');
+    setIsProfileCreated(true);
     setIsEditProfileModalOpen(false);
   };
 
@@ -257,7 +258,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                 </span>
               </div>
               <p className="text-xs text-neutral-400">
-                틴더 스타일 AI 프렌즈 매칭, 내 프로필 등록/수정, 한국어 퀴즈 & 밋업 소식
+                틴더 스타일 AI 프렌즈 매칭, 내 프로필 작성/수정, 한국어 퀴즈 & 밋업 소식
               </p>
             </div>
           </div>
@@ -280,8 +281,8 @@ export default function LoungePage({ onBack }: LoungePageProps) {
           }}
           className="px-4 py-2 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-rose-600/30 flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
         >
-          <UserPlus size={15} />
-          <span>내 매칭 프로필 등록/수정</span>
+          {isProfileCreated ? <Edit3 size={15} /> : <UserPlus size={15} />}
+          <span>{isProfileCreated ? '내 프로필 수정' : '내 프로필 작성하기'}</span>
         </button>
       </header>
 
@@ -328,96 +329,141 @@ export default function LoungePage({ onBack }: LoungePageProps) {
         {/* TAB 1: TINDER-STYLE AI FRIENDS MATCHING */}
         {activeTab === 'matching' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center space-y-6">
-            {/* Tinder Card Container */}
-            <div className="relative w-full max-w-md h-[540px] rounded-3xl border border-white/15 overflow-hidden shadow-2xl bg-neutral-950 flex flex-col justify-between group">
-              {/* Profile Image Background */}
-              <img
-                src={currentProfile.avatar}
-                alt={currentProfile.name}
-                className="absolute inset-0 w-full h-full object-cover filter brightness-90 transition-transform duration-500 group-hover:scale-105"
-              />
-
-              {/* Gradient Dark Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20" />
-
-              {/* Top AI Match Badge */}
-              <div className="relative z-10 p-5 flex items-center justify-between">
-                <span className="px-3.5 py-1.5 rounded-full bg-rose-600/80 border border-rose-400/50 backdrop-blur-md text-white font-black text-xs shadow-xl flex items-center gap-1.5 animate-pulse">
-                  <Zap size={14} className="text-amber-300 fill-amber-300" />
-                  ⚡ AI 성향 일치도 {currentProfile.aiMatchScore}%
-                </span>
-
-                <div className="flex items-center gap-2">
-                  {currentProfile.id === 'my-profile' && (
-                    <span className="px-3 py-1 rounded-full bg-emerald-600/90 border border-emerald-400 text-[10px] font-black text-white backdrop-blur-md">
-                      👤 내 프로필 카드
-                    </span>
-                  )}
-                  <span className="px-3 py-1 rounded-full bg-black/60 border border-white/20 text-xs font-bold backdrop-blur-md text-white">
-                    {currentIndex + 1} / {profiles.length}
-                  </span>
+            {!isProfileCreated ? (
+              /* ONBOARDING STEP: IF PROFILE NOT CREATED YET, SHOW CREATE PROFILE ONBOARDING WIZARD FIRST */
+              <div className="w-full max-w-xl p-8 rounded-3xl border-2 border-rose-500/50 bg-gradient-to-b from-neutral-900 via-neutral-900 to-rose-950/30 backdrop-blur-xl shadow-2xl space-y-6 text-center">
+                <div className="w-20 h-20 rounded-full bg-rose-600/20 border-2 border-rose-500 text-rose-400 mx-auto flex items-center justify-center animate-bounce">
+                  <UserPlus size={40} />
                 </div>
-              </div>
 
-              {/* Bottom Profile Info Details */}
-              <div className="relative z-10 p-6 space-y-3">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-black text-white">{currentProfile.name}, {currentProfile.age}</h2>
-                    <span className="px-2.5 py-0.5 rounded bg-white/20 text-xs font-bold text-white backdrop-blur-md">
-                      {currentProfile.nationality}
-                    </span>
-                  </div>
-                  <p className="text-xs text-rose-300 font-bold mt-1">
-                    📚 {currentProfile.major} | MBTI: {currentProfile.mbti}
+                  <h2 className="text-2xl font-black text-white tracking-tight">AI 프렌즈 매칭에 오신 것을 환영합니다! 🎉</h2>
+                  <p className="text-xs text-neutral-300 mt-1.5 leading-relaxed font-medium">
+                    매칭을 시작하기 전, 상대방에게 보일 <strong className="text-rose-400">본인의 내 프로필</strong>을 먼저 작성해주세요.<br />
+                    작성이 완료되면 성향이 맞는 다른 유학생들의 프로필만 스와이프하며 매칭할 수 있습니다!
                   </p>
                 </div>
 
-                <p className="text-xs text-neutral-200 leading-relaxed font-medium bg-black/40 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
-                  "{currentProfile.bio}"
-                </p>
+                <div className="p-4 rounded-2xl bg-neutral-950 border border-white/10 text-left text-xs space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-rose-300">
+                    <CheckCircle2 size={16} />
+                    <span>프로필 등록 시 제공되는 혜택:</span>
+                  </div>
+                  <ul className="list-disc list-inside text-neutral-400 space-y-1 pl-1">
+                    <li>AI 알고리즘이 내 성향/MBTI/언어 목표와 90% 이상 일치하는 친구 추천</li>
+                    <li>상대방과 매칭 시 즉시 1:1 라이브 대화 가능</li>
+                    <li>언어 교환, 학식 친구, 소모임 버디 매칭 연결</li>
+                  </ul>
+                </div>
 
-                {/* Languages & Hobbies Badges */}
-                <div className="space-y-1.5 pt-1">
-                  <div className="flex items-center gap-1.5 overflow-x-auto">
-                    <span className="text-[10px] font-bold text-neutral-400 shrink-0">언어:</span>
-                    {currentProfile.languages.map((lang, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold border border-blue-500/30 shrink-0">
-                        {lang}
-                      </span>
-                    ))}
+                <button
+                  onClick={() => {
+                    setEditName(myProfile.name);
+                    setEditAge(myProfile.age);
+                    setEditGender(myProfile.gender);
+                    setEditNationality(myProfile.nationality);
+                    setEditMajor(myProfile.major);
+                    setEditMbti(myProfile.mbti);
+                    setEditLanguages(myProfile.languages.join(', '));
+                    setEditHobbies(myProfile.hobbies.join(', '));
+                    setEditBio(myProfile.bio);
+                    setEditAvatar(myProfile.avatar);
+                    setIsEditProfileModalOpen(true);
+                  }}
+                  className="w-full py-4 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-rose-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <UserPlus size={18} />
+                  <span>💖 내 프로필 작성하고 매칭 시작하기!</span>
+                </button>
+              </div>
+            ) : (
+              /* ONCE PROFILE IS CREATED, SHOW ONLY OTHER STUDENTS' SWIPE CARDS */
+              <>
+                {/* Tinder Card Container */}
+                <div className="relative w-full max-w-md h-[540px] rounded-3xl border border-white/15 overflow-hidden shadow-2xl bg-neutral-950 flex flex-col justify-between group">
+                  {/* Profile Image Background */}
+                  <img
+                    src={currentProfile.avatar}
+                    alt={currentProfile.name}
+                    className="absolute inset-0 w-full h-full object-cover filter brightness-90 transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  {/* Gradient Dark Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20" />
+
+                  {/* Top AI Match Badge */}
+                  <div className="relative z-10 p-5 flex items-center justify-between">
+                    <span className="px-3.5 py-1.5 rounded-full bg-rose-600/80 border border-rose-400/50 backdrop-blur-md text-white font-black text-xs shadow-xl flex items-center gap-1.5 animate-pulse">
+                      <Zap size={14} className="text-amber-300 fill-amber-300" />
+                      ⚡ AI 성향 일치도 {currentProfile.aiMatchScore}%
+                    </span>
+
+                    <span className="px-3 py-1 rounded-full bg-black/60 border border-white/20 text-xs font-bold backdrop-blur-md text-white">
+                      {currentIndex + 1} / {profiles.length}
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 overflow-x-auto">
-                    <span className="text-[10px] font-bold text-neutral-400 shrink-0">취미:</span>
-                    {currentProfile.hobbies.map((hob, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 text-[10px] font-bold border border-pink-500/30 shrink-0">
-                        #{hob}
-                      </span>
-                    ))}
+                  {/* Bottom Profile Info Details */}
+                  <div className="relative z-10 p-6 space-y-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-2xl font-black text-white">{currentProfile.name}, {currentProfile.age}</h2>
+                        <span className="px-2.5 py-0.5 rounded bg-white/20 text-xs font-bold text-white backdrop-blur-md">
+                          {currentProfile.nationality}
+                        </span>
+                      </div>
+                      <p className="text-xs text-rose-300 font-bold mt-1">
+                        📚 {currentProfile.major} | MBTI: {currentProfile.mbti}
+                      </p>
+                    </div>
+
+                    <p className="text-xs text-neutral-200 leading-relaxed font-medium bg-black/40 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
+                      "{currentProfile.bio}"
+                    </p>
+
+                    {/* Languages & Hobbies Badges */}
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex items-center gap-1.5 overflow-x-auto">
+                        <span className="text-[10px] font-bold text-neutral-400 shrink-0">언어:</span>
+                        {currentProfile.languages.map((lang, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold border border-blue-500/30 shrink-0">
+                            {lang}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 overflow-x-auto">
+                        <span className="text-[10px] font-bold text-neutral-400 shrink-0">취미:</span>
+                        {currentProfile.hobbies.map((hob, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded bg-pink-500/20 text-pink-300 text-[10px] font-bold border border-pink-500/30 shrink-0">
+                            #{hob}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* TINDER SWIPE ACTION BUTTONS */}
-            <div className="flex items-center gap-6 z-20">
-              <button
-                onClick={handlePass}
-                className="w-16 h-16 rounded-full bg-neutral-900 border-2 border-red-500/50 hover:border-red-500 hover:bg-red-950/50 text-red-400 flex items-center justify-center shadow-2xl transition-all cursor-pointer active:scale-90"
-                title="지나가기 (PASS)"
-              >
-                <X size={28} />
-              </button>
+                {/* TINDER SWIPE ACTION BUTTONS */}
+                <div className="flex items-center gap-6 z-20">
+                  <button
+                    onClick={handlePass}
+                    className="w-16 h-16 rounded-full bg-neutral-900 border-2 border-red-500/50 hover:border-red-500 hover:bg-red-950/50 text-red-400 flex items-center justify-center shadow-2xl transition-all cursor-pointer active:scale-90"
+                    title="지나가기 (PASS)"
+                  >
+                    <X size={28} />
+                  </button>
 
-              <button
-                onClick={handleLikeMatch}
-                className="w-20 h-20 rounded-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white flex items-center justify-center shadow-2xl shadow-rose-600/40 transition-all cursor-pointer active:scale-95 animate-bounce"
-                title="좋아요 & AI 매칭하기 (MATCH)"
-              >
-                <Heart size={36} className="fill-white" />
-              </button>
-            </div>
+                  <button
+                    onClick={handleLikeMatch}
+                    className="w-20 h-20 rounded-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white flex items-center justify-center shadow-2xl shadow-rose-600/40 transition-all cursor-pointer active:scale-95 animate-bounce"
+                    title="좋아요 & AI 매칭하기 (MATCH)"
+                  >
+                    <Heart size={36} className="fill-white" />
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
         )}
 
@@ -644,7 +690,7 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                   <div className="p-2 rounded-xl bg-rose-600 text-white">
                     <User size={18} />
                   </div>
-                  <h3 className="text-base font-black">내 AI 프렌즈 매칭 프로필 등록/수정</h3>
+                  <h3 className="text-base font-black">내 AI 프렌즈 매칭 프로필 작성/수정</h3>
                 </div>
                 <button onClick={() => setIsEditProfileModalOpen(false)} className="text-neutral-400 hover:text-white cursor-pointer">
                   <X size={18} />
@@ -762,9 +808,9 @@ export default function LoungePage({ onBack }: LoungePageProps) {
                 </button>
                 <button
                   onClick={handleSaveMyProfile}
-                  className="flex-1 py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-600/30 cursor-pointer"
+                  className="flex-1 py-3 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black rounded-xl text-xs shadow-lg shadow-rose-600/30 cursor-pointer"
                 >
-                  프로필 등록 & 저장하기
+                  💖 프로필 등록 완료 및 매칭 시작하기!
                 </button>
               </div>
             </motion.div>
