@@ -10,8 +10,6 @@ import {
   CheckCircle,
   LocateFixed,
   Eye,
-  Volume2,
-  VolumeX,
   Play,
   Pause,
   RotateCcw,
@@ -64,23 +62,11 @@ export default function CampusNavigationModal({
 
   // Live Real-Time Navigation Engine States
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
-  const [isVoiceMuted, setIsVoiceMuted] = useState<boolean>(false);
   const [progressPercent, setProgressPercent] = useState<number>(0);
   const [remainingDistance, setRemainingDistance] = useState<number>(140);
   const walkingSpeed = 4.2;
 
   const animTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Pre-load voices for SpeechSynthesis
-  useEffect(() => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
-    }
-  }, []);
 
   useEffect(() => {
     if (destinationBuilding) {
@@ -95,71 +81,12 @@ export default function CampusNavigationModal({
     return matchCat && matchQuery;
   });
 
-  // Fail-Safe Dual TTS Voice Sound Engine (WebSpeech API + Direct Audio Stream Fallback)
-  const speakText = (text: string) => {
-    if (isVoiceMuted) return;
-
-    // Method 1: Web Speech API (Native Speech Synthesis)
-    if ('speechSynthesis' in window) {
-      try {
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        }
-        window.speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'ko-KR';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.3;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices();
-        const femaleKoVoice = voices.find(
-          (v) => (v.lang.includes('ko') || v.lang.includes('KO')) &&
-            (v.name.includes('Sun') || v.name.includes('Yuna') || v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Yuri') || v.name.includes('Heami') || v.name.includes('Siri'))
-        ) || voices.find((v) => v.lang.includes('ko') || v.lang.includes('KO'));
-
-        if (femaleKoVoice) {
-          utterance.voice = femaleKoVoice;
-        }
-
-        window.speechSynthesis.speak(utterance);
-      } catch (e) {
-        console.error('Web Speech API Error, using Audio Fallback:', e);
-      }
-    }
-
-    // Method 2: Fail-Safe HTML5 Audio TTS Stream Fallback
-    try {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ko&client=tw-ob`;
-      const audio = new Audio(ttsUrl);
-      audioRef.current = audio;
-      audio.play().catch((err) => {
-        console.log('Audio playback prevented by browser:', err);
-      });
-    } catch (err) {
-      console.error('Audio Stream Fallback Error:', err);
-    }
-  };
-
-  // Turn-by-Turn Voice Navigation Start
+  // Turn-by-Turn Visual Live Navigation Start
   const startLiveNavigation = () => {
-    // Synchronous Audio Unlock
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.resume();
-    }
-
     setIsNavigating(true);
     setCurrentStep(0);
     setProgressPercent(0);
     setRemainingDistance(140);
-
-    // Initial Korean TTS Voice Speech Prompt
-    const naviPrompt1 = `네비게이션 길안내를 시작합니다. 목적지는 ${selectedPlace.name}입니다. 정문에서 50미터 직진하세요.`;
-    speakText(naviPrompt1);
 
     if (animTimerRef.current) clearInterval(animTimerRef.current);
 
@@ -171,8 +98,7 @@ export default function CampusNavigationModal({
           setIsNavigating(false);
           setRemainingDistance(0);
           setCurrentStep(2);
-          const arrivePrompt = `목적지인 ${selectedPlace.name}에 도착했습니다. 안내를 종료합니다.`;
-          speakText(arrivePrompt);
+          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
           return 100;
         }
 
@@ -181,10 +107,8 @@ export default function CampusNavigationModal({
 
         if (next > 40 && next < 45 && currentStep === 0) {
           setCurrentStep(1);
-          speakText(`30미터 앞 로비에서 ${selectedPlace.floor} 복도 방향으로 좌회전하세요.`);
         } else if (next > 80 && next < 85 && currentStep === 1) {
           setCurrentStep(2);
-          speakText(`곧 목적지인 ${selectedPlace.name}에 도착합니다.`);
         }
 
         return next;
@@ -195,8 +119,6 @@ export default function CampusNavigationModal({
   const stopLiveNavigation = () => {
     if (animTimerRef.current) clearInterval(animTimerRef.current);
     setIsNavigating(false);
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    if (audioRef.current) audioRef.current.pause();
   };
 
   const resetNavigation = () => {
@@ -222,8 +144,6 @@ export default function CampusNavigationModal({
   useEffect(() => {
     return () => {
       if (animTimerRef.current) clearInterval(animTimerRef.current);
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      if (audioRef.current) audioRef.current.pause();
     };
   }, []);
 
@@ -278,14 +198,14 @@ export default function CampusNavigationModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-black tracking-tight">실시간 한국어 TTS 음성 길안내 시스템</h3>
+                  <h3 className="text-lg font-black tracking-tight">스마트 핀포인트 길안내 네비게이션</h3>
                   <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center gap-1">
-                    <Volume2 size={12} className="animate-pulse" />
-                    TTS Voice Engine
+                    <LocateFixed size={10} />
+                    Live Route & GPS
                   </span>
                 </div>
                 <p className="text-xs text-neutral-400 mt-0.5">
-                  학교 평면도 기반 음성합성(TTS) 음성 나레이션 실시간 길안내 서비스
+                  학교 평면도 지적도 기반 수강 강의실, 북카페, 푸드코트 실시간 동선안내
                 </p>
               </div>
             </div>
@@ -298,18 +218,6 @@ export default function CampusNavigationModal({
               >
                 <MapPin size={14} />
                 <span>GPS 위치 갱신</span>
-              </button>
-
-              <button
-                onClick={() => setIsVoiceMuted(!isVoiceMuted)}
-                className={`p-2.5 rounded-full border transition-colors cursor-pointer ${
-                  isVoiceMuted
-                    ? 'bg-neutral-800 border-white/10 text-neutral-500'
-                    : 'bg-blue-600/20 border-blue-500/30 text-blue-400'
-                }`}
-                title="음성 안내 ON/OFF"
-              >
-                {isVoiceMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
               </button>
 
               <button
@@ -518,7 +426,7 @@ export default function CampusNavigationModal({
               </div>
             </div>
 
-            {/* Bottom Current Step & Voice Turn Guidance Banner */}
+            {/* Bottom Current Step & Guidance Banner */}
             <div className="p-4 bg-black/95 border-t border-white/20 backdrop-blur-md z-20 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl p-2.5 rounded-2xl bg-blue-600/30 border border-blue-400/40 text-blue-300 font-bold">
@@ -542,22 +450,14 @@ export default function CampusNavigationModal({
               {/* Step Navigation manual buttons */}
               <div className="flex gap-1.5 shrink-0">
                 <button
-                  onClick={() => {
-                    const prevStep = Math.max(0, currentStep - 1);
-                    setCurrentStep(prevStep);
-                    speakText(routeSteps[prevStep].instruction);
-                  }}
+                  onClick={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
                   disabled={currentStep === 0}
                   className="px-4 py-2 bg-neutral-800 disabled:opacity-40 text-xs font-bold rounded-xl hover:bg-neutral-700 transition-colors cursor-pointer"
                 >
                   이전
                 </button>
                 <button
-                  onClick={() => {
-                    const nextStep = Math.min(routeSteps.length - 1, currentStep + 1);
-                    setCurrentStep(nextStep);
-                    speakText(routeSteps[nextStep].instruction);
-                  }}
+                  onClick={() => setCurrentStep((prev) => Math.min(routeSteps.length - 1, prev + 1))}
                   disabled={currentStep === routeSteps.length - 1}
                   className="px-4 py-2 bg-blue-600 disabled:opacity-40 text-xs font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer shadow-lg shadow-blue-600/30"
                 >
@@ -571,7 +471,7 @@ export default function CampusNavigationModal({
           <div className="flex items-center justify-between pt-1 shrink-0">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Eye size={16} className="text-blue-400" />
-              <span>실시간 TTS 한국어 음성합성 나레이션으로 길안내를 제공하고 있습니다.</span>
+              <span>실시간 핀포인트 2D 지적도 도면 기반 스마트 길안내 서비스입니다.</span>
             </div>
             <button
               onClick={() => {
