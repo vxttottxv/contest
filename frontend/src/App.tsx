@@ -71,10 +71,10 @@ function CircularMenu({ onSelectCategory }: CircularMenuProps) {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
   };
 
-  const radius = 350;
+  const radius = 370;
 
   return (
-    <div className="relative w-full max-w-[800px] h-[550px] scale-[0.85] md:scale-100 origin-top">
+    <div className="relative w-full max-w-[900px] h-[580px] scale-[0.85] md:scale-100 origin-top">
       {/* Outer subtle ring */}
       <div className="absolute top-[90%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full border-t-2 border-dashed border-white/10 pointer-events-none" />
       
@@ -108,10 +108,10 @@ function CircularMenu({ onSelectCategory }: CircularMenuProps) {
             onClick={() => onSelectCategory(cat.id)}
             className="absolute top-[90%] left-1/2 rounded-3xl overflow-hidden cursor-pointer bg-neutral-900 border border-white/10 shadow-2xl origin-center group"
             style={{
-              width: 160,
-              height: 200,
-              marginLeft: -80,
-              marginTop: -100,
+              width: isCenter ? 240 : 180,
+              height: isCenter ? 260 : 240,
+              marginLeft: isCenter ? -120 : -90,
+              marginTop: isCenter ? -130 : -120,
               zIndex: isCenter ? 50 : (isAdjacent ? 40 : 10),
               pointerEvents: (isCenter || isAdjacent) ? 'auto' : 'none'
             }}
