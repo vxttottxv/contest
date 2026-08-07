@@ -64,7 +64,7 @@ function CircularMenu({ onSelectCategory }: CircularMenuProps) {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveIndex(i);
-    }, 250);
+    }, 600);
   };
 
   const handleHoverEnd = () => {
@@ -121,7 +121,7 @@ function CircularMenu({ onSelectCategory }: CircularMenuProps) {
               scale: isCenter ? 1.2 : (isAdjacent ? 0.9 : (isFar ? 0.65 : 0.5)),
               filter: isFar ? 'blur(4px)' : 'blur(0px)',
             }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             onMouseEnter={() => {
               if (isCenter || isAdjacent) handleHover(i);
             }}
