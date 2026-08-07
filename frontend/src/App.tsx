@@ -64,7 +64,7 @@ function CircularMenu({ onSelectCategory }: CircularMenuProps) {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => {
       setActiveIndex(i);
-    }, 600);
+    }, 350);
   };
 
   const handleHoverEnd = () => {
