@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee, LogOut, UserCheck } from 'lucide-react';
+import { Map, GraduationCap, ShieldCheck, MessageCircle, Coffee, LogOut, UserCheck, LayoutGrid, X } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import type { UserSession } from './components/AuthModal';
 import AcademicsPage from './pages/AcademicsPage';
@@ -184,6 +184,7 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
+  const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
 
   // Ensure app always starts on home page
   useEffect(() => {
@@ -282,6 +283,59 @@ export default function App() {
        
        <div className="w-full flex justify-center mt-12 md:mt-16 shrink-0">
           <CircularMenu onSelectCategory={handleCategorySelect} />
+       </div>
+
+       {/* Floating Quick Menu Button (bottom-right) */}
+       <div className="absolute bottom-8 right-8 z-50 flex flex-col items-end gap-3">
+         <AnimatePresence>
+           {isQuickMenuOpen && (
+             <motion.div
+               initial={{ opacity: 0, y: 16, scale: 0.95 }}
+               animate={{ opacity: 1, y: 0, scale: 1 }}
+               exit={{ opacity: 0, y: 16, scale: 0.95 }}
+               transition={{ duration: 0.2, ease: 'easeOut' }}
+               className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-3xl p-3 shadow-[0_8px_32px_rgba(0,0,0,0.6)] min-w-[180px]"
+             >
+               <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold px-3 pb-2 border-b border-white/10 mb-2">Quick Access</p>
+               <div className="flex flex-col gap-1">
+                 {CATEGORIES.map((cat) => (
+                   <button
+                     key={cat.id}
+                     onClick={() => { handleCategorySelect(cat.id); setIsQuickMenuOpen(false); }}
+                     className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-white/10 transition-colors text-left cursor-pointer group w-full"
+                   >
+                     <div className="p-2 rounded-xl bg-white/10 border border-white/10 text-white group-hover:bg-white/20 transition-colors shrink-0">
+                       <cat.icon size={14} />
+                     </div>
+                     <div>
+                       <p className="text-xs font-bold text-white">{cat.title}</p>
+                       <p className="text-[10px] text-neutral-500">{cat.subtitle}</p>
+                     </div>
+                   </button>
+                 ))}
+               </div>
+             </motion.div>
+           )}
+         </AnimatePresence>
+
+         <motion.button
+           onClick={() => setIsQuickMenuOpen(prev => !prev)}
+           whileHover={{ scale: 1.08 }}
+           whileTap={{ scale: 0.95 }}
+           className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-xl flex items-center justify-center text-white shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:bg-white/20 transition-colors cursor-pointer"
+         >
+           <AnimatePresence mode="wait">
+             {isQuickMenuOpen ? (
+               <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                 <X size={18} />
+               </motion.span>
+             ) : (
+               <motion.span key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                 <LayoutGrid size={18} />
+               </motion.span>
+             )}
+           </AnimatePresence>
+         </motion.button>
        </div>
 
        {/* Auth Modal */}
